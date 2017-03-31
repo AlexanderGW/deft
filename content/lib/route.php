@@ -158,7 +158,7 @@ class Route {
 			call_user_func( $active_callback );
 
 		Snappy::log( 'route', array(
-			'path' => $active_path,
+			'path' => '/' . $active_path,
 			'pattern' => $active_pattern,
 			'env' => $active_env,
 			'callback' => $active_callback
