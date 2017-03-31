@@ -174,6 +174,10 @@ class Route {
 	public static function add( $path = null, $args = array(), $callback = null ) {
 		if( is_null( $path ) )
 			return;
+		if( strpos( $path, '/' ) === 0 )
+			$path = substr( $path, 1 );
+		if( !$path )
+			$path = '';
 
 		if( is_array( $args ) and count( $args ) ) {
 			$patterns = $errors = array();
@@ -206,9 +210,11 @@ class Route {
 	 * @param null $path
 	 */
 	public static function get( $path = null ) {
-		if( !is_null( $path ) )
-			return self::$rules[ $path ];
-		return null;
+		if( is_null( $path ) )
+			return;
+		if( strpos( $path, '/' ) === 0 )
+			$path = substr( $path, 1 );
+		return self::$rules[ $path ];
 	}
 
 	/**
@@ -222,6 +228,8 @@ class Route {
 	 * @param null $path
 	 */
 	public static function remove( $path = null ) {
+		if( strpos( $path, '/' ) === 0 )
+			$path = substr( $path, 1 );
 		if( array_key_exists( $path, self::$rules ) )
 			unset( self::$rules[ $path ] );
 	}
