@@ -30,7 +30,7 @@ class Example_Plugin {
 	public static function init() {
 		Route::add( '/', null, array( 'Example_Plugin', 'initContent' ) );
 		Route::add(
-			'/[page]',               // Route path relative to Snappy framework, with regex pattern placeholder [page]
+			'/[page]',              // Route path relative to Snappy framework, with regex pattern placeholder [page]
 			array(
 				'page' => '[a-z]+', // Pattern for [page]. Subsequent value stored in GET global. Http::get('page');
 				'foo' => 'bar'      // Additional GET environment var to set if route matched.
