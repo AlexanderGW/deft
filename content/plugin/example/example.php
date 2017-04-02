@@ -28,6 +28,11 @@ if( !defined( 'IN_SNAPPY' ) ) {
 
 class Example_Plugin {
 	public static function init() {
+
+		/**
+		 * Route rules can be automatically loaded at runtime after being added with Route:save()
+		 */
+
 		Route::add( '/', null, array( 'Example_Plugin', 'initContent' ) );
 		Route::add(
 			'/[page]',              // Route path relative to Snappy framework, with regex pattern placeholder [page]
@@ -75,16 +80,4 @@ Hook::add( 'init', array( 'Example_Plugin', 'init' ) );
 // Example hook for files in the request, they have been processed in Http::init() and are ready to handle
 Hook::add( 'httpRequestHasFiles', function ( $files ) {
 	var_dump($files); exit;
-} );
-
-function temp1($content) {
-	return '<!---->' . $content;
-}
-
-function temp2($content) {
-	return '<!--000-->' . $content;
-}
-
-Filter::add( 'documentGetHead', function ($content) {
-	return '<!--000-->' . $content;
 } );

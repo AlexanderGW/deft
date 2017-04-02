@@ -71,97 +71,75 @@ class Route {
 			return;
 		}
 
-		$active_path = $active_pattern = $active_env = $active_callback = null;
-		$routes = self::getRules();
-		if( count( $routes ) ) {
+		$target_path = $target_pattern = $target_env = $target_callback = null;
+
+		// Process requested route
+		if( ( $route = self::get( SNAPPY_ROUTE ) ) !== null ) {
+			$target_path = SNAPPY_ROUTE;
+			$target_env = $route['env'];
+		} elseif( strlen( SNAPPY_ROUTE ) ) {
+			$routes = self::getRules();
 			$divider = '/';
 
-			// Process requested route
-			if( strlen( SNAPPY_ROUTE ) ) {
-				$found = array();
-				$segments = explode( $divider, SNAPPY_ROUTE );
-				$total_segments = count( $segments );
-				$total_devide = $total_segments - 1;
+			$request = explode( $divider, SNAPPY_ROUTE );
+			array_pop( $request );
+			$max = count( $request );
+			$request = implode( $divider, $request ) . $divider;
 
-				$request = SNAPPY_ROUTE;
-				if( array_key_exists( $request, $routes ) ) {
-					$active_path = $request;
-					$active_env = $routes[ $request ]['env'];
-				} else {
-					for( $i = $total_segments; $i > 0; $i-- ) {
-						if( $i < $total_segments )
-							$request .= $divider;
+			foreach( $routes as $path => $args ) {
+				if( ( strpos( $path, $request ) === 0 or
+				      ( substr_count( $path, $divider ) == $max and strpos( $path, '[' ) !== false and strpos( $path, ']' ) !== false )
+				    ) and array_key_exists( 'pattern', $args ) and count( $args['pattern'] ) ) {
 
-						foreach( $routes as $path => $args ) {
-							if( ( strpos( $path, $request ) === 0 or
-							      ( substr_count( $path, $divider ) == $total_devide and strpos( $path, '[' ) !== false and strpos( $path, ']' ) !== false )
-							) )
-								$found[ $path ] = $args;
-						}
+					// Build pattern
+					$path_pattern = '#^' . $path . '$#';
+					foreach( $args['pattern'] as $name => $pattern )
+						$path_pattern = str_replace( '[' . $name . ']', '(' . $pattern . ')', $path_pattern );
 
-						if( $i < $total_segments )
-							break;
+					// Run pattern
+					preg_match( $path_pattern, SNAPPY_ROUTE, $matches );
+					if( count( $matches ) ) {
+						preg_match_all( '#\[([a-z0-9]+)\]#', $path, $keys );
+						array_shift( $matches );
 
-						array_pop( $segments );
-						$request = implode( $divider, $segments );
+						foreach( $matches as $i => $match )
+							$args['env'][ $keys[1][ $i ] ] = $match;
+
+						$target_path = $path;
+						$target_pattern = $path_pattern;
+						$target_env = $args['env'];
+						$target_callback = $args['callback'];
+						break;
 					}
-
-					// Process potential patterns
-					if( count( $found ) ) {
-						foreach( $found as $path => $args ) {
-							if( array_key_exists( 'pattern', $args ) and count( $args['pattern'] ) ) {
-
-								// Build pattern
-								$path_pattern = '#^' . $path . '$#';
-								foreach( $args['pattern'] as $name => $pattern )
-									$path_pattern = str_replace( '[' . $name . ']', '(' . $pattern . ')', $path_pattern );
-
-								// Run pattern
-								preg_match( $path_pattern, SNAPPY_ROUTE, $matches );
-								if( count( $matches ) ) {
-									preg_match_all( '#\[([a-z0-9]+)\]#', $path, $keys );
-									array_shift( $matches );
-
-									foreach( $matches as $i => $match )
-										$args['env'][ $keys[1][ $i ] ] = $match;
-
-									$active_path = $path;
-									$active_pattern = $path_pattern;
-									$active_env = $args['env'];
-									$active_callback = $args['callback'];
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-
-			// Default
-			elseif( array_key_exists( '', $routes ) and array_key_exists( 'env', $routes[''] ) ) {
-				$active_path = $active_pattern = '';
-				$active_env = (array)$routes['']['env'];
-				$active_callback = $routes['']['callback'];
-			}
-
-			// Apply route environment
-			if( is_array( $active_env ) ) {
-				foreach( $active_env as $key => $value ) {
-					$key = Helper::trimAllCtrlChars( $key );
-					$value = Helper::trimAllCtrlChars( $value );
-					$_GET[ $key ] = $value;
 				}
 			}
 		}
 
-		if( !is_null( $active_callback ) and is_callable( $active_callback ) )
-			call_user_func( $active_callback );
+		// Default
+		elseif( ( $route = self::get( '' ) ) !== null ) {
+			$target_path = $target_pattern = '';
+			$target_env = (array)$route['env'];
+			$target_callback = $route['callback'];
+		}
+
+		// Apply route environment
+		if( is_array( $target_env ) ) {
+			foreach( $target_env as $key => $value ) {
+				$key = Helper::trimAllCtrlChars( $key );
+				$value = Helper::trimAllCtrlChars( $value );
+				$_GET[ $key ] = $value;
+			}
+		}
+
+		// Route callback
+		if( is_callable( $target_callback ) )
+			call_user_func( $target_callback );
 
 		Snappy::log( 'route', array(
-			'path' => '/' . $active_path,
-			'pattern' => $active_pattern,
-			'env' => $active_env,
-			'callback' => $active_callback
+			'path' => '/' . $target_path,
+			'pattern' => $target_pattern,
+			'env' => $target_env,
+			'callback' => $target_callback
 		) );
 
 		self::$parsed = true;
@@ -211,7 +189,7 @@ class Route {
 	 */
 	public static function get( $path = null ) {
 		if( is_null( $path ) )
-			return;
+			return null;
 		if( strpos( $path, '/' ) === 0 )
 			$path = substr( $path, 1 );
 		return self::$rules[ $path ];
