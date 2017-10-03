@@ -161,7 +161,7 @@ class Helper {
 
 		$string = '';
 		for( $i = 0; $i < $length; $i++ ) {
-			mt_srand( self::getRandomSeed() );
+			mt_srand( (int)self::getRandomSeed() );
 			$offset = mt_rand( 0, $map_length );
 			if( strpos( $exception, $map{ $offset } ) !== false )
 				$i--;
