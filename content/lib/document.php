@@ -733,7 +733,7 @@ class Document {
 		if( self::getBaseUrl() )
 			$html .= Html::element( 'base', array( 'href' => self::getBaseUrl() ), 'documentBase', true ) . self::getEOL();
 
-		self::addMeta( 'generator', 'Snappy ' . SNAPPY_VERSION );
+		self::addMeta( 'generator', 'Snappy ' . Snappy::VERSION );
 
 		if( self::getDescription() )
 			self::addMeta( 'description', self::getDescription() );
