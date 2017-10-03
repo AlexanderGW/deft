@@ -87,9 +87,18 @@ class Route {
 			$request = implode( $divider, $request ) . $divider;
 
 			foreach( $routes as $path => $args ) {
-				if( ( strpos( $path, $request ) === 0 or
-				      ( substr_count( $path, $divider ) == $max and strpos( $path, '[' ) !== false and strpos( $path, ']' ) !== false )
-				    ) and array_key_exists( 'pattern', $args ) and count( $args['pattern'] ) ) {
+				if(
+					(
+						// Check for exact match
+						strpos( $path, $request ) === 0
+
+						// Check for potentials with the same depth (path dividers), which also has placeholder(s)
+						or ( substr_count( $path, $divider ) == $max and strpos( $path, '[' ) !== false and strpos( $path, ']' ) !== false )
+					)
+
+					// Check route has placeholder patterns
+					and array_key_exists( 'pattern', $args ) and count( $args['pattern'] )
+				) {
 
 					// Build pattern
 					$path_pattern = '#^' . $path . '$#';
@@ -157,11 +166,16 @@ class Route {
 		if( !$path )
 			$path = '';
 
+		// Process route arguments
 		if( is_array( $args ) and count( $args ) ) {
 			$patterns = $errors = array();
+
+			// Test for route placeholders
 			preg_match_all( '#\[([a-z0-9]+)\]#', $path, $matches );
 			if( count( $matches ) ) {
 				foreach( $matches[1] as $name ) {
+
+					// Placeholder pattern not found in route rule list
 					if( !array_key_exists( $name, $args ) )
 						$errors[] = $name;
 					else {
@@ -170,11 +184,13 @@ class Route {
 					}
 				}
 
+				// Throw route rule pattern errors
 				if( count( $errors ) )
 					Snappy::error( 'Route rule "%1$s" missing required parameter(s): %2$s', $path, implode( ', ', $errors ) );
 			}
 		}
 
+		// Store rule
 		self::$rules[ $path ] = array(
 			'env' => $args,
 			'pattern' => $patterns,
@@ -236,5 +252,8 @@ class Route {
 	}
 }
 
+// Load route rules
 Hook::add( 'init', array( 'Route', 'init' ), 1 );
+
+// Process HTTP request against available route rules
 Hook::add( 'init', array( 'Route', 'parse' ), 999 );
