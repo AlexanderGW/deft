@@ -181,23 +181,25 @@ class Http {
 				$result['name'] = Helper::trimAllCtrlChars( $data['name'] );
 				$result['tmp_name'] = Helper::trimAllCtrlChars( $data['tmp_name'] );
 			}
+
+			return $result;
 		}
-		return $result;
+		return null;
 	}
 
 	/**
-	 * @param null $location
+	 * @param null $uri
 	 */
-	public static function location( $location = null ) {
-		if( !is_string( $location ) )
-			$location = './';
-		die( header( sprintf( 'Location: %s', $location ) ) );
+	public static function location( $uri = null ) {
+		if( !is_string( $uri ) )
+			$uri = './';
+		die( header( sprintf( 'Location: %s', $uri ) ) );
 	}
 
 	/**
 	 * @param null $code
 	 *
-	 * @return bool|void
+	 * @return bool
 	 */
 	public static function status( $code = null ) {
 		if( !is_null( $code ) ) {
@@ -240,11 +242,11 @@ class Http {
 	 * @param null $url
 	 * @param array $options
 	 *
-	 * @return array
+	 * @return null|array
 	 */
 	public static function request( $url = null, $options = null, $post = null ) {
 		if( !function_exists( 'curl_init' ) )
-			return;
+			return null;
 
 		$parts = parse_url( $url );
 		extract( $parts );
