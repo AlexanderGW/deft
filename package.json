@@ -1,0 +1,27 @@
+{
+  "name": "snappy",
+  "version": "1.0.0",
+  "description": "A basic PHP 5.3 framework",
+  "main": "Gruntfile.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexanderGW/Snappy.git"
+  },
+  "author": "Alexander Gailey-White",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexanderGW/Snappy/issues"
+  },
+  "homepage": "https://github.com/AlexanderGW/Snappy#readme",
+  "devDependencies": {
+    "grunt": "^1.0.2",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-contrib-watch": "^1.1.0"
+  }
+}
