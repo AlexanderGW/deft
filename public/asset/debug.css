@@ -1,0 +1,72 @@
+article.sy-debug-report {
+	border-top: .25rem solid #000;
+	background: repeating-linear-gradient(
+		45deg,
+		#ddd,
+		#ddd 1rem,
+		#fff 1rem,
+		#fff 2rem
+	);
+	margin-top: 4%;
+	padding: 2% 0;
+	font-size: 1rem;
+}
+
+article.sy-debug-report > div {
+	background-color: #fff;
+	border: .125rem solid #000;
+	margin: 2% auto;
+	padding: 2%;
+	max-width: 1200px;
+	width: 90%;
+}
+
+article.sy-debug-report h3, article.sy-debug-report h4 {
+	padding: 0;
+	margin: 0;
+	background-color: transparent;
+	color: #000;
+}
+
+article.sy-debug-report h3 {
+	margin: 1.25rem 0 0;
+	padding: .5rem 0;
+	border: .1125rem solid #333;
+	background-color: #ccc;
+}
+
+article.sy-debug-report h4 {
+	margin: 10px 0;
+}
+
+article.sy-debug-report table {
+	box-sizing: border-box;
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: .125rem;
+	background-color: #333;
+}
+
+article.sy-debug-report > div > table {
+	width: 100%;
+	display: block;
+	overflow-x: scroll;
+}
+
+article.sy-debug-report td {
+	background-color: #ddd;
+	padding: .2em;
+	vertical-align: top;
+	font-family: monospace;
+}
+
+article.sy-debug-report td:nth-child(odd) {
+	text-align: right;
+	font-weight: 700;
+}
+
+article.sy-debug-report td:nth-child(even) {
+	background-color: #eee;
+	text-align: left;
+}
+
