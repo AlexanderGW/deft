@@ -21,19 +21,13 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
-
-function addBodyClass( $args ) {
-	if( array_key_exists( 'class', $args ) )
-		$args['class'] .= ' http-404';
+Filter::add( 'elementBody', function( $array ) {
+	if( array_key_exists( 'class', $array['props'] ) )
+		$array['props']['class'] .= ' http-404';
 	else
-		$args['class'] = 'http-404';
-	return $args;
-}
-Filter::add( 'elementBody', 'addBodyClass' );
+		$array['props']['class'] = 'http-404';
+	return $array;
+} );
 
-?><h1><?php ___( 'Error 404' ) ?></h1>
+?><h1><?php ___( '404 - Page Not Found' ) ?></h1>
 <h2><?php ___( 'The resource you requested could not be found. <a href="%1$s">Return home</a>', SNAPPY_URL ) ?></h2>

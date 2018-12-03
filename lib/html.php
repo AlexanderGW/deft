@@ -21,11 +21,6 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
-
 class Html {
 
 	/**
@@ -47,35 +42,108 @@ class Html {
 	 *
 	 * @return string
 	 */
-	public static function element( $label = null, $attributes = null, $filter = null, $self_close = false ) {
-		if( is_null( $label ) or ( !is_array( $attributes ) and !is_string( $attributes ) ) )
-			return;
+	public static function element( $value = null, $filter = null ) {
 
-		if( is_string( $attributes ) )
-			$attributes = array( 'html' => $attributes );
+		// Not an array, return it...
+		if( !is_array( $value ) )
+			return $value;
 
-		if( !array_key_exists( 'html', $attributes ) )
-			$attributes['html'] = '';
+		// Add props key to avoid throwing notices
+		if( !array_key_exists( 'props', $value ) or !is_array( $value['props'] ) )
+			$value['props'] = array();
 
+		// Filter structure
 		if( is_string( $filter ) )
-			$attributes = Filter::exec( $filter, $attributes );
+			$value = Filter::exec( $filter, $value );
 
-		$html_attributes = '';
-		if( is_array( $attributes ) ) {
-			ksort( $attributes );
-			foreach( $attributes as $name => $value ) {
-				if( $name == 'html' )
-					continue;
-				$html_attributes .= ' ' . $name . ( !is_bool( $value ) ? '="' . $value . '"' : '' );
+		// Not an element, may be an array of elements...
+		if( !array_key_exists( 'tag', $value ) and !array_key_exists( 'markup', $value ) ) {
+			$markup = array();
+			foreach( $value as $key => $val ) {
+				$element = self::element( $val );
+				if( !is_null( $element ) )
+					$markup[] = $element;
 			}
-		} elseif( is_string( $attributes ) )
-			$html_attributes =& $attributes;
 
-		if( $self_close )
-			$html_tag = '<' . $label . $html_attributes . '>';
+			if( !count( $markup ) )
+				return;
+
+			return implode( null, $markup );
+		}
+
+		// A nested array of elements in markup...
+		elseif( is_array( $value['markup'] ) ) {
+			$markup = array();
+			foreach( $value['markup'] as $key => $val ) {
+				$element = self::element( $val );
+				if( !is_null( $element ) )
+					$markup[] = $element;
+			}
+
+			if( !count( $markup ) )
+				return;
+
+			$value['markup'] = implode( null, $markup );
+
+			if( !array_key_exists( 'tag', $value ) )
+				return $value['markup'];
+		}
+
+		// Value glue for props with an array for a value
+		if( !array_key_exists( 'prop_glue', $value ) )
+			$value['prop_glue'] = ' ';
+
+		// Return closing element markup?
+		if( !array_key_exists( 'close', $value ) )
+			$value['close'] = true;
 		else
-			$html_tag = '<' . $label . $html_attributes . '>' . $attributes['html'] . '</' . $label . '>';
+			$value['close'] = (bool)$value['close'];
 
-		return $html_tag;
+		// Process array of props
+		$props = '';
+		if( array_key_exists( 'props', $value ) and is_array( $value['props'] ) ) {
+			ksort( $value['props'] );
+			foreach( $value['props'] as $key => $val ) {
+				if( !is_null( $val ) )
+					$props .= ' ' . $key . (
+						!is_bool( $val )
+							? '="' . trim( is_array( $val )
+								? implode( $value['prop_glue'], $val )
+								: $val ) . '"'
+							: ''
+						);
+			}
+		}
+
+		// Reference string of props
+		elseif( is_string( $value['props'] ) )
+			$props =& $value['props'];
+
+		$element = '';
+		if (SNAPPY_DEBUG)
+			$element .= "<!-- OpenTag: {$value['tag']} -> @{$filter} -->\r\n";
+
+		// Open markup
+		if( empty( $value['close'] ) )
+			$element .= '<' . $value['tag'] . $props . '>' . "\r\n";
+
+		// Close markup
+		else
+			$element .= '<' . $value['tag'] . $props . '>' . $value['markup'] . '</' . $value['tag'] . '>' . "\r\n";
+
+		if (SNAPPY_DEBUG) {
+			$element .= "<!-- CloseTag: {$value['tag']} -->";
+
+			if (SNAPPY_DEBUG > 1)
+				$value['markup'] = htmlspecialchars($value['markup']);
+			else
+				$value['markup'] = null;
+		}
+
+		Snappy::log('element/' . $filter, array(
+			'element' => $value
+		));
+		
+		return $element;
 	}
 }

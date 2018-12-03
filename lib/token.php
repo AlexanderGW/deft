@@ -21,11 +21,6 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
-
 class Token {
 	/**
 	 * Set TRUE once init() executes.
@@ -34,7 +29,7 @@ class Token {
 	 */
 	private static $initialized = false;
 
-	private static $fields = array();
+	private static $props = array();
 	private static $cookie = false;
 
 	/**
@@ -56,7 +51,7 @@ class Token {
 		}
 
 		if( is_string( $data ) )
-			self::$fields = (array)Snappy::decode( $data );
+			self::$props = (array)Snappy::decode( $data );
 
 		self::$initialized = true;
 	}
@@ -83,12 +78,11 @@ class Token {
 	 * @return bool
 	 */
 	public static function save() {
-		if( !self::$initialized )
-			self::init();
+		self::init();
 
 		$hash = self::getHash();
-		self::$fields = Filter::exec( 'tokenSave', self::$fields );
-		$_SESSION[ $hash ] = Snappy::encode( self::$fields );
+		self::$props = Filter::exec( 'tokenSave', self::$props );
+		$_SESSION[ $hash ] = Snappy::encode( self::$props );
 		return true;
 	}
 
@@ -101,13 +95,13 @@ class Token {
 		$timeout = (int)Snappy::getCfg()->get( 'token_timeout', 2592000 );
 		$expire = ( ( TIME_UTC + ( 3600 * (float)self::get( 'timezone' ) ) ) + $timeout );
 
-		if( !count( self::$fields ) ) {
+		if( !count( self::$props ) ) {
 			$encoded = -1;
 			$expire = time() - 86400;
 		} else
-			$encoded = Snappy::encode( self::$fields );
+			$encoded = Snappy::encode( self::$props );
 
-		setcookie( $hash, $encoded, $expire );
+		setcookie( $hash, $encoded, $expire, SNAPPY_URL_PATH, $_SERVER['HTTP_HOST'] );
 		return true;
 	}
 
@@ -115,7 +109,7 @@ class Token {
 	 *
 	 */
 	public static function clear() {
-		self::$fields = array();
+		self::$props = array();
 		self::saveCookie();
 	}
 
@@ -124,25 +118,23 @@ class Token {
 	 * @param null $b
 	 */
 	public static function set( $a = null, $b = null ) {
-		if( !self::$initialized )
-			self::init();
+		self::init();
 
 		if( is_string( $a ) )
-			self::$fields[ $a ] = $b;
+			self::$props[ $a ] = $b;
 
 		if( is_array( $a ) )
-			self::$fields = array_merge( self::$fields, $a );
+			self::$props = array_merge( self::$props, $a );
 	}
 
 	/**
 	 * @param null $a
 	 */
 	public static function get( $a = null ) {
-		if( !self::$initialized )
-			self::init();
+		self::init();
 
-		if( !is_null( $a ) and array_key_exists( $a, self::$fields ) )
-			return self::$fields[ $a ];
+		if( !is_null( $a ) and array_key_exists( $a, self::$props ) )
+			return self::$props[ $a ];
 
 		return;
 	}
@@ -151,10 +143,9 @@ class Token {
 	 * @return bool
 	 */
 	public static function hasData() {
-		if( !self::$initialized )
-			self::init();
+		self::init();
 
-		if( !is_null( self::$fields ) )
+		if( !is_null( self::$props ) )
 			return true;
 		return false;
 	}
@@ -163,8 +154,7 @@ class Token {
 	 * @return bool
 	 */
 	public static function isFromCookie() {
-		if( !self::$initialized )
-			self::init();
+		self::init();
 
 		return self::$cookie;
 	}

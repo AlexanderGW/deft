@@ -21,165 +21,148 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
-
 class Form extends Snappy_Concrete {
-	private $id = null;
-	private $attributes = array();
+	private $element = array();
 	private $fields = array();
 
-	function __construct( $args = null ) {
-		if( is_string( $args ) )
-			$this->id = $args;
-		elseif( is_array( $args ) )
-			$this->id = array_shift( $args );
+	function __construct ($value = null) {
+		$this->element['tag'] = 'form';
+		if (is_null($value)) {
+			$this->prop('id', 'sf_' . Helper::getRandomChars(5));
+		}
+		if (is_string($value)) {
+			$this->prop('id', $value);
+		} elseif (is_array($value)) {
+			$this->element = $value;
+		}
 
-		parent::__construct( $this->id );
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getId() {
-		if( is_null( $this->id ) )
-			$this->id = 'sf_' . Helper::getRandomChars( 5 );
-		return $this->id;
-	}
-
-	/**
-	 * @param null $name
-	 * @param null $value
-	 *
-	 * @return $this
-	 */
-	public function setAttribute( $name = null, $value = null ) {
-		if( is_string( $name ) )
-			$this->attributes[ $name ] = $value;
-		return $this;
-	}
-
-	/**
-	 * @param null $array
-	 *
-	 * @return $this
-	 */
-	public function setAttributes( $array = null ) {
-		if( is_array( $array ) )
-			$this->attributes = array_merge( $this->attributes, $array );
-		return $this;
+		parent::__construct(__CLASS__, $this->prop('id'));
 	}
 
 	/**
 	 * @param null $value
-	 *
-	 * @return $this
-	 */
-	public function action( $value = null ) {
-		if( is_null( $value ) )
-			return $this->getAttribute( 'action' );
-		$this->setAttribute( 'action', $value );
-		return $this;
-	}
-
-	/**
-	 * @param null $value
-	 *
-	 * @return $this
-	 */
-	public function method( $value = null ) {
-		if( is_null( $value ) )
-			return $this->getAttribute( 'method' );
-		$this->setAttribute( 'method', $value );
-		return $this;
-	}
-
-	/**
-	 * @param null $type
-	 * @param null $name
-	 * @param null $id
 	 *
 	 * @return mixed
 	 */
-	public function add( $type = null, $name = null, $id = null ) {
-		if( is_string( $id ) )
-			$key =& $id;
-		else
-			$key = 'sff_' . Helper::getRandomChars( 5 );
-		$this->fields[ $key ] = new FormField( $type, $name, $id );
-		return $this->fields[ $key ];
+	public function route ($value = null) {
+		//$this->prop('action','');
+		return $this;
 	}
 
 	/**
-	 * @param null $key
+	 * @param null $value
+	 *
+	 * @return $this|null
 	 */
-	public function get( $key = null ) {
-		if( array_key_exists( $key, $this->fields ) )
-			return $this->fields[ $key ];
-		return;
+	public function post ($value = null) {
+		if (is_null($value)) {
+			return $this->props('method') === 'post';
+		}
+		$this->prop('method', (bool) $value === true ? 'post' : 'get');
+
+		return $this;
+	}
+
+	/**
+	 * @param null $value
+	 *
+	 * @return mixed
+	 */
+	public function props ($value = null) {
+		if (is_null($value)) {
+			return $this->element['props'];
+		}
+
+		$this->element['props'] = array(
+			                          'id' => $this->element['props']['id']
+		                          ) + (array) $value;
+
+		return $this;
+	}
+
+	/**
+	 * @param null $value
+	 *
+	 * @return mixed
+	 */
+	public function prop ($name = null, $value = null) {
+		if (is_null($value)) {
+			return $this->element['props'][$name];
+		}
+		if (!is_null($name)) {
+			$this->element['props'][$name] = $value;
+		}
+
+		return $this;
+	}
+
+	/**
+	 * @param null $scope
+	 *
+	 * @return object
+	 */
+	public function field ($scope = null) {
+		if (is_null($scope)) {
+			$tag  = 'input';
+			$type = 'hidden';
+		}
+
+		if (!array_key_exists($scope, $this->fields)) {
+			if (strpos($scope, 'select') === 0 or strpos($scope, 'textarea') === 0) {
+				list($tag, $name, $id) = explode('.', $scope);
+				$type = null;
+			} else {
+				list($tag, $type, $name, $id) = explode('.', $scope);
+			}
+			if (empty($id)) {
+				$id = 'sy-field-' . md5($tag . $type . $name);
+			}
+			$this->fields[$scope] = new FormField($tag, $type, $name, $id);
+		}
+
+		return $this->fields[$scope];
 	}
 
 	/**
 	 * @return string
 	 */
-	public function __toString() {
-		if( $this->getid() )
-			$this->attributes['id'] = $this->getId();
-
-		$this->attributes['html'] = '';
-		foreach( $this->fields as $field ) {
-			if( $field->getType() == FormField::File and !array_key_exists( 'enctype', $this->attributes ) )
-				$this->attributes['enctype'] = 'multipart/form-data';
-			$this->attributes['html'] .= $field->content();
+	public function __toString () {
+		foreach ($this->fields as $field) {
+			if ($field->prop('type') == 'file' and !$this->prop('enctype')) {
+				$this->prop('enctype', 'multipart/form-data');
+			}
+			$this->element['markup'] .= $field->content();
 		}
 
-		if( array_key_exists( 'class', $this->attributes ) )
-			$this->attributes['class'] = implode( ' ', $this->attributes['class'] );
-		$return = Filter::exec( 'formContent', Html::element( 'form', $this->attributes, 'elementForm_' . $this->id ) );
-		return $return;
+		return Html::element($this->element, 'elementForm_' . $this->prop('id'));
+	}
+
+	public function save () {
+		$config =& Snappy::getCfg('config.form.' . $this->prop('id'));
+
+		$array = array();
+		foreach ($this->fields as $field) {
+			array_push($array, array(
+				'tag'         => $field->tag(),
+				'label'       => $field->label(),
+				'description' => $field->description(),
+				'options'     => $field->options(),
+				'props'       => $field->props()
+			));
+		}
+
+		$config->set($array);
+
+		return $config->save();
 	}
 }
 
 class FormField {
-	const Hidden = 0;
-	const Text = 1;
-	const Password = 2;
-	const Button = 3;
-	const ButtonSubmit = 4;
-	const InputButton = 5;
-	const InputSubmit = 6;
-	const Checkbox = 7;
-	const Radio = 8;
-	const Select = 9;
-	const Textarea = 10;
-	const File = 11;
-	const Color = 100;
-	const Date = 101;
-	const Datetime = 102;
-	const Email = 103;
-	const Month = 104;
-	const Number = 105;
-	const Range = 106;
-	const Search = 107;
-	const Phone = 108;
-	const Time = 109;
-	const Url = 110;
-	const Week = 111;
 
 	/**
 	 * @var null
 	 */
-	private $id = null;
-	/**
-	 * @var null
-	 */
-	private $name = null;
-	/**
-	 * @var int|null
-	 */
-	private $type = null;
+	private $tag = null;
 	/**
 	 * @var null
 	 */
@@ -187,29 +170,39 @@ class FormField {
 	/**
 	 * @var null
 	 */
-	private $info = null;
+	private $description = null;
+	/**
+	 * @var null
+	 */
+	private $markup = null;
 	/**
 	 * @var array
 	 */
-	private $attributes = array();
+	private $props = array();
 	/**
 	 * @var array
 	 */
-	private $field_options = array();
+	private $options = array();
 
 	/**
 	 * FormField constructor.
 	 *
+	 * @param null $tag
 	 * @param null $type
 	 * @param null $name
 	 * @param null $id
 	 */
-	public function __construct( $type = null, $name = null, $id = null ) {
-		if( is_null( $type ) )
-			$type = self::Hidden;
-		$this->type = $type;
-		$this->name = $name;
-		$this->id = $id;
+	public function __construct ($tag = null, $type = null, $name = null, $id = null) {
+		if (is_null($tag)) {
+			$tag = 'input';
+		}
+		$this->tag = $tag;
+		if (is_null($type) and $tag == 'input') {
+			$type = 'hidden';
+		}
+		$this->props['type'] = $type;
+		$this->props['name'] = $name;
+		$this->props['id']   = $id;
 	}
 
 	/**
@@ -217,10 +210,12 @@ class FormField {
 	 *
 	 * @return $this|null
 	 */
-	public function label( $value = null ) {
-		if( is_null( $value ) )
+	public function label ($value = null) {
+		if (is_null($value)) {
 			return $this->label;
+		}
 		$this->label = $value;
+
 		return $this;
 	}
 
@@ -229,63 +224,59 @@ class FormField {
 	 *
 	 * @return $this|null
 	 */
-	public function info( $value = null ) {
-		if( is_null( $value ) )
-			return $this->info;
-		$this->info = $value;
+	public function description ($value = null) {
+		if (is_null($value)) {
+			return $this->description;
+		}
+		$this->description = $value;
+
+		return $this;
+	}
+
+	/**
+	 * @return int|null
+	 */
+	public function tag ($value = null) {
+		if (is_null($value)) {
+			return $this->tag;
+		}
+		$this->tag = $value;
+
 		return $this;
 	}
 
 	/**
 	 * @return null
 	 */
-	public function getName() {
-		return $this->name;
+	public function name ($value = null) {
+		return $this->prop('name', $value);
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getId() {
-		return strtolower( $this->id );
+	public function id ($value = null) {
+		return $this->prop('id', $value);
 	}
 
 	/**
 	 * @return int|null
 	 */
-	public function getType() {
-		return $this->type;
+	public function type ($value = null) {
+		return $this->prop('type', $value);
 	}
 
 	/**
-	 * @param null $name
-	 */
-	public function getAttribute( $name = null ) {
-		if( !is_null( $name ) and array_key_exists( $name, $this->attributes ) )
-			return $this->attributes[ $name ];
-		return;
-	}
-
-	/**
-	 * @param null $name
 	 * @param null $value
 	 *
-	 * @return $this
+	 * @return mixed
 	 */
-	public function setAttribute( $name = null, $value = null ) {
-		if( is_string( $name ) )
-			$this->attributes[ $name ] = $value;
-		return $this;
-	}
+	public function props ($value = null) {
+		if (is_null($value)) {
+			return $this->props;
+		}
+		$this->props = (array) $value;
 
-	/**
-	 * @param null $array
-	 *
-	 * @return $this
-	 */
-	public function setAttributes( $array = null ) {
-		if( is_array( $array ) )
-			$this->attributes = array_merge( $this->attributes, $array );
 		return $this;
 	}
 
@@ -294,11 +285,14 @@ class FormField {
 	 *
 	 * @return mixed
 	 */
-	public function _handle( $name = null, $value = null ) {
-		if( is_null( $value ) )
-			return $this->getAttribute( $name );
-		if( !is_null( $name ) )
-			$this->setAttribute( $name, $value );
+	public function prop ($name = null, $value = null) {
+		if (is_null($value)) {
+			return $this->props[$name];
+		}
+		if (!is_null($name)) {
+			$this->props[$name] = $value;
+		}
+
 		return $this;
 	}
 
@@ -307,8 +301,8 @@ class FormField {
 	 *
 	 * @return mixed
 	 */
-	public function isAutoComplete( $value = null ) {
-		return $this->_handle( 'autocomplete', ( (bool)$value ? 'on' : 'off' ) );
+	public function autoComplete ($value = null) {
+		return $this->prop('autocomplete', ((bool) $value ? 'on' : 'off'));
 	}
 
 	/**
@@ -316,8 +310,8 @@ class FormField {
 	 *
 	 * @return mixed
 	 */
-	public function isChecked( $value = null ) {
-		return $this->_handle( 'checked', (bool)$value );
+	public function checked ($value = null) {
+		return $this->prop('checked', (bool) $value);
 	}
 
 	/**
@@ -325,8 +319,8 @@ class FormField {
 	 *
 	 * @return mixed
 	 */
-	public function isDisabled( $value = null ) {
-		return $this->_handle( 'disabled', (bool)$value );
+	public function disabled ($value = null) {
+		return $this->prop('disabled', (bool) $value);
 	}
 
 	/**
@@ -334,8 +328,8 @@ class FormField {
 	 *
 	 * @return mixed
 	 */
-	public function isReadOnly( $value = null ) {
-		return $this->_handle( 'readonly', (bool)$value );
+	public function readOnly ($value = null) {
+		return $this->prop('readonly', (bool) $value);
 	}
 
 	/**
@@ -343,8 +337,8 @@ class FormField {
 	 *
 	 * @return mixed
 	 */
-	public function isRequired( $value = null ) {
-		return $this->_handle( 'required', (bool)$value );
+	public function required ($value = null) {
+		return $this->prop('required', (bool) $value);
 	}
 
 	/**
@@ -352,8 +346,8 @@ class FormField {
 	 *
 	 * @return mixed
 	 */
-	public function cols( $value = null ) {
-		return $this->_handle( 'cols', (int)$value );
+	public function cols ($value = null) {
+		return $this->prop('cols', (int) $value);
 	}
 
 	/**
@@ -361,8 +355,8 @@ class FormField {
 	 *
 	 * @return $this|void
 	 */
-	public function max( $value = null ) {
-		return $this->_handle( 'max', $value );
+	public function max ($value = null) {
+		return $this->prop('max', $value);
 	}
 
 	/**
@@ -370,8 +364,8 @@ class FormField {
 	 *
 	 * @return $this|void
 	 */
-	public function maxLength( $value = null ) {
-		return $this->_handle( 'maxlength', (int)$value );
+	public function maxLength ($value = null) {
+		return $this->prop('maxlength', (int) $value);
 	}
 
 	/**
@@ -379,8 +373,8 @@ class FormField {
 	 *
 	 * @return $this|void
 	 */
-	public function min( $value = null ) {
-		return $this->_handle( 'min', $value );
+	public function min ($value = null) {
+		return $this->prop('min', $value);
 	}
 
 	/**
@@ -388,10 +382,12 @@ class FormField {
 	 *
 	 * @return $this|array
 	 */
-	public function options( $value = null ) {
-		if( is_null( $value ) )
-			return $this->field_options;
-		$this->field_options = (array)$value;
+	public function options ($value = null) {
+		if (is_null($value)) {
+			return $this->options;
+		}
+		$this->options = (array) $value;
+
 		return $this;
 	}
 
@@ -400,8 +396,8 @@ class FormField {
 	 *
 	 * @return $this|void
 	 */
-	public function pattern( $value = null ) {
-		return $this->_handle( 'pattern', $value );
+	public function pattern ($value = null) {
+		return $this->prop('pattern', $value);
 	}
 
 	/**
@@ -409,8 +405,8 @@ class FormField {
 	 *
 	 * @return $this|void
 	 */
-	public function rows( $value = null ) {
-		return $this->_handle( 'rows', (int)$value );
+	public function rows ($value = null) {
+		return $this->prop('rows', (int) $value);
 	}
 
 	/**
@@ -420,16 +416,18 @@ class FormField {
 	 *
 	 * @return $this|array
 	 */
-	public function scales( $min = null, $step = null, $max = null ) {
-		if( is_null( $min ) )
+	public function scales ($min = null, $step = null, $max = null) {
+		if (is_null($min)) {
 			return array(
-				$this->getAttribute( 'min' ),
-				$this->getAttribute( 'step' ),
-				$this->getAttribute( 'max' )
+				$this->prop('min'),
+				$this->prop('step'),
+				$this->prop('max')
 			);
-		$this->setAttribute( 'min', $min );
-		$this->setAttribute( 'step', $step );
-		$this->setAttribute( 'max', $max );
+		}
+		$this->prop('min', $min);
+		$this->prop('step', $step);
+		$this->prop('max', $max);
+
 		return $this;
 	}
 
@@ -438,8 +436,8 @@ class FormField {
 	 *
 	 * @return $this|void
 	 */
-	public function size( $value = null ) {
-		return $this->_handle( 'size', (int)$value );
+	public function size ($value = null) {
+		return $this->prop('size', (int) $value);
 	}
 
 	/**
@@ -447,8 +445,8 @@ class FormField {
 	 *
 	 * @return $this|void
 	 */
-	public function step( $value = null ) {
-		return $this->_handle( 'step', (float)$value );
+	public function step ($value = null) {
+		return $this->prop('step', (float) $value);
 	}
 
 	/**
@@ -456,15 +454,8 @@ class FormField {
 	 *
 	 * @return $this|void
 	 */
-	public function value( $value = null ) {
-		return $this->_handle( 'value', $value );
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getClass() {
-		return (array)$this->getAttribute( 'class' );
+	public function value ($value = null) {
+		return $this->prop('value', $value);
 	}
 
 	/**
@@ -472,12 +463,14 @@ class FormField {
 	 *
 	 * @return $this
 	 */
-	public function setClass( $value = null ) {
-		if( !is_null( $value ) ) {
-			if( is_string( $value ) and strpos( $value, ' ' ) )
-				$value = explode( ' ', trim( $value ) );
-			$this->setAttribute( 'class', (array)$value );
+	public function classes ($value = null) {
+		if (!is_null($value)) {
+			if (is_string($value) and strpos($value, ' ')) {
+				$value = explode(' ', trim($value));
+			}
+			$this->prop('class', (array) $value);
 		}
+
 		return $this;
 	}
 
@@ -486,9 +479,15 @@ class FormField {
 	 *
 	 * @return bool|void
 	 */
-	public function hasClass( $name = null ) {
-		if( is_string( $name ) )
-			return in_array( $name, $this->getAttribute( 'class' ) );
+	public function hasClass ($value = null) {
+		if (($classes = $this->prop('class'))) {
+			if (is_string($classes)) {
+				return (strpos($classes, $value) !== false);
+			} elseif (is_array($classes)) {
+				return in_array($value, $classes);
+			}
+		}
+
 		return;
 	}
 
@@ -497,211 +496,266 @@ class FormField {
 	 *
 	 * @return null|string
 	 */
-	public function content() {
-		$tag = 'input';
-		$elements = $type = null;
-		$self_close = true;
-		switch( $this->type ) {
-			case self::Hidden :
-				$type = 'hidden';
+	public function content () {
+		$elements = null;
+
+		// TODO: Check if in cache, return if we have a value
+
+		switch ($this->tag) {
+
+			/**
+			 * Input controls
+			 */
+			case 'input' :
+				switch ($this->prop('type')) {
+
+					/**
+					 * Checkbox control
+					 */
+					case 'checkbox' :
+						if (count($this->options)) {
+
+							// Remove value prop
+							$prop_value = null;
+							if ($prop_value = $this->prop('value')) {
+								unset($this->props['value']);
+							}
+
+							// Build options
+							$elements = '';
+							foreach ($this->options as $value => $label) {
+
+								// Build props
+								$props = array(
+									         'type'            => 'checkbox',
+									         'value'           => $value,
+									         'name'            => $this->prop('name') . '[]',
+									         'aria-labelledby' => 'sy-field-label-' . $this->id()
+								         ) + $this->props;
+
+								// Is option the current state value?
+								if ($prop_value and $value == $prop_value) {
+									$props['checked'] = true;
+								}
+
+								// Control element
+								$element = Html::element(array(
+									'tag'   => 'input',
+									'close' => false,
+									'props' => $props
+								), 'elementInputCheckboxFormFieldOption');
+
+								// Control element template
+								$template = Html::element(array(
+									'tag'    => 'label',
+									'markup' => array(
+										'%1$s',
+										array(
+											'tag'    => 'span',
+											'props'  => array(
+												'id' => 'sy-field-label-' . $this->id()
+											),
+											'markup' => '%2$s'
+										)
+									)
+								), 'elementInputCheckboxFormFieldOptionTemplate');
+								if (!empty($template)) {
+									$elements .= sprintf($template, $element, $label);
+								} else {
+									$elements .= $element;
+								}
+							}
+						}
+						break;
+
+					/**
+					 * Radio control
+					 */
+					case 'radio' :
+						if (count($this->options)) {
+
+							// Remove value prop
+							$prop_value = null;
+							if (array_key_exists('value', $this->props)) {
+								$prop_value = $this->prop('value');
+								unset($this->props['value']);
+							}
+
+							// Build options
+							$elements = '';
+							foreach ($this->options as $value => $label) {
+
+								// Build props
+								$props = array(
+									         'type'            => 'radio',
+									         'value'           => $value,
+									         'name'            => $this->prop('name'),
+									         'aria-labelledby' => 'sy-field-label-' . $this->id()
+								         ) + $this->props;
+
+								// Is option the current state value?
+								if ($prop_value and $value == $prop_value) {
+									$props['checked'] = true;
+								}
+
+								// Control element
+								$element = Html::element(array(
+									'tag'   => 'input',
+									'close' => false,
+									'props' => $props
+								), 'elementInputRadioFormFieldOption');
+
+								// Control element template
+								$template = Html::element(array(
+									'tag'    => 'label',
+									'markup' => array(
+										'%1$s',
+										array(
+											'tag'    => 'span',
+											'markup' => '%2$s'
+										)
+									),
+									'props'  => array(
+										'id' => 'sy-field-label-' . $this->id()
+									)
+								), 'elementInputRadioFormFieldOptionTemplate');
+								if (!empty($template)) {
+									$elements .= sprintf($template, $element, $label);
+								} else {
+									$elements .= $element;
+								}
+							}
+						}
+						break;
+				}
 				break;
 
-			case self::Text :
-				$type = 'text';
-				break;
+			/**
+			 * Select control
+			 */
+			case 'select' :
 
-			case self::Password :
-				$type = 'password';
-				break;
+				// Remove value prop
+				$prop_value = null;
+				if ($prop_value = $this->prop('value')) {
+					unset($this->props['value']);
+				}
 
-			case self::InputSubmit :
-				$type = 'submit';
-				break;
+				// Build options
+				foreach ($this->options as $value => $label) {
 
-			case self::Button :
-				$tag = 'button';
-				$type = 'button';
-				$self_close = false;
-				break;
+					// Build props
+					$props = array(
+						'value' => $value,
+					);
 
-			case self::ButtonSubmit :
-				$tag = 'button';
-				$type = 'submit';
-				$self_close = false;
-				break;
-
-			case self::File :
-				$type = 'file';
-				break;
-
-			case self::Color :
-				$type = 'color';
-				break;
-
-			case self::Date :
-				$type = 'date';
-				break;
-
-			case self::Datetime :
-				$type = 'datetime';
-				break;
-
-			case self::Email :
-				$type = 'email';
-				break;
-
-			case self::Month :
-				$type = 'month';
-				break;
-
-			case self::Number :
-				$type = 'number';
-				break;
-
-			case self::Range :
-				$type = 'range';
-				break;
-
-			case self::Search :
-				$type = 'search';
-				break;
-
-			case self::Phone :
-				$type = 'phone';
-				break;
-
-			case self::Time :
-				$type = 'time';
-				break;
-
-			case self::Url :
-				$type = 'url';
-				break;
-
-			case self::Week :
-				$type = 'week';
-				break;
-
-			case self::Checkbox :
-				$type = 'checkbox';
-
-				if( count( $this->field_options ) ) {
-					$element_value = null;
-					if( array_key_exists( 'value', $this->attributes ) ) {
-						$element_value = $this->attributes['value'];
-						unset( $this->attributes['value'] );
+					// Is option the current state value?
+					if ($prop_value and $value == $prop_value) {
+						$props['selected'] = true;
 					}
 
-					$elements = '';
-					foreach( $this->field_options as $value => $label ) {
-						$option_attributes = array( 'type' => $type, 'value' => $value, 'name' => $this->name . '[]' ) + $this->attributes;
-						if( $element_value and $value == $element_value )
-							$option_attributes['checked'] = true;
-
-						$element = Html::element( 'input', $option_attributes, 'elementInput' );
-						$template = Filter::exec( 'formFieldCheckboxOptionTemplate', '<label>%1$s<span>%2$s</span></label>' );
-						if( !empty( $template ) )
-							$elements .= sprintf( $template, $element, $label );
-						else
-							$elements .= $element;
-					}
+					// Control elements
+					$this->markup .= Html::element(array(
+						'tag'    => 'option',
+						'markup' => $label,
+						'props'  => $props
+					), 'elementSelectOptionFormFieldOption');
 				}
+
+				$elements = Html::element(array(
+					'tag'    => 'select',
+					'markup' => $this->markup,
+					'props'  => $this->props
+				));
 				break;
 
-			case self::Radio :
-				$type = 'radio';
+			/**
+			 * Textarea control
+			 */
+			case 'textarea' :
 
-				if( count( $this->field_options ) ) {
-					$element_value = null;
-					if( array_key_exists( 'value', $this->attributes ) ) {
-						$element_value = $this->attributes['value'];
-						unset( $this->attributes['value'] );
-					}
-
-					$elements = '';
-					foreach( $this->field_options as $value => $label ) {
-						$option_attributes = array( 'type' => $type, 'value' => $value, 'name' => $this->name ) + $this->attributes;
-						if( $element_value and $value == $element_value )
-							$option_attributes['checked'] = true;
-
-						$element = Html::element( 'input', $option_attributes, 'elementInput' );
-						$template = Filter::exec( 'formFieldRadioOptionTemplate', '<label>%1$s<div class="radio"></div><span>%2$s</span></label>' );
-						if( !empty( $template ) )
-							$elements .= sprintf( $template, $element, $label );
-						else
-							$elements .= $element;
-					}
-				}
-				break;
-
-			case self::Select :
-				$tag = 'select';
-				$self_close = false;
-
-				$attribute_value = null;
-				if( array_key_exists( 'value', $this->attributes ) ) {
-					$attribute_value = $this->attributes['value'];
-					unset( $this->attributes['value'] );
+				// Remove value prop, set as markup
+				if ($prop_value = $this->prop('value')) {
+					$this->markup = Html::escape($prop_value);
+					unset($this->props['value']);
 				}
 
-				$options = '';
-				foreach( $this->field_options as $value => $label ) {
-					$attributes = array( 'value' => $value, 'html' => $label );
-					if( $attribute_value and $value == $attribute_value )
-						$attributes['selected'] = true;
-					$options .= Html::element( 'option', $attributes, 'elementOption' );
-				}
-
-				$this->attributes['html'] = $options;
-				break;
-
-			case self::Textarea :
-				$tag = 'textarea';
-				$self_close = false;
-
-				if( array_key_exists( 'value', $this->attributes ) ) {
-					$this->attributes['html'] = $this->attributes['value'];
-					unset( $this->attributes['value'] );
-				}
+				$elements = Html::element(array(
+					'tag'    => 'textarea',
+					'markup' => $this->markup,
+					'props'  => $this->props
+				));
 				break;
 		}
 
-		if( $this->getName() )
-			$this->attributes['name'] = $this->getName();
-		if( $this->getId() )
-			$this->attributes['id'] = $this->getId();
-
-		$class = null;
-		if( array_key_exists( 'class', $this->attributes ) )
-			$this->attributes['class'] = implode( ' ', $this->attributes['class'] );
-
-		if( !is_null( $type ) )
-			$this->attributes['type'] = $type;
-
-		$info = '';
-		if( $this->info() ) {
-			$template = Filter::exec( 'formFieldInfoTemplate', '<p>%s</p>' );
-			if( !empty( $template ) )
-				$info = sprintf( $template, $this->info() );
-		}
-
+		// Field label
 		$label = '';
-		if( $this->label() ) {
-			$template = Filter::exec( 'formFieldLabelTemplate', '<label>%s</label>' );
-			if( !empty( $template ) )
-				$label = sprintf( $template, $this->label() );
+		if ($this->label()) {
+			$label = Html::element(array(
+				'tag'    => 'label',
+				'markup' => $this->label(),
+				'props'  => array(
+					'id' => 'label-' . $this->id()
+				)
+			), 'formFieldLabelTemplate');
 		}
 
-		if( is_null( $elements ) )
-			$elements = Html::element( $tag, $this->attributes, 'element' . ucfirst( $tag ) . ucfirst( $type ), $self_close );
-		$template = Filter::exec( 'formFieldElementTemplate', '<div>%s</div>' );
-		if( !empty( $template ) )
-			$elements = sprintf( $template, $elements );
+		// Field description
+		$description = '';
+		if ($this->description()) {
+			$description = Html::element(array(
+				'tag'    => 'p',
+				'markup' => $this->description(),
+				'props'  => array(
+					'id' => 'desc-' . $this->id()
+				)
+			), 'formFieldDescriptionTemplate');
+		}
 
-		$template = Filter::exec( 'formFieldWrapperTemplate', '<div>%1$s%2$s%3$s</div>' );
-		if( !empty( $template ) )
-			return sprintf( $template, $label, $info, $elements );
-		else
+		// Field control
+		if (is_null($elements)) {
+			$this->props = array_merge(array(
+				'aria-labelledby'  => 'label-' . $this->id(),
+				'aria-describedby' => 'desc-' . $this->id()
+			), $this->props);
+
+			$elements = Html::element(array(
+				'tag'    => $this->tag,
+				'close'  => ($this->tag == 'input'),
+				'markup' => $this->markup,
+				'props'  => $this->props
+			), 'element' . ucfirst($this->tag) . '_' . strtolower($this->prop('type')) . '_' . ucfirst($this->prop('name')));
+		}
+
+		// Field control template
+		$template = Html::element(array(
+			'tag'    => 'div',
+			'props'  => array(
+				'class' => array(
+					'control'
+				),
+			),
+			'markup' => '%s'
+		), 'formFieldControlTemplate');
+		if (!empty($template)) {
+			$elements = sprintf($template, $elements);
+		}
+
+		// Field template
+		$template = Html::element(array(
+			'tag'    => 'div',
+			'markup' => '%1$s%2$s%3$s',
+			'props'  => array(
+				'class' => array(
+					'sy-field',
+					$this->prop('name')
+				)
+			)
+		), 'formFieldTemplate');
+		if (!empty($template)) {
+			return sprintf($template, $label, $description, $elements);
+		} else {
 			return $elements;
+		}
 	}
 }

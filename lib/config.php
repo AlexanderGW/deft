@@ -21,39 +21,45 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
-
 class Config extends Snappy_Concrete {
 	private $path = null;
 	private $exists = false;
+	private $type;
 	private $readable = false;
 	private $empty = true;
 	private $fields = array();
+	private $exception = null;
 
 	/**
 	 * Config constructor.
 	 *
 	 * @param null $args
 	 */
-	function __construct( $scope = null ) {
-		$scope = SNAPPY_PATH . str_replace( '.', DS, $scope ) . '.php';
-		$this->path = self::getArgs( $scope );
-		parent::__construct( $this->path );
+	function __construct ($scope = null) {
+		$this->scope = self::getArgs($scope);
+		$this->type = Snappy::support('yml') ? 'yml' : 'php';
+		$this->path = SNAPPY_PATH . str_replace('.', DS, $this->scope) . '.' . $this->type;
 
-		if( file_exists( $this->path ) ) {
+		if (file_exists($this->path)) {
 			$this->exists = true;
-			if( is_readable( $this->path ) ) {
+			if (is_readable($this->path)) {
 				$this->readable = true;
-				include $this->path;
-				if( isset( $array ) and is_array( $array ) ) {
+
+				try {
+					$array = include $this->path;
+				}
+				catch (Exception $e) {
+					$this->exception = $e;
+				}
+
+				if (isset($array) and is_array($array)) {
 					$this->fields = $array;
-					$this->empty = false;
+					$this->empty  = false;
 				}
 			}
 		}
+
+		parent::__construct(__CLASS__, $this->scope);
 	}
 
 	/**
@@ -61,9 +67,11 @@ class Config extends Snappy_Concrete {
 	 *
 	 * @return null|string
 	 */
-	public static function getArgs( $args = null ) {
-		if( !is_string( $args ) )
-			$args = 'config.app';
+	public static function getArgs ($args = null) {
+		if (!is_string($args)) {
+			$args = 'config.snappy';
+		}
+
 		return $args;
 	}
 
@@ -73,16 +81,19 @@ class Config extends Snappy_Concrete {
 	 *
 	 * @return array|null|string|void
 	 */
-	function get( $arg = -1, $fallback = null ) {
-		if( is_null( $arg ) )
+	function get ($arg = - 1, $fallback = null) {
+		if (is_null($arg)) {
 			return;
+		}
 
-		if( $arg < 0 )
+		if ($arg < 0) {
 			return $this->fields;
+		}
 
-		if( array_key_exists( $arg, $this->fields ) ) {
-			$return = $this->fields[ $arg ];
-			return is_string( $return ) ? stripslashes( $return ) : $return;
+		if (array_key_exists($arg, $this->fields)) {
+			$return = $this->fields[$arg];
+
+			return is_string($return) ? stripslashes($return) : $return;
 		}
 
 		return $fallback;
@@ -92,15 +103,18 @@ class Config extends Snappy_Concrete {
 	 * @param null $x
 	 * @param null $y
 	 */
-	function set( $x = null, $y = null ) {
-		if( is_null( $x ) )
+	function set ($x = null, $y = null) {
+		if (is_null($x)) {
 			return;
+		}
 
-		if( is_array( $x ) ) {
-			foreach( $x as $a => $b )
-				$this->fields[ $a ] = $b;
-		} else
-			$this->fields[ $x ] = $y;
+		if (is_array($x)) {
+			foreach ($x as $a => $b) {
+				$this->fields[$a] = $b;
+			}
+		} else {
+			$this->fields[$x] = $y;
+		}
 	}
 
 	/**
@@ -108,9 +122,10 @@ class Config extends Snappy_Concrete {
 	 *
 	 * @return bool
 	 */
-	function remove( $field ) {
-		if( array_key_exists( $field, $this->fields ) !== false ) {
-			unset( $this->fields[ $field ] );
+	function remove ($field) {
+		if (array_key_exists($field, $this->fields) !== false) {
+			unset($this->fields[$field]);
+
 			return true;
 		}
 
@@ -121,38 +136,42 @@ class Config extends Snappy_Concrete {
 	 * @param null $item
 	 * @param int $depth
 	 *
-	 * @return mixed|null|string|void
+	 * @return string
 	 */
-	private function _save( $item = null, $depth = 1 ) {
-		if( is_null( $item ) )
-			return;
+	private function _save ($item = null, $depth = 1) {
+		if (is_null($item)) {
+			return 'null';
+		}
 
 		$padding_char = "\t";
-		$padding = str_repeat( $padding_char, $depth );
+		$padding      = str_repeat($padding_char, $depth);
 
-		if( is_array( $item ) ) {
+		if (is_array($item)) {
 			$content = "array(\r\n";
 
-			foreach( $item as $key => $val ) {
-				$array_key = ( !is_string( $key ) ? $key : "'" . $key . "'" );
+			foreach ($item as $key => $val) {
+				if (!is_null($val)) {
+					$array_key = (!is_string($key) ? $key : "'" . $key . "'");
 
-				$content .= sprintf(
-					"%s%s => %s,%s",
-					$padding . $padding_char,
-					$array_key,
-					$this->_save( $val, ( $depth + 1 ) ),
-					"\r\n"
-				);
+					$content .= sprintf(
+						"%s%s => %s,%s",
+						$padding . $padding_char,
+						$array_key,
+						$this->_save($val, ($depth + 1)),
+						"\r\n"
+					);
+				}
 			}
 
-			$content = preg_replace( "/,\r\n$/", "\r\n", $content );
+			$content = preg_replace("/,\r\n$/", "\r\n", $content);
 			$content .= $padding . ")";
 
 			return $content;
 		}
 
-		if( is_int( $item ) )
+		if (is_int($item)) {
 			return $item;
+		}
 
 		return "'" . $item . "'";
 	}
@@ -160,34 +179,49 @@ class Config extends Snappy_Concrete {
 	/**
 	 * @return bool
 	 */
-	function save() {
-		ksort( $this->fields );
+	function save () {
+		if (count($this->fields)) {
+			ksort($this->fields);
 
-		$content	= "<" . "?php\r\n\r\n"
-		              . "/" . "**\r\n"
-		              . " * File: " . str_replace( SNAPPY_PATH, '', $this->path ) . "\r\n"
-		              . " * Date: " . gmdate( 'Y-m-d H:i:s' ) . "\r\n"
-		              . " * Auto-generated configuration by the Snappy Framework\r\n"
-		              . " *" . "/\r\n\r\n"
-		              . "if( !defined( 'IN_SNAPPY' ) ) {\r\n"
-		              . "\theader( 'HTTP/1.0 404 Not Found' );\r\n"
-		              . "\texit;\r\n"
-		              . "}\r\n\r\n"
-		              . "\$array = array(\r\n";
+			if (!file_exists($this->path)) {
+				touch($this->path);
+			}
 
-		foreach( $this->fields AS $arg => $value )
-			$content .= "\t'" . $arg . "' => " . $this->_save( $value ) . ",\r\n";
-		$content = preg_replace( "/,\r\n$/", "\r\n", $content );
-		$content .= ");";
+			$content = null;
 
-		$fp = fopen( $this->path, 'wb' );
-		if( !$fp )
-			Snappy::error( 'Config not accessible: %1$s', $this->path );
-		else {
-			fwrite( $fp, $content );
-			fclose( $fp );
+			// YAML support?
+			if ($this->type == 'yml') {
+				yaml_emit_file($this->path, $this->fields, YAML_UTF8_ENCODING);
+				$content = true;
+			}
 
-			return true;
+
+			// Default PHP ouput
+			if (!$content) {
+				$content = "<" . "?php" . PHP_EOL . PHP_EOL
+				           . "/" . "**" . PHP_EOL
+				           . " * File: " . str_replace(SNAPPY_PATH, '', $this->path) . PHP_EOL
+				           . " * Date: " . gmdate('Y-m-d H:i:s') . PHP_EOL
+				           . " * Auto-generated configuration by the Snappy Framework" . PHP_EOL
+				           . " *" . PHP_EOL . PHP_EOL
+				           . "return array(" . PHP_EOL;
+
+				foreach ($this->fields AS $arg => $value) {
+					$content .= "\t'" . $arg . "' => " . $this->_save($value) . "," . PHP_EOL;
+				}
+				$content = preg_replace("/," . PHP_EOL . "$/", PHP_EOL, $content);
+				$content .= ");";
+			}
+
+			$fp = fopen($this->path, 'wb');
+			if (!$fp) {
+				Snappy::error('Config not accessible: %1$s', $this->path);
+			} else {
+				fwrite($fp, $content);
+				fclose($fp);
+
+				return true;
+			}
 		}
 
 		return false;
@@ -196,28 +230,28 @@ class Config extends Snappy_Concrete {
 	/**
 	 * @return null|string
 	 */
-	function getPath() {
+	function getPath () {
 		return $this->path;
 	}
 
 	/**
 	 * @return bool
 	 */
-	function exists() {
+	function exists () {
 		return $this->exists;
 	}
 
 	/**
 	 * @return bool
 	 */
-	function isReadable() {
+	function isReadable () {
 		return $this->readable;
 	}
 
 	/**
 	 * @return bool
 	 */
-	function isEmpty() {
+	function isEmpty () {
 		return $this->empty;
 	}
 }

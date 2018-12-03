@@ -21,19 +21,24 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
+$markup = "\r\n" . Html::element( array(
+	'tag' => 'head',
+	'markup' => Document::getHead()
+), 'elementHead' ) .
+	  "\r\n" . Html::element( array(
+	'tag' => 'body',
+	'markup' => Document::getBody()
+), 'elementBody' );
 
-$content = array(
-	'lang' => Document::getLocale(),
-	'html' => "\r\n" . Html::element( 'head', Document::getHead(), 'elementHead' ) .
-	          "\r\n" . Html::element( 'body', Document::getBody(), 'elementBody' )
+$props = array(
+	'lang' => Document::getLocale()
 );
-
 if( Document::getDirection() != 'ltr' )
-	$content['dir'] = Document::getDirection();
+	$props['dir'] = Document::getDirection();
 
 ?><!DOCTYPE html>
-<?php echo Html::element( 'html', $content, 'elementHtml' ) ?>
+<?php echo Html::element( array(
+	'tag' => 'html',
+	'markup' => $markup,
+	'props' => $props
+), 'elementHtml' ) ?>

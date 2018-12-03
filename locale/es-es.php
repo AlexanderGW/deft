@@ -27,12 +27,13 @@ return array(
 		'encoding' => 'utf-8',
 		'iso2' => 'es',
 		'iso3' => 'esp',
-		'locale' => 'es-ES'
+		'locale' => 'es-ES',
+		'timezone' => 'Europe/Madrid'
 	),
 	array(
 		'Environment settings' => 'La configuración del entorno',
 		'Hello' => 'Hola',
 		'Language' => 'Idioma',
-		'Welcome' => 'Bienvenido'
+		'Welcome' => 'Bidataenido'
 	)
 );

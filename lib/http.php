@@ -21,11 +21,6 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
-
 class Http {
 	/**
 	 * Set TRUE once init() executes.
@@ -47,7 +42,8 @@ class Http {
 			$results = array();
 			$size = min(
 				Helper::getBytesFromShno( ini_get( 'post_max_size' ) ),
-				Helper::getBytesFromShno( ini_get( 'upload_max_filesize' ) )
+				Helper::getBytesFromShno( ini_get( 'upload_max_filesize' ) ),
+				Helper::getBytesFromShno( ini_get( 'memory_limit' ) )
 			);
 
 			foreach( $_FILES as $group => $data ) {
@@ -58,10 +54,19 @@ class Http {
 				$results[ $group ][] = self::_file( $data, $size );
 			}
 
-			Hook::exec( 'httpRequestHasFiles', $results );
+			Event::exec( 'httpRequestHasFiles', $results );
 		}
 
 		self::$initialized = true;
+	}
+
+	/**
+	 * Is the HTTP request a POST?
+	 *
+	 * @return bool
+	 */
+	public static function isPostRequest() {
+		return ( $_SERVER['REQUEST_METHOD'] === 'POST' );
 	}
 
 	/**
@@ -229,7 +234,7 @@ class Http {
 			if( array_key_exists( $code, $codes ) ) {
 				header( sprintf( 'HTTP/1.1 %d %s', $code, $codes[ $code ] ) );
 
-				// If empty response, throw an error template
+				// If empty response, show an error template
 				if( Document::isEmpty() ) {
 					$content = Snappy::capture( 'template.' . $code );
 					if( is_string( $content ) ) {
@@ -293,7 +298,7 @@ class Http {
 
 		// Exec request
 		if( ( $response = curl_exec( $ch ) ) === false )
-			Document::addErrorMessage( curl_error( $ch ), curl_errno( $ch ), 'cURL' );
+			Document::setErrorMessage( curl_error( $ch ), curl_errno( $ch ), 'cURL' );
 
 		$return = curl_getinfo( $ch );
 		$return['content'] = $response;
@@ -303,4 +308,4 @@ class Http {
 	}
 }
 
-Hook::add( 'init', array( 'Http', 'init' ) );
+Event::add( 'init', array( 'Http', 'init' ) );

@@ -21,11 +21,6 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
-
 class Route {
 	/**
 	 * Set TRUE once init() executes.
@@ -104,7 +99,11 @@ class Route {
 					// Build pattern
 					$path_pattern = '#^' . $path . '$#';
 					foreach( $args['pattern'] as $name => $pattern )
-						$path_pattern = str_replace( '[' . $name . ']', '(' . $pattern . ')', $path_pattern );
+						$path_pattern = str_replace(
+							'[' . $name . ']',
+							'(' . $pattern . ')',
+							$path_pattern
+						);
 
 					// Run pattern
 					preg_match( $path_pattern, SNAPPY_ROUTE, $matches );
@@ -113,7 +112,7 @@ class Route {
 						array_shift( $matches );
 
 						foreach( $matches as $i => $match )
-							$args['env'][ $keys[1][ $i ] ] = $match;
+							$args['data'][ $keys[1][ $i ] ] = $match;
 
 						self::$route = array_merge(
 							$args,
@@ -129,12 +128,12 @@ class Route {
 			}
 		}
 
-		// Apply route environment
-		if( is_array( self::$route['env'] ) ) {
-			foreach( self::$route['env'] as $key => $value ) {
+		// Apply route dataironment
+		if( is_array( self::$route['data'] ) ) {
+			foreach( self::$route['data'] as $key => $value ) {
 				$key = Helper::trimAllCtrlChars( $key );
 				$value = Helper::trimAllCtrlChars( $value );
-				$_GET[ $key ] = $value;
+				self::$route['data'][ $key ] = $value;
 			}
 		}
 
@@ -148,20 +147,24 @@ class Route {
 			'request' => SNAPPY_ROUTE,
 			'path' => self::$route['path'],
 			'pattern' => self::$route['pattern'],
-			'env' => self::$route['env'],
+			'data' => self::$route['data'],
 			'callback' => self::$route['callback']
 		) );
+
+		if (self::$route === null) {
+			Http::status(404);
+		}
 
 		self::$parsed = true;
 	}
 
 	/**
-	 *
+	 * Returns the currently patched route. Provide a value for a particular route key, or return the whole object.
 	 */
 	public static function current( $arg = null ) {
 		if( is_null( $arg ) )
 			return (object)self::$route;
-		if( array_key_exists( $arg, self::$route ) )
+		if( is_array(self::$route) and array_key_exists( $arg, self::$route ) )
 			return self::$route[ $arg ];
 		return;
 	}
@@ -171,12 +174,19 @@ class Route {
 	 * @param array $args
 	 */
 	public static function add( $name = null, $path = null, $args = array(), $callback = null ) {
+
+		// TODO: Need to split path by separator
+
 		if( is_null( $path ) )
 			return;
+
 		if( is_null( $name ) )
 			$name = md5( $path );
-		if( strpos( $path, Snappy::getCfg()->get( 'url_separator', '/' ) ) === 0 )
-			$path = substr( $path, 1 );
+
+		$sep = Snappy::getCfg()->get( 'url_separator', '/' );
+		if( strpos( $path, $sep ) === 0 )
+			$path = substr( $path, strlen($sep) );
+
 		if( !$path )
 			$path = '';
 
@@ -207,7 +217,7 @@ class Route {
 		// Store rule
 		self::$rules[ $path ] = array(
 			'name' => $name,
-			'env' => $args,
+			'data' => $args,
 			'pattern' => $patterns,
 			'callback' => ( is_array( $callback ) ? $callback[0] . '::' . $callback[1] : $callback )
 		);
@@ -267,10 +277,44 @@ class Route {
 		$cfg->set( self::getRules() );
 		$cfg->save();
 	}
+
+	/**
+	 * Syntactic suger
+	 *
+	 * @return mixed|object|void
+	 */
+	public static function getName() {
+		return self::current('name');
+	}
+
+	public static function getRequest() {
+		return self::current('request');
+	}
+
+	public static function getPath() {
+		return self::current('path');
+	}
+
+	public static function getPattern() {
+		return self::current('pattern');
+	}
+
+	public static function getData($key = null) {
+		$data = self::current('data');
+		if (is_array($data)) {
+			if (array_key_exists($key,$data)) {
+				return $data[$key];
+			}
+		}
+	}
+
+	public static function getCallback() {
+		return self::current('callback');
+	}
 }
 
 // Load route rules
-Hook::add( 'init', array( 'Route', 'init' ), 1 );
+Event::add( 'init', array( 'Route', 'init' ), 1 );
 
 // Process HTTP request against available route rules
-Hook::add( 'init', array( 'Route', 'parse' ), 999 );
+Event::add( 'init', array( 'Route', 'parse' ), 999 );

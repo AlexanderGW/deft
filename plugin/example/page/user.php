@@ -21,12 +21,7 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if (!defined('IN_SNAPPY')) {
-	header('HTTP/1.0 404 Not Found');
-	exit;
-}
-
-Document::prependTitle(__('User environment'));
+Document::prependTitle(__('User dataironment'));
 
 /**
  * POST of locale, negotiate with available locales, store in token, and reload page
@@ -52,7 +47,7 @@ if (!$locales) {
 array_unshift($locales, 'en-GB');
 
 /**
- * Build form to set locale environment
+ * Build form to set locale dataironment
  */
 $form =& Snappy::getForm('user-locale')->route('example.page')->props(array(
 	'method' => 'post'

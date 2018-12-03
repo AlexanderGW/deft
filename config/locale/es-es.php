@@ -21,27 +21,18 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Attempt to fetch a cached version of the request
- */
-Event::add('documentInit', function() {
-	if (Http::isPostRequest() === false) {
-		$document = Snappy::get('cache.memcached')->getLink()->get('snappy.document.' . md5(SNAPPY_ROUTE));
-		if ($document) {
-			die($document);
-		}
-	}
-});
-
-/**
- * Cache rendered document for future requests
- */
-Filter::add('documentContent', function($content) {
-	Snappy::get('cache.memcached')->getLink()->set(
-		'snappy.document.' . md5(SNAPPY_ROUTE),
-		$content,
-		Snappy::getCfg('cache.memcached')->get('expire', 900)
-	);
-
-	return $content;
-});
+return array(
+	array(
+		'direction' => 'ltr',
+		'encoding' => 'utf-8',
+		'iso2' => 'es',
+		'iso3' => 'esp',
+		'locale' => 'es-ES'
+	),
+	array(
+		'Environment settings' => 'La configuración del entorno',
+		'Hello' => 'Hola',
+		'Language' => 'Idioma',
+		'Welcome' => 'Bienvenido'
+	)
+);

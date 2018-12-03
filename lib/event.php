@@ -24,16 +24,18 @@
 class Event {
 	private static $actions = array();
 
-	static function add( $name = null, $function = null, $priority = 10, $arg_count = 1 ) {
-		if( !is_null( $name ) and !is_null( $function ) ) {
-			if( !array_key_exists( $name, self::$actions ) )
-				self::$actions[ $name ] = array();
+	static function add ($name = null, $function = null, $priority = 10, $arg_count = 1) {
+		if (!is_null($name) and !is_null($function)) {
+			if (!array_key_exists($name, self::$actions)) {
+				self::$actions[$name] = array();
+			}
 
-			$priority = intval( $priority );
-			if( !array_key_exists( $priority, self::$actions[ $name ] ) )
-				self::$actions[ $name ][ $priority ] = array();
+			$priority = intval($priority);
+			if (!array_key_exists($priority, self::$actions[$name])) {
+				self::$actions[$name][$priority] = array();
+			}
 
-			self::$actions[ $name ][ $priority ][] = array( $function, $arg_count );
+			self::$actions[$name][$priority][] = array($function, $arg_count);
 
 			return true;
 		}
@@ -41,66 +43,79 @@ class Event {
 		return;
 	}
 
-	static function get( $name = null ) {
-		if( !is_null( $name ) )
-			if( array_key_exists( $name, self::$actions ) )
-				return self::$actions[ $name ];
+	static function get ($name = null) {
+		if (!is_null($name)) {
+			if (array_key_exists($name, self::$actions)) {
+				return self::$actions[$name];
+			}
+		}
+
 		return;
 	}
 
-	static function clear( $name = null, $function = null ) {
-		if( !is_null( $name ) and array_key_exists( $name, self::$actions ) ) {
-			if( is_null( $function ) )
-				self::$actions[ $name ] = array();
-			else {
-				foreach( self::$actions[ $name ] as $priority => $actions ) {
-					foreach( $actions as $i => $action ) {
-						if( ( is_array( $function ) and $action[0][0] == $function[0] and $action[0][1] == $function[1] ) or $action[0] == $function ) {
-							unset( self::$actions[ $name ][ $priority ][ $i ] );
+	static function clear ($name = null, $function = null) {
+		if (!is_null($name) and array_key_exists($name, self::$actions)) {
+			if (is_null($function)) {
+				self::$actions[$name] = array();
+			} else {
+				foreach (self::$actions[$name] as $priority => $actions) {
+					foreach ($actions as $i => $action) {
+						if ((is_array($function) and $action[0][0] == $function[0] and $action[0][1] == $function[1]) or $action[0] == $function) {
+							unset(self::$actions[$name][$priority][$i]);
 
-							if( !count( self::$actions[ $name ][ $priority ] ) )
-								unset( self::$actions[ $name ][ $priority ] );
+							if (!count(self::$actions[$name][$priority])) {
+								unset(self::$actions[$name][$priority]);
+							}
 						}
 					}
 				}
 			}
+
 			return true;
 		}
+
 		return false;
 	}
 
-	static function exec( /*polymorphic*/ ) {
-		if( !func_num_args() )
+	/**
+	 * Execute all event actions in order of priority, and alphabetical order.
+	 *
+	 * @return bool
+	 */
+	static function exec ( /*polymorphic*/) {
+		if (!func_num_args()) {
 			return;
+		}
 
 		$args = func_get_args();
-		$name = array_shift( $args );
+		$name = array_shift($args);
 
-		if( array_key_exists( $name, self::$actions ) ) {
-			$queue =& self::$actions[ $name ];
-			if( count( $queue ) ) {
-				ksort( $queue );
+		if (array_key_exists($name, self::$actions)) {
+			$queue =& self::$actions[$name];
+			if (count($queue)) {
+				ksort($queue);
 
 				$array = array();
 				$start = Helper::getMicroTime();
 
-				foreach( $queue as $priority => $callbacks ) {
-					foreach( $callbacks as $callback ) {
-						if( is_callable( $callback[0] ) ) {
-							$array[ $priority ][] = ( is_array( $callback[0] ) ? $callback[0][0] . '::' . $callback[0][1] : $callback[0] );
-							call_user_func_array( $callback[0], array_slice( $args, 0, $callback[1] ) );
+				foreach ($queue as $priority => $callbacks) {
+					foreach ($callbacks as $callback) {
+						if (is_callable($callback[0])) {
+							$array[$priority][] = (is_array($callback[0]) ? $callback[0][0] . '::' . $callback[0][1] : $callback[0]);
+							call_user_func_array($callback[0], array_slice($args, 0, $callback[1]));
 						}
 					}
 				}
 
-				Snappy::log( 'hook/' . $name, array(
-					'time' => Helper::getMoment( $start ),
+				Snappy::log('event/' . $name, array(
+					'time'      => Helper::getMoment($start),
 					'callbacks' => $array
-				) );
+				));
 
 				return true;
 			}
 		}
+
 		return false;
 	}
 }

@@ -21,11 +21,6 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
-
 if( ( $value = Http::post( 'foobar' ) ) != false ) {
 	echo serialize( array( 'value' => $value ) );
 }

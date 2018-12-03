@@ -24,25 +24,11 @@
 // Get the framework
 require 'snappy.php';
 
-if( !defined( 'SNAPPY_LIB_DIR' ) )
-	define( 'SNAPPY_LIB_DIR', 'lib' );
-
-if( !defined( 'SNAPPY_PLUGIN_DIR' ) )
-	define( 'SNAPPY_PLUGIN_DIR', 'plugin' );
-
-if( !defined( 'SNAPPY_PUBLIC_DIR' ) )
-	define( 'SNAPPY_PUBLIC_DIR', 'public' );
-
-if( !defined( 'SNAPPY_PUBLIC_ASSET_DIR' ) )
-	define( 'SNAPPY_PUBLIC_ASSET_DIR', 'asset' );
-
 // Initialise
-Snappy::init();
+Snappy::init( require 'config/snappy.php' );
 
-// Append debugging
-//if( SNAPPY_DEBUG > 0 ) {
-	Filter::add( 'documentBody', function( $content ) {
-		$content .= Snappy::capture( 'template.debug' );
-		return $content;
-	} );
-//}
+echo Document::content();
+
+/*
+ * Document::beforeDocumentGetBody the resource info for this debug stack, debug.js etc etc to API REST the JSON
+ * */

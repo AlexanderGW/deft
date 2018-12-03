@@ -21,11 +21,6 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
-
 class Snappy_Google_Helper_Plugin {
 	public static function addFonts() {
 		if( count( Google::$fonts ) ) {
@@ -86,4 +81,4 @@ class Google {
 	}
 }
 
-Hook::add( 'beforeDocumentGetHead', array( 'Snappy_Google_Helper_Plugin', 'addFonts' ) );
+Event::add( 'beforeDocumentGetHead', array( 'Snappy_Google_Helper_Plugin', 'addFonts' ) );

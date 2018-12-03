@@ -21,12 +21,7 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( !defined( 'IN_SNAPPY' ) ) {
-	header( 'HTTP/1.0 404 Not Found' );
-	exit;
-}
-
-define( 'SNAPPY_LOCALE_PATH', SNAPPY_PATH . 'locale' . DS );
+define('SNAPPY_LOCALE_PATH', SNAPPY_PATH . 'locale' . DS);
 
 class Language {
 	const DEFAULT_LOCALE = 'en-GB';
@@ -45,26 +40,31 @@ class Language {
 	/**
 	 * @param null $args
 	 */
-	public static function init() {
-		if( self::$initialized )
-			return;
-
-		$cfg =& Snappy::getCfg();
-		$locales = $cfg->get( 'locales', array() );
-
-		$string = Http::post( 'locale' );
-		if( !$string ) {
-			$string = Http::get( 'locale' );
-			if( !$string ) {
-				$string = Token::get( 'locale' );
-				if( !$string )
-					$string = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
-			}
+	public static function init () {
+		if (self::$initialized) {
+	 		return;
 		}
 
-		if( $string !== $_SERVER['HTTP_ACCEPT_LANGUAGE'] )
-			$locale = self::negotiate( $string );
-		else {
+		$cfg     =& Snappy::getCfg();
+		$locales = $cfg->get('locales', array());
+
+		$string = Http::post('locale');
+		if (!$string) {
+			$string = Http::get('locale');
+		}
+		if (!$string) {
+			$string = Token::get('locale');
+		}
+		if (!$string) {
+			$string = Route::getData('locale');
+		}
+		if (!$string) {
+			$string = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+		}
+
+		if ($string !== $_SERVER['HTTP_ACCEPT_LANGUAGE']) {
+			$locale = self::negotiate($string);
+		} else {
 			preg_match_all(
 				"/([[:alpha:]]{1,8})(-([[:alpha:]|-]{1,8}))?(\s*;\s*q\s*=\s*(1\.0{0,3}|0\.\d{0,3}))?\s*(,|$)/i",
 				$string,
@@ -73,88 +73,97 @@ class Language {
 			);
 
 			$locale = null;
-			if( count( $matches ) ) {
+			if (count($matches)) {
 				$bestq = 0;
-				foreach ( $matches as $value ) {
-					$language = strtolower( $value[1] );
+				foreach ($matches as $value) {
+					$language = strtolower($value[1]);
 
-					if( !empty( $value[3] ) ) {
+					if (!empty($value[3])) {
 						$region = $value[3];
-						$label = $language . '-' . $region;
-					} else
+						$label  = $language . '-' . $region;
+					} else {
 						$label = $language;
+					}
 
 					$q = 1.0;
-					if( !empty( $value[5] ) )
-						$q = floatval( $value[5] );
+					if (!empty($value[5])) {
+						$q = floatval($value[5]);
+					}
 
-					if( in_array( $label, $locales ) && ( $q > $bestq ) ) {
+					if (in_array($label, $locales) && ($q > $bestq)) {
 						$locale = $label;
-						$bestq = $q;
-					} elseif( in_array( $language, $locales ) && ( ( $q * 0.9 ) > $bestq ) ) {
+						$bestq  = $q;
+					} elseif (in_array($language, $locales) && (($q * 0.9) > $bestq)) {
 						$locale = $language;
-						$bestq = ( $q * 0.9 );
+						$bestq  = ($q * 0.9);
 					}
 				}
 			}
 		}
 
-		if( is_null( $locale ) )
-			$locale = $cfg->get( 'locale_default', self::DEFAULT_LOCALE );
+		if (is_null($locale)) {
+			$locale = $cfg->get('locale_default', self::DEFAULT_LOCALE);
+		}
 
-		if( $locale != self::DEFAULT_LOCALE ) {
-			$cfg = Snappy::getCfg( 'locale.' . strtolower( $locale ) );
-			if( !$cfg->isEmpty() ) {
+		if ($locale != self::DEFAULT_LOCALE) {
+			$cfg = Snappy::getCfg('locale.' . strtolower($locale));
+			if (!$cfg->isEmpty()) {
 				$args = $cfg->get(0);
-				if( $args )
+				if ($args) {
 					self::$args = $args;
+				}
 
 				$phrases = $cfg->get(1);
-				if( $phrases )
+				if ($phrases) {
 					self::$phrases = $phrases;
+				}
 			}
 		}
 
-		if( !count( self::$args ) ) {
+		if (!count(self::$args)) {
 			self::$args = array(
 				'direction' => 'ltr',
-				'encoding' => 'utf-8',
-				'iso2' => 'en',
-				'iso3' => 'eng',
-				'locale' => 'en-GB'
+				'encoding'  => 'utf-8',
+				'iso2'      => 'en',
+				'iso3'      => 'eng',
+				'locale'    => 'en-GB'
 			);
 		}
 
-		setlocale( LC_ALL, $locale . '.utf8' );
-		Hook::exec( 'initLanguage' );
+		setlocale(LC_ALL, $locale . '.utf8');
+		Event::exec('initLanguage');
 		self::$initialized = true;
 	}
 
 	/**
 	 * @return string
 	 */
-	public static function negotiate( $locale = null ) {
-		if( is_string( $locale ) and ( strlen( $locale ) == 2 or strlen( $locale ) == 5 ) ) {
-			$cfg =& Snappy::getCfg();
-			$locales = $cfg->get( 'locales', array() );
+	public static function negotiate ($locale = null) {
+		if (is_string($locale) and (strlen($locale) == 2 or strlen($locale) == 5)) {
+			$cfg     =& Snappy::getCfg();
+			$locales = $cfg->get('locales', array());
 
-			if( strlen( $locale ) == 5 ) {
-				if( in_array( $locale, $locales ) )
+			if (strlen($locale) == 5) {
+				if (in_array($locale, $locales)) {
 					return $locale;
-				$locale = substr( $locale, 0, 2 );
+				}
+				$locale = substr($locale, 0, 2);
 			}
-			if( strlen( $locale ) == 2 and in_array( $locale, $locales ) )
+			if (strlen($locale) == 2 and in_array($locale, $locales)) {
 				return $locale;
+			}
 		}
+
 		return self::DEFAULT_LOCALE;
 	}
 
 	/**
 	 * @return string
 	 */
-	public static function getEncoding() {
-		if( !self::$initialized )
+	public static function getEncoding () {
+		if (!self::$initialized) {
 			self::init();
+		}
 
 		return self::$args['encoding'];
 	}
@@ -164,22 +173,25 @@ class Language {
 	 *
 	 * @return string
 	 */
-	public static function getISO( $length = 2 ) {
-		if( $length < 2 or $length > 3 )
+	public static function getISO ($length = 2) {
+		if ($length < 2 or $length > 3) {
 			return null;
+		}
 
-		if( !self::$initialized )
+		if (!self::$initialized) {
 			self::init();
+		}
 
-		return self::$args[ 'iso' . $length ];
+		return self::$args['iso' . $length];
 	}
 
 	/**
 	 * @return string
 	 */
-	public static function getLocale() {
-		if( !self::$initialized )
+	public static function getLocale () {
+		if (!self::$initialized) {
 			self::init();
+		}
 
 		return self::$args['locale'];
 	}
@@ -187,9 +199,10 @@ class Language {
 	/**
 	 * @return string
 	 */
-	public static function getDirection() {
-		if( !self::$initialized )
+	public static function getDirection () {
+		if (!self::$initialized) {
 			self::init();
+		}
 
 		return self::$args['direction'];
 	}
@@ -197,18 +210,19 @@ class Language {
 	/**
 	 * @return bool
 	 */
-	public static function isRTL() {
-		if( !self::$initialized )
+	public static function isRTL () {
+		if (!self::$initialized) {
 			self::init();
+		}
 
-		return ( self::$args['direction'] == 'rtl' ? true : false );
+		return (self::$args['direction'] == 'rtl' ? true : false);
 	}
 
 	/**
 	 * @return bool
 	 */
-	public static function isDefault() {
-		return ( self::getLocale() == self::DEFAULT_LOCALE );
+	public static function isDefault () {
+		return (self::getLocale() == self::DEFAULT_LOCALE);
 	}
 
 	/**
@@ -216,13 +230,15 @@ class Language {
 	 *
 	 * @return null
 	 */
-	public static function getPhrase( $string = null ) {
-		if( !self::$initialized )
+	public static function getPhrase ($string = null) {
+		if (!self::$initialized) {
 			self::init();
+		}
 
-		if( !self::isDefault() ) {
-			if( array_key_exists( $string, self::$phrases ) )
-				return self::$phrases[ $string ];
+		if (!self::isDefault()) {
+			if (array_key_exists($string, self::$phrases)) {
+				return self::$phrases[$string];
+			}
 		}
 
 		return $string;
