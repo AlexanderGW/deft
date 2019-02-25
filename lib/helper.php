@@ -34,28 +34,6 @@ class Helper {
 	const EXTENDED_CHARS = '!#$%^&()*+-.,:;<=>?@[]_';
 
 	/**
-	 * Trim all control characters.
-	 *
-	 * @param $string
-	 *
-	 * @return mixed
-	 */
-	public static function trimCtrlChars( $string ) {
-		return preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '', $string );
-	}
-
-	/**
-	 * Trims all control characters, including lines.
-	 *
-	 * @param $string
-	 *
-	 * @return mixed
-	 */
-	public static function trimAllCtrlChars( $string ) {
-		return preg_replace( '/[\x00-\x1F\x80-\x9F]/u', '', $string );
-	}
-
-	/**
 	 * @param null $arg
 	 * @param null $global
 	 */
@@ -196,6 +174,7 @@ class Helper {
 		return $hash;
 	}
 
+	// compareCsrfHash
 	public static function verifyCsrfHash( $hash = null ) {
 		if( is_string( $hash ) ) {
 			$hash_on_token = Token::get( 'csrf' );
@@ -250,6 +229,8 @@ class Helper {
 			return null;
 
 		$unit = 0;
+		// self::SI_UNIT_BYTES
+		// a construct to capture custom arrays of above, etc. Before any actual (real) calls are made.
 		$suffix = array( __( 'bytes' ), __( 'KB' ), __( 'MB' ), __( 'GB' ), __( 'TB' ) );
 		$precision = array( 0, 0, 0, 1, 2 );
 
