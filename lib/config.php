@@ -37,7 +37,7 @@ class Config extends Snappy_Concrete {
 	 */
 	function __construct ($scope = null) {
 		$this->scope = self::getArgs($scope);
-		$this->type = Snappy::support('yml') ? 'yml' : 'php';
+		$this->type = Snappy::support('yaml') ? 'yml' : 'php';
 		$this->path = SNAPPY_PATH . str_replace('.', DS, $this->scope) . '.' . $this->type;
 
 		if (file_exists($this->path)) {
@@ -191,10 +191,8 @@ class Config extends Snappy_Concrete {
 
 			// YAML support?
 			if ($this->type == 'yml') {
-				yaml_emit_file($this->path, $this->fields, YAML_UTF8_ENCODING);
-				$content = true;
+				$content = yaml_emit_file($this->path, $this->fields, YAML_UTF8_ENCODING);
 			}
-
 
 			// Default PHP ouput
 			if (!$content) {
@@ -203,7 +201,7 @@ class Config extends Snappy_Concrete {
 				           . " * File: " . str_replace(SNAPPY_PATH, '', $this->path) . PHP_EOL
 				           . " * Date: " . gmdate('Y-m-d H:i:s') . PHP_EOL
 				           . " * Auto-generated configuration by the Snappy Framework" . PHP_EOL
-				           . " *" . PHP_EOL . PHP_EOL
+				           . " */" . PHP_EOL . PHP_EOL
 				           . "return array(" . PHP_EOL;
 
 				foreach ($this->fields AS $arg => $value) {
@@ -215,7 +213,12 @@ class Config extends Snappy_Concrete {
 
 			$fp = fopen($this->path, 'wb');
 			if (!$fp) {
-				Snappy::error('Config not accessible: %1$s', $this->path);
+				if (!SNAPPY_DEBUG) {
+					$path = basename($this->path);
+				} else {
+					$path = $this->path;
+				}
+				Snappy::error('Failed to open configuration file: %1$s', $path);
 			} else {
 				fwrite($fp, $content);
 				fclose($fp);
