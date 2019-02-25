@@ -184,11 +184,11 @@ class Db extends Snappy_Concrete {
 				$this->resource = $this->link->query($this->query);
 			}
 			catch (PDOException $e) {
-				Document::setErrorMessage($e->getMessage(), $e->getCode(), __('Database'));
+				Watchdog::set($e->getMessage(), $e->getCode(), 'db');
 			}
 
 			if (SNAPPY_DEBUG > 0) {
-				$query = Helper::trimAllCtrlChars($this->query);
+				$query = Sanitize::forText($this->query);
 				$entry = array(
 					'time'  => Helper::getMoment($start),
 					'query' => $query
@@ -205,7 +205,7 @@ class Db extends Snappy_Concrete {
 								$resource = $this->link->query($this->query);
 							}
 							catch (PDOException $e) {
-								Document::setErrorMessage($e->getMessage(), $e->getCode(), __('Database'));
+								Watchdog::set($e->getMessage(), $e->getCode(), 'db');
 							}
 
 							if ($resource) {
