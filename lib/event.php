@@ -24,7 +24,7 @@
 class Event {
 	private static $actions = array();
 
-	static function add ($name = null, $function = null, $priority = 10, $arg_count = 1) {
+	static function set ($name = null, $function = null, $priority = 10, $arg_count = 1) {
 		if (!is_null($name) and !is_null($function)) {
 			if (!array_key_exists($name, self::$actions)) {
 				self::$actions[$name] = array();
@@ -101,8 +101,10 @@ class Event {
 				foreach ($queue as $priority => $callbacks) {
 					foreach ($callbacks as $callback) {
 						if (is_callable($callback[0])) {
-							$array[$priority][] = (is_array($callback[0]) ? $callback[0][0] . '::' . $callback[0][1] : $callback[0]);
-							call_user_func_array($callback[0], array_slice($args, 0, $callback[1]));
+							$array[$priority][] = array(
+								'callback' => (is_array($callback[0]) ? $callback[0][0] . '::' . $callback[0][1] : $callback[0]),
+								'return'   => call_user_func_array($callback[0], array_slice($args, 0, $callback[1]))
+							);
 						}
 					}
 				}
