@@ -21,6 +21,12 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+/**
+ * Document class, default HTML5
+ *
+ * Class Document
+ */
 class Document {
 
 	/**
@@ -76,131 +82,6 @@ class Document {
 
 		Event::exec('documentInit');
 		self::$initialized = true;
-	}
-
-	/**
-	 * @param null $message
-	 * @param int $code
-	 * @param null $stack
-	 */
-	static function setErrorMessage ($message = null, $code = 0, $stack = null) {
-		$cfg   =& Snappy::getCfg();
-		$limit = $cfg->get('document_max_errors', 30);
-		if (count(self::$errors) >= $limit) {
-			Snappy::error('Document error limit reached (%1%d)', $limit);
-		}
-
-		if (!is_string($message)) {
-			return;
-		}
-		if (!is_string($stack)) {
-			$stack = 'app';
-		}
-		$code = (int) $code;
-
-		if (!array_key_exists($stack, self::$errors)) {
-			self::$errors[$stack] = array();
-		}
-		self::$errors[$stack][] = array(
-			'code'    => $code,
-			'message' => $message
-		);
-
-		Document::prependBody(sprintf(
-			Html::element(array(
-				'tag' => 'div',
-				'props' => array(
-					'tabindex' => 0,
-					'class' => array(
-						'message',
-						'error'
-					),
-					'role' => 'alert'
-				),
-				'markup' => array(
-					array(
-						'tag' => 'strong',
-						'markup' => '%1$s'
-					),
-					array(
-						'tag' => 'span',
-						'markup' => '%2$s'
-					)
-				)
-			), 'documentErrorTemplate'),
-			__('Error: %1$s (%2$d)', $stack, $code),
-			$message
-		));
-	}
-
-	/**
-	 * @param null $message
-	 */
-	static function addWarningMessage ($message = null) {
-		if (!is_string($message)) {
-			return;
-		}
-
-		Document::prependBody(sprintf(
-			Html::element(array(
-				'tag' => 'div',
-				'props' => array(
-					'tabindex' => 0,
-					'class' => array(
-						'message',
-						'warning'
-					),
-					'role' => 'alert'
-				),
-				'markup' => array(
-					array(
-						'tag' => 'strong',
-						'markup' => '%1$s'
-					),
-					array(
-						'tag' => 'span',
-						'markup' => '%2$s'
-					)
-				)
-			), 'documentWarningTemplate'),
-			__('Warning'),
-			$message
-		));
-	}
-
-	/**
-	 * @param null $message
-	 */
-	static function addInfoMessage ($message = null) {
-		if (!is_string($message)) {
-			return;
-		}
-
-		Document::prependBody(sprintf(
-			Html::element(array(
-				'tag' => 'div',
-				'props' => array(
-					'tabindex' => 0,
-					'class' => array(
-						'message',
-						'info'
-					),
-					'role' => 'alert'
-				),
-				'markup' => array(
-					array(
-						'tag' => 'strong',
-						'markup' => '%1$s'
-					),
-					array(
-						'tag' => 'span',
-						'markup' => '%2$s'
-					)
-				)
-			), 'documentInfoTemplate'),
-			__('Information'),
-			$message
-		));
 	}
 
 	/**
@@ -664,9 +545,9 @@ class Document {
 
 		$hash                = md5($content);
 		self::$styles[$hash] = array(
-			'tag'    => 'style',
-			'markup' => $content,
-			'props'  => array(
+			'@tag'    => 'style',
+			'@markup' => $content,
+			'@props'  => array(
 				'type'  => 'text/css',
 				'media' => $media,
 			)
@@ -754,9 +635,9 @@ class Document {
 
 		$hash                 = md5($content);
 		self::$scripts[$hash] = array(
-			'tag'    => 'script',
-			'markup' => $content,
-			'props'  => array(
+			'@tag'    => 'script',
+			'@markup' => $content,
+			'@props'  => array(
 				'type' => $type
 			)
 		);
@@ -809,8 +690,8 @@ class Document {
 
 		$hash                 = md5($path);
 		self::$scripts[$hash] = array(
-			'tag'   => 'script',
-			'props' => array_merge(array(
+			'@tag'   => 'script',
+			'@props' => array_merge(array(
 				'type' => $type,
 				'src'  => $path,
 			), (array) $attributes)
@@ -874,9 +755,9 @@ class Document {
 
 		$html = '';
 		if (self::getBaseUrl()) {
-			$html .= Html::element(array(
-					'tag'   => 'base',
-					'props' => array(
+			$html .= Element::html(array(
+					'@tag'   => 'base',
+					'@props' => array(
 						'href' => self::getBaseUrl()
 					)
 				), 'documentBase', true) . self::getEOL();
@@ -929,19 +810,19 @@ class Document {
 			self::$meta = Filter::exec('documentMeta', self::$meta);
 			foreach (self::$meta['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
-					$html .= Html::element(array(
-							'tag'   => 'meta',
-							'close' => false,
-							'props' => self::$meta[$hash]
+					$html .= Element::html(array(
+							'@tag'   => 'meta',
+							'@close' => false,
+							'@props' => self::$meta[$hash]
 						), 'documentMeta', true) . self::getEOL();
 				}
 			}
 		}
 
 		if (self::getArg('title')) {
-			$html .= Html::element(array(
-					'tag'    => 'title',
-					'markup' => self::getTitle()
+			$html .= Element::html(array(
+					'@tag'    => 'title',
+					'@markup' => self::getTitle()
 				), 'documentTitle') . self::getEOL();
 		}
 
@@ -952,7 +833,7 @@ class Document {
 			$styles = array();
 			foreach (self::$links['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
-					self::$links[$hash]['href'] = Helper::trimAllCtrlChars(self::$links[$hash]['href']);
+					self::$links[$hash]['href'] = Sanitize::forText(self::$links[$hash]['href']);
 
 					// Add meta..
 					if (
@@ -968,10 +849,10 @@ class Document {
 							and !file_exists(SNAPPY_PATH . self::$links[$hash]['href'])
 						)
 					) {
-						$html .= Html::element(array(
-								'tag'   => 'link',
-								'close' => false,
-								'props' => self::$links[$hash]
+						$html .= Element::html(array(
+								'@tag'   => 'link',
+								'@close' => false,
+								'@props' => self::$links[$hash]
 							), 'documentLink', true) . self::getEOL();
 					} else {
 						if (!array_key_exists(self::$links[$hash]['media'], $styles)) {
@@ -995,7 +876,7 @@ class Document {
 			self::$styles = Filter::exec('documentHeadStyles', self::$styles);
 			foreach (self::$styles['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
-					$html .= Html::element(self::$styles[$hash], 'documentStyle', true) . self::getEOL();
+					$html .= Element::html(self::$styles[$hash], 'documentStyle', true) . self::getEOL();
 				}
 			}
 		}
@@ -1053,10 +934,10 @@ class Document {
 						Snappy::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						file_put_contents($path_file, $content);
-						return Html::element(array(
-							'tag'   => 'link',
-							'close' => false,
-							'props' => array(
+						return Element::html(array(
+							'@tag'   => 'link',
+							'@close' => false,
+							'@props' => array(
 								'media' => $media,
 								'type'  => 'text/css',
 								'rel'   => 'stylesheet',
@@ -1092,10 +973,10 @@ class Document {
 					} else {
 						$content = file_get_contents($file['href']) . "\n\n";
 						file_put_contents($path_file, $content);
-						$return[] = Html::element(array(
-							'tag'   => 'link',
-							'close' => false,
-							'props' => array(
+						$return[] = Element::html(array(
+							'@tag'   => 'link',
+							'@close' => false,
+							'@props' => array(
 								'media' => $media,
 								'type'  => 'text/css',
 								'rel'   => 'stylesheet',
@@ -1128,10 +1009,10 @@ class Document {
 					} else {
 						$content = file_get_contents(SNAPPY_PATH . $file['href']) . "\n\n";
 						file_put_contents($path_file, $content);
-						$return[] = Html::element(array(
-							'tag'   => 'link',
-							'close' => false,
-							'props' => array(
+						$return[] = Element::html(array(
+							'@tag'   => 'link',
+							'@close' => false,
+							'@props' => array(
 								'media' => $media,
 								'type'  => 'text/css',
 								'rel'   => 'stylesheet',
@@ -1162,14 +1043,14 @@ class Document {
 			if (SNAPPY_DEBUG === 0) {
 				if (!file_exists($path_file)) {
 					foreach ($scripts as $i => $script) {
-						$content .= '/* (' . ($i + 1) . '/' . $total . ') ' . $script['props']['src'] . " */\n";
+						$content .= '/* (' . ($i + 1) . '/' . $total . ') ' . $script['@props']['src'] . " */\n";
 
 						// Absolute path
-						if (strpos($script['props']['src'], SNAPPY_PATH) === 0) {
-							$content .= file_get_contents($script['props']['src']) . "\n\n";
+						if (strpos($script['@props']['src'], SNAPPY_PATH) === 0) {
+							$content .= file_get_contents($script['@props']['src']) . "\n\n";
 						} // Relative to Snappy path
-						elseif (file_exists(SNAPPY_PATH . $script['props']['src'])) {
-							$content .= file_get_contents(SNAPPY_PATH . $script['props']['src']) . "\n\n";
+						elseif (file_exists(SNAPPY_PATH . $script['@props']['src'])) {
+							$content .= file_get_contents(SNAPPY_PATH . $script['@props']['src']) . "\n\n";
 						}
 					}
 
@@ -1189,9 +1070,9 @@ class Document {
 					}
 				}
 
-				return Html::element(array(
-					'tag'   => 'script',
-					'props' => array(
+				return Element::html(array(
+					'@tag'   => 'script',
+					'@props' => array(
 						'type' => 'text/javascript',
 						'src'  => str_replace(
 							array(dirname(SNAPPY_PUBLIC_ASSET_PATH), "\\"),
@@ -1204,11 +1085,11 @@ class Document {
 
 			$return = array();
 			foreach ($scripts as $i => $script) {
-				$content .= '/* (' . ($i + 1) . '/' . $total . ') ' . $script['props']['src'] . " */\n";
+				$content .= '/* (' . ($i + 1) . '/' . $total . ') ' . $script['@props']['src'] . " */\n";
 
 				// Absolute path
-				if (strpos($script['props']['src'], SNAPPY_PATH) === 0) {
-					$path_file = $path . '/' . basename($script['props']['src']);
+				if (strpos($script['@props']['src'], SNAPPY_PATH) === 0) {
+					$path_file = $path . '/' . basename($script['@props']['src']);
 
 					// Attempt to create
 					if (!is_dir($path)) {
@@ -1222,16 +1103,16 @@ class Document {
 					} elseif (!is_writable($path_file)) {
 						Snappy::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
-						$content = file_get_contents($script['props']['src']) . "\n\n";
+						$content = file_get_contents($script['@props']['src']) . "\n\n";
 						file_put_contents($path_file, $content);
-						$return[] = Html::element(array(
-							'tag'   => 'script',
-							'props' => array(
+						$return[] = Element::html(array(
+							'@tag'   => 'script',
+							'@props' => array(
 								'type' => 'text/javascript',
 								'src'  => str_replace(
 									array(dirname(SNAPPY_PUBLIC_ASSET_PATH), "\\"),
 									array(SNAPPY_URL, '/'),
-									$script['props']['src'] . '?' . time()
+									$script['@props']['src'] . '?' . time()
 								)
 							),
 						), 'documentScript');
@@ -1240,9 +1121,9 @@ class Document {
 
 
 				// Relative to Snappy path
-				elseif (file_exists(SNAPPY_PATH . $script['props']['src'])) {
+				elseif (file_exists(SNAPPY_PATH . $script['@props']['src'])) {
 					$path      = SNAPPY_PUBLIC_ASSET_PATH;
-					$path_file = $path . basename($script['props']['src']);
+					$path_file = $path . basename($script['@props']['src']);
 
 					// Attempt to create
 					if (!is_dir($path)) {
@@ -1256,13 +1137,13 @@ class Document {
 					} elseif (!is_writable($path_file)) {
 						Snappy::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
-						$content = file_get_contents(SNAPPY_PATH . $script['props']['src']) . "\n\n";
+						$content = file_get_contents(SNAPPY_PATH . $script['@props']['src']) . "\n\n";
 						file_put_contents($path_file, $content);
-						$return[] = Html::element(array(
-							'tag'   => 'script',
-							'props' => array(
+						$return[] = Element::html(array(
+							'@tag'   => 'script',
+							'@props' => array(
 								'type' => 'text/javascript',
-								'src'  => SNAPPY_ASSET_URL . basename($script['props']['src']) . '?' . time()
+								'src'  => SNAPPY_ASSET_URL . basename($script['@props']['src']) . '?' . time()
 							),
 						), 'documentScript');
 					}
@@ -1321,30 +1202,30 @@ class Document {
 			$scripts = array();
 			foreach (self::$scripts['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
-					self::$links[$hash]['props']['src'] = Helper::trimAllCtrlChars(self::$scripts[$hash]['props']['src']);
+					self::$links[$hash]['@props']['src'] = Sanitize::forText(self::$scripts[$hash]['@props']['src']);
 
 					// Add script..
 					if (
 
 						// If not javascript
-						(array_key_exists('type', self::$scripts[$hash]['props']) and self::$scripts[$hash]['props']['type'] != 'text/javascript')
+						(array_key_exists('type', self::$scripts[$hash]['@props']) and self::$scripts[$hash]['@props']['type'] != 'text/javascript')
 
 						// Has inline markup..
-						or (!empty(self::$scripts[$hash]['markup']))
+						or (!empty(self::$scripts[$hash]['@markup']))
 
 						or (
 
 							// or isn't in the Snappy url dataironment...
-							strpos(self::$scripts[$hash]['props']['src'], SNAPPY_PATH) !== 0
+							strpos(self::$scripts[$hash]['@props']['src'], SNAPPY_PATH) !== 0
 
 							// nor the Snappy sys dataironment...
-							and !file_exists(SNAPPY_PATH . self::$scripts[$hash]['props']['src'])
+							and !file_exists(SNAPPY_PATH . self::$scripts[$hash]['@props']['src'])
 						)
 					) {
-						self::appendBody(Html::element(array(
-								'tag'    => 'script',
-								'markup' => self::$scripts[$hash]['markup'],
-								'props'  => self::$scripts[$hash]['props']
+						self::appendBody(Element::html(array(
+								'@tag'    => 'script',
+								'@markup' => self::$scripts[$hash]['@markup'],
+								'@props'  => self::$scripts[$hash]['@props']
 							), 'documentScript') . self::getEOL());
 					} else {
 						$scripts[] = self::$scripts[$hash];
@@ -1373,6 +1254,14 @@ class Document {
 	}
 
 	/**
+	 *
+	 */
+	static public function json($content) {
+		header('Content-type: text/json');
+		die($content);
+	}
+
+	/**
 	 * @param null $scope
 	 *
 	 * @return mixed|string|void
@@ -1390,9 +1279,11 @@ class Document {
 		// Ultimate document event
 		Event::exec('afterDocumentContent');
 
-		return $return;
+		// Output content
+		header('Content-type: text/html');
+		echo $return;
 	}
 }
 
-Event::add('init', array('Document', 'init'));
-//Event::add('init', array('Document', 'content'), 9999);
+Event::set('init', array('Document', 'init'));
+//Event::set('init', array('Document', 'content'), 9999);
