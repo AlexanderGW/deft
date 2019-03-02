@@ -1,30 +1,35 @@
 module.exports = function (grunt) {
+	const sass = require('node-sass');
+
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		sass: {
-			options: {
-				sourceMap: true
-			},
-			dist: {
+			theme: {
+				options: {
+					implementation: sass,
+					sourceMap: true
+				},
 				files: [{
-					expand: true, // Recursive
-					cwd: "./", // The startup directory
-					src: '**/*.scss', // Source files
-					dest: "./",
-					ext: ".css" // File extension
+					expand: true,
+					cwd: '.s',
+					src: '**/*.scss',
+					dest: '.',
+					ext: '.css'
 				}]
 			}
 		},
 		watch: {
-			css: {
-				files: '**/*.scss',
-				tasks: ['sass:dist']
+			sass: {
+				files: ['**/*.scss'],
+				tasks: [
+					'sass:theme'
+				]
 			}
 		}
 	});
-	grunt.loadNpmTasks('grunt-contrib-sass');
+	grunt.loadNpmTasks('grunt-sass');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.registerTask('default', [
-		'sass:dist'
+		'sass:theme'
 	]);
 };
