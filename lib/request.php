@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,75 +21,257 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Request {
+namespace Snappy\Lib;
 
-	/**
-	 * Set TRUE once init() executes.
-	 *
-	 * @var array
-	 */
-	private static $initialized = false;
+class Request extends \Snappy_Concrete {
+	protected $url = false;
+	protected $parsed = false;
+	protected $post = false;
+	protected $max_size = -1;
+	protected $files_in = [];
+	protected $files_out = [];
 
-	public static $url = false;
+	public $query;
 
 	/**
 	 * Config constructor.
 	 *
 	 * @param null $args
 	 */
-	public static function init() {
-		if ( self::$initialized ) {
-			return;
-		}
-
+	function __construct () {
 		if (PHP_SAPI  == 'cli') {
-			$request = $_SERVER['argv'];
-			die('CLI not implemented');
+//			$request = $_SERVER['argv'];
+			die('CLI not yet implemented');
 		} else {
 			$request = $_SERVER['REQUEST_URI'];
 
-			$query = null;
 			$pos = strpos($request, '?');
 			if ($pos !== false) {
 				$path = urldecode(substr($request, 0, $pos));
-				$query = http_build_query(
+				$this->query = http_build_query(
 					filter_input_array(
 						INPUT_GET,
-						FILTER_SANITIZE_URL
+						FILTER_SANITIZE_STRING
 					)
 				);
 			} else
 				$path = urldecode($request);
 
-			self::$url = parse_url((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https:" : "http:")
-			                       . "//{$_SERVER['HTTP_HOST']}"
-			                       . $path
-			                       . ($query ? '?' . $query : NULL));
+			$this->url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https:" : "http:")
+			       . "//{$_SERVER['HTTP_HOST']}"
+			       . $path
+			       . ($this->query ? '?' . $this->query : NULL);
+
+			$this->parsed = parse_url($this->url);
 
 			// Make query an array
-			if (array_key_exists('query', self::$url)) {
-				parse_str(self::$url['query'], self::$url['query']);
+			if (array_key_exists('query', $this->parsed)) {
+				parse_str($this->parsed['query'], $this->parsed['query']);
+			}
+
+			// Store POST variables
+			if ($_POST && is_array($_POST)) {
+				$this->post = Filter::exec('requestPostIn', filter_input_array(
+					INPUT_POST,
+					FILTER_SANITIZE_STRING
+				));
+//				var_dump('POST:',$this->post);
+			}
+
+			// Process uploaded files
+			if( $_FILES and count( $_FILES ) ) {
+				$this->max_size = min(
+					Helper::getBytesFromShno( ini_get( 'post_max_size' ) ),
+					Helper::getBytesFromShno( ini_get( 'upload_max_filesize' ) ),
+					Helper::getBytesFromShno( ini_get( 'memory_limit' ) )
+				);
+
+				$this->files_in = Filter::exec('requestFilesIn', $_FILES);
+
+				foreach( $this->files_in as $group => $data ) {
+					if( !array_key_exists( 'error', $data ) )
+						continue;
+					if( !array_key_exists( $group, $this->files_out ) )
+						$this->files_out[ $group ] = array();
+					$this->files_out[ $group ][] = self::_file( $data, $this->max_size );
+				}
+
+				$this->files_out = Filter::exec('requestFilesOut', $this->files_out);
+				Event::exec( 'requestHasFiles', $this->files_out );
 			}
 		}
+	}
 
-		self::$initialized = TRUE;
+	/**
+	 * @param null $args
+	 *
+	 * @return null|string
+	 */
+//	public static function getArgs ($args = null) {
+////		if (!is_string($args)) {
+////			$args = 'cache';
+////		}
+//
+//		return $args;
+//	}
+
+	/**
+	 * @param null $data
+	 * @param null $max_size
+	 *
+	 * @return array
+	 */
+	private static function _file( $data = null, $max_size = 0 ) {
+		if( array_key_exists( 'name', $data ) and
+		    array_key_exists( 'type', $data ) and
+		    array_key_exists( 'size', $data ) and
+		    array_key_exists( 'tmp_name', $data ) and
+		    array_key_exists( 'error', $data ) and
+		    !is_array( $data['error'] )
+		) {
+			$result = array(
+				'error' => null
+			);
+
+			switch( $data['error'] ) {
+				case UPLOAD_ERR_OK:
+					break;
+				case UPLOAD_ERR_NO_FILE:
+					$result['error'] = __( 'No file sent' );
+					break;
+				case UPLOAD_ERR_INI_SIZE:
+				case UPLOAD_ERR_FORM_SIZE:
+					$result['error'] = __( 'Exceeded upload file size limit of %1$s', $max_size );
+					break;
+				default:
+					$result['error'] = __( 'Unknown error' );
+					break;
+			}
+
+			if( empty( $result['error'] ) ) {
+				if( $max_size and $data['size'] > $max_size )
+					$result['error'] = __( 'Exceeded file size limit of %1$s', $max_size );
+
+				$finfo = finfo_open( FILEINFO_MIME_TYPE );
+				$result['type'] = finfo_file( $finfo, $data['tmp_name'] );
+				$result['name'] = Sanitize::forText( $data['name'] );
+				$result['tmp_name'] = Sanitize::forText( $data['tmp_name'] );
+			}
+
+			return $result;
+		}
+		return null;
 	}
 
 	/**
 	 *
 	 */
-	public static function has($key = null) {
-		return (array_key_exists($key, self::$url));
+	public function fileInput() {
+		return $this->file_in;
 	}
 
 	/**
 	 *
 	 */
-	public static function get($key = null) {
-		if (self::has($key))
-			return self::$url[$key];
+	public function fileOutput() {
+		return $this->file_out;
+	}
+
+	/**
+	 *
+	 */
+	public function url() {
+		return $this->url;
+	}
+
+	/**
+	 *
+	 */
+	public function scheme() {
+		return $this->parsed['scheme'];
+	}
+
+	/**
+	 *
+	 */
+	public function host() {
+		return $this->parsed['host'];
+	}
+
+	/**
+	 *
+	 */
+	public function port() {
+		return $this->parsed['port'];
+	}
+
+	/**
+	 *
+	 */
+	public function path() {
+		return $this->parsed['path'];
+	}
+
+	/**
+	 *
+	 */
+	public function has($key = null) {
+		return (array_key_exists($key, $this->parsed));
+	}
+
+	/**
+	 *
+	 */
+	public function query($key = null, $default = null) {
+		if (
+			$this->has('query')
+			&& array_key_exists($key, $this->parsed['query'])
+		) {
+			$value = $this->parsed['query'][$key];
+			if( is_null( $value ) )
+				return $default;
+			if( is_array( $value ) ) {
+				$value = array_map( function( $value ) {
+					return Sanitize::forText( $value );
+				}, $value );
+			}
+			return Sanitize::forText( $value );
+		} else
+			return $default;
+
+//		if (is_array($this->parsed['query'])) {
+//			if (is_string($key) && array_key_exists($key, $this->parsed['query'])) {
+//				return $this->parsed['query'][$key];
+//			} elseif (is_null($key)) {
+//				return $this->parsed['query'];
+//			}
+//		}
+//
+//		return;
+	}
+
+	/**
+	 *
+	 */
+//	public function get($key = null) {
+//		if (self::has($key))
+//			return $this->parsed[$key];
+//		return;
+//	}
+
+	/**
+	 *
+	 */
+	public function post($key = null) {
+		if ($this->isPost() && array_key_exists($key, $this->post))
+			return $this->post[$key];
 		return;
 	}
-}
 
-Request::init();
+	/**
+	 *
+	 */
+	public function isPost() {
+		return ($this->post ? true : false);
+	}
+}

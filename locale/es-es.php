@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -34,6 +34,6 @@ return array(
 		'Environment settings' => 'La configuración del entorno',
 		'Hello' => 'Hola',
 		'Language' => 'Idioma',
-		'Welcome' => 'Bidataenido'
+		'Welcome' => 'Bienvenido'
 	)
 );

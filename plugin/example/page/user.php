@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,51 +21,47 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Document::prependTitle(__('User dataironment'));
+use Snappy\Lib\Language;
+use Snappy\Lib\Token;
+
+\Snappy::response()->prependTitle(__('User environment'));
 
 /**
  * POST of locale, negotiate with available locales, store in token, and reload page
  */
-$locale = Http::post('locale');
+$locale = \Snappy::request()->post('locale');
+
 if ($locale) {
-	Token::set('locale', Language::negotiate($locale));
+//	var_dump($locale);exit;
+	$code = Language::negotiate($locale);
+	Token::set('locale', $code);
 	Token::saveCookie();
-	Http::location('./user');
+//	\Snappy::response()->location('/user');
+} else {
+//	var_dump(Token::get('locale'), Language::getLocale());
 }
 
 /*
  * Get a list of locales from config, if empty add Spanish "es-ES" (see /locale/es-es.php) to test with,
  * and add the default EN for form options
  */
-$cfg     =& Snappy::getCfg();
-$locales = $cfg->get('locales');
+$config =& \Snappy::config();
+$locales = $config->get('locales');
 if (!$locales) {
 	$locales = array('es-ES');
-	$cfg->set('locales', $locales);
-	$cfg->save();
+	$config->set('locales', $locales);
+	$config->save();
 }
 array_unshift($locales, 'en-GB');
 
 /**
- * Build form to set locale dataironment
+ * Build form to set locale environment
  */
-$form =& Snappy::getForm('user-locale')->route('example.page')->props(array(
-	'method' => 'post'
-));
+$form =& \Snappy::form('user_locale');
+
+$form->validate(['', '']);
 
 $form->field('input.radio.locale')
-     ->label(__('Language'))
-     ->description(__('Select a locale then click Submit to save your preferences.'))
-     ->options(array_combine($locales, $locales))
-     ->value(Language::getLocale());
-
-$form->field('input.checkbox.locale2')
-     ->label(__('Language'))
-     ->description(__('Select a locale then click Submit to save your preferences.'))
-     ->options(array_combine($locales, $locales))
-     ->value(Language::getLocale());
-
-$form->field('select.locale3')
      ->label(__('Language'))
      ->description(__('Select a locale then click Submit to save your preferences.'))
      ->options(array_combine($locales, $locales))
@@ -103,8 +99,10 @@ $form->field('input.submit')->value(__('Submit'));
 $form->save();
 
 ?>
-	<h3><?php ___('Snappy / User') ?></h3>
-	<p><a href="./">Return to previous page.</a><br>Here is a basic form created with <code>Snappy::getForm()</code>
+<div>
+	<h1><?php ___('User settings') ?></h1>
+	<p><a href="./">Return to previous page.</a><br>Here is a basic form created with <code>Snappy::form()</code>
 		to set the user's locale/language (information is stored and retrieved from a PHP session and browser
 		cookie using the <code>Token</code> class). See source of this script.</p>
+</div>
 <?php echo $form;

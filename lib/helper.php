@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -20,6 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace Snappy\Lib;
 
 class Helper {
 
@@ -100,7 +102,7 @@ class Helper {
 	 */
 	public static function getMoment( $start = null ) {
 		if( is_null( $start ) )
-			$start = Snappy::$start;
+			$start = \Snappy::$start;
 		return round( self::getMicroTime() - $start, 12 );
 	}
 
@@ -159,7 +161,7 @@ class Helper {
 	public static function getCsrfHash() {
 		$hash = Token::get( 'csrf' );
 		if( $hash ) {
-			if( time() > ( Token::get( 'csrf_time' ) + Snappy::getCfg()->get( 'csrf_timeout', 900 ) ) )
+			if( time() > ( Token::get( 'csrf_time' ) + \Snappy::config()->get( 'csrf_timeout', 900 ) ) )
 				$hash = null;
 		}
 
@@ -179,7 +181,7 @@ class Helper {
 		if( is_string( $hash ) ) {
 			$hash_on_token = Token::get( 'csrf' );
 			if( $hash_on_token === $hash ) {
-				if( time() < ( Token::get( 'csrf_time' ) + Snappy::getCfg()->get( 'csrf_timeout', 900 ) ) )
+				if( time() < ( Token::get( 'csrf_time' ) + \Snappy::config()->get( 'csrf_timeout', 900 ) ) )
 					return true;
 			}
 		}

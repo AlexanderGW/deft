@@ -1,5 +1,3 @@
-<?php
-
 /**
  * Snappy, a micro framework for PHP.
  *
@@ -21,18 +19,39 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-return array(
-	array(
-		'direction' => 'ltr',
-		'encoding' => 'utf-8',
-		'iso2' => 'es',
-		'iso3' => 'esp',
-		'locale' => 'es-ES'
-	),
-	array(
-		'Environment settings' => 'La configuración del entorno',
-		'Hello' => 'Hola',
-		'Language' => 'Idioma',
-		'Welcome' => 'Bienvenido'
-	)
-);
+'use strict';
+
+var Snappy = Snappy || {
+	DEBUG: 1
+};
+
+Snappy.request = function (method, url, data) {
+	var xhr = new XMLHttpRequest();
+	xhr.open(method, url);
+	xhr.send(data);
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4) {
+			Snappy.response(xhr);
+		}
+	};
+};
+
+Snappy.response = function (xhr /*XMLHttpRequest*/ ) {
+	console.log(xhr);
+};
+
+Snappy.delete = function (url) {
+	Snappy.request('DELETE', url);
+};
+
+Snappy.get = function (url) {
+	Snappy.request('GET', url);
+};
+
+Snappy.post = function (url, data) {
+	Snappy.request('POST', url, data);
+};
+
+Snappy.put = function (url) {
+	Snappy.request('PUT', url, data);
+};

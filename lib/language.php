@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -20,6 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace Snappy\Lib;
 
 define('SNAPPY_LOCALE_PATH', SNAPPY_PATH . 'locale' . DS);
 
@@ -45,18 +47,18 @@ class Language {
 	 		return;
 		}
 
-		$cfg     =& Snappy::getCfg();
-		$locales = $cfg->get('locales', array());
+		$config     =& \Snappy::config();
+		$locales = $config->get('locales', array());
 
-		$string = Http::post('locale');
+		$string = \Snappy::request()->post('locale');
 		if (!$string) {
-			$string = Http::get('locale');
+			$string = \Snappy::request()->query('locale');
 		}
 		if (!$string) {
 			$string = Token::get('locale');
 		}
 		if (!$string) {
-			$string = Route::getData('locale');
+			$string = Route::getParam('locale');
 		}
 		if (!$string) {
 			$string = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
@@ -102,18 +104,18 @@ class Language {
 		}
 
 		if (is_null($locale)) {
-			$locale = $cfg->get('locale_default', self::DEFAULT_LOCALE);
+			$locale = $config->get('locale_default', self::DEFAULT_LOCALE);
 		}
 
 		if ($locale != self::DEFAULT_LOCALE) {
-			$cfg = Snappy::getCfg('locale.' . strtolower($locale));
-			if (!$cfg->isEmpty()) {
-				$args = $cfg->get(0);
+			$config = \Snappy::config('locale.' . strtolower($locale));
+			if (!$config->isEmpty()) {
+				$args = $config->get(0);
 				if ($args) {
 					self::$args = $args;
 				}
 
-				$phrases = $cfg->get(1);
+				$phrases = $config->get(1);
 				if ($phrases) {
 					self::$phrases = $phrases;
 				}
@@ -140,8 +142,8 @@ class Language {
 	 */
 	public static function negotiate ($locale = null) {
 		if (is_string($locale) and (strlen($locale) == 2 or strlen($locale) == 5)) {
-			$cfg     =& Snappy::getCfg();
-			$locales = $cfg->get('locales', array());
+			$config     =& \Snappy::config();
+			$locales = $config->get('locales', array());
 
 			if (strlen($locale) == 5) {
 				if (in_array($locale, $locales)) {

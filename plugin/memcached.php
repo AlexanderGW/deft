@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -24,9 +24,9 @@
 /**
  * Attempt to fetch a cached version of the request
  */
-Event::add('documentInit', function() {
-	if (Http::isPostRequest() === false) {
-		$document = Snappy::get('cache.memcached')->getLink()->get('snappy.document.' . md5(SNAPPY_ROUTE));
+Event::set('documentInit', function() {
+	if (Snappy::request()->isPost() === false) {
+		$document = \Snappy::get('cache.memcached')->getLink()->get('snappy.document.' . md5(SNAPPY_ROUTE));
 		if ($document) {
 			die($document);
 		}
@@ -36,11 +36,11 @@ Event::add('documentInit', function() {
 /**
  * Cache rendered document for future requests
  */
-Filter::add('documentContent', function($content) {
-	Snappy::get('cache.memcached')->getLink()->set(
+Filter::add('documentOutput', function($content) {
+	\Snappy::get('cache.memcached')->getLink()->set(
 		'snappy.document.' . md5(SNAPPY_ROUTE),
 		$content,
-		Snappy::getCfg('cache.memcached')->get('expire', 900)
+		\Snappy::config('cache.memcached')->get('expire', 900)
 	);
 
 	return $content;

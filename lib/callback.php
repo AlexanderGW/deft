@@ -21,18 +21,12 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-return array(
-	array(
-		'direction' => 'ltr',
-		'encoding' => 'utf-8',
-		'iso2' => 'es',
-		'iso3' => 'esp',
-		'locale' => 'es-ES'
-	),
-	array(
-		'Environment settings' => 'La configuración del entorno',
-		'Hello' => 'Hola',
-		'Language' => 'Idioma',
-		'Welcome' => 'Bienvenido'
-	)
-);
+namespace Snappy\Lib;
+
+\Snappy::import('response');
+
+class Callback {
+	public static function echoResponseOutput() {
+		echo \Snappy::response()->output();
+	}
+}

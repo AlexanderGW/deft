@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,9 +21,12 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Composer... Is that you?
+// Composer... is that you?
 if (file_exists('../vendor/autoload.php'))
-	require '../vendor/autoload.php';
+	$loader = include_once '../vendor/autoload.php';
 
 // Bootstrap Snappy
 require '../bootstrap.php';
+
+// Output response
+echo \Snappy::response()->output();

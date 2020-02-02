@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -38,7 +38,7 @@ class Snappy_Google_Helper_Plugin {
 				$fonts[] = $font;
 			}
 
-			Document::addStyle( 'https://fonts.googleapis.com/css?family=' . implode( '|', $fonts ), 999 );
+			\Snappy::response()->addStyle( 'https://fonts.googleapis.com/css?family=' . implode( '|', $fonts ), 99 );
 		}
 	}
 }
@@ -81,4 +81,4 @@ class Google {
 	}
 }
 
-Event::add( 'beforeDocumentGetHead', array( 'Snappy_Google_Helper_Plugin', 'addFonts' ) );
+Event::set( 'beforeDocumentGetHead', array( 'Snappy_Google_Helper_Plugin', 'addFonts' ) );

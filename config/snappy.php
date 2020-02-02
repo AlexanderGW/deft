@@ -7,9 +7,10 @@
  */
 
 return array(
+//	'init_callback' => array('\Snappy\Lib\Callback', 'echoResponseOutput'),
 	'capture_hash' => '4f29b0352150f345d65599f1c247211d',
-	'debug' => 1,
-	'db_dbname' => 'nautilus',
+	'debug' => 0,
+	'db_dbname' => 'temp',
 	'locales' => array(
 		0 => 'es-ES'
 	),

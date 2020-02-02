@@ -9,13 +9,9 @@ module.exports = function (grunt) {
 					implementation: sass,
 					sourceMap: true
 				},
-				files: [{
-					expand: true,
-					cwd: '.s',
-					src: '**/*.scss',
-					dest: '.',
-					ext: '.css'
-				}]
+				files: {
+					'plugin/example/asset/css/example.css': 'plugin/example/asset/scss/example.scss'
+				}
 			}
 		},
 		watch: {

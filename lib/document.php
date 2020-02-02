@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,67 +21,61 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace Snappy\Lib;
 
 /**
  * Document class, default HTML5
  *
  * Class Document
  */
-class Document {
-
-	/**
-	 * Set TRUE once init() executes.
-	 *
-	 * @var array
-	 */
-	private static $initialized = false;
-
-	private static $args = array(
-		'base'      => null,
-		'encoding'  => 'utf-8',
-		'locale'    => 'en',
-		'direction' => 'ltr'
-	);
-	private static $errors = array();
-	private static $robots = array(
+class Document extends \Snappy_Concrete {
+	private $errors = array();
+	private $robots = array(
 		'index'  => true,
 		'follow' => true
 	);
-	private static $custom = array(
+	private $custom = array(
 		'_' => array()
 	);
-	private static $styles = array(
+	private $styles = array(
 		'_' => array()
 	);
-	private static $meta = array(
+	private $meta = array(
 		'_' => array()
 	);
-	private static $links = array(
+	private $links = array(
 		'_' => array()
 	);
-	private static $scripts = array(
+	private $scripts = array(
 		'_' => array()
 	);
-	private static $viewport = array(
+	private $viewport = array(
 		'height'  => null,
 		'width'   => null,
 		'initial' => null,
 		'minimum' => null,
 		'maximum' => null
 	);
-	private static $eol = "\r\n";
-	private static $body = array();
+	private $eol = "\r\n";
+	private $body = array();
 
 	/**
-	 * @name static function
+	 * Db constructor.
+	 *
+	 * @param array $args
 	 */
-	static function init () {
-		if (self::$initialized) {
-			return;
-		}
+	function __construct ($args = array()) {
+		$this->args = $this->getArgs($args);
+		parent::__construct(__CLASS__, $this->args);
+	}
 
-		Event::exec('documentInit');
-		self::$initialized = true;
+	/**
+	 * @param array $args
+	 *
+	 * @return array
+	 */
+	public static function getArgs ($args = array()) {
+		return $args;
 	}
 
 	/**
@@ -90,11 +84,11 @@ class Document {
 	 *
 	 * @return bool
 	 */
-	static function setArg ($arg = null, $value = null) {
+	public function setArg ($arg = null, $value = null) {
 		if (is_null($arg)) {
 			return false;
 		}
-		self::$args[$arg] = array($value);
+		$this->args[$arg] = array($value);
 
 		return true;
 	}
@@ -105,21 +99,21 @@ class Document {
 	 *
 	 * @return bool
 	 */
-	static function prependArg ($arg = null, $value = null) {
+	public function prependArg ($arg = null, $value = null) {
 		if (is_null($arg)) {
 			return false;
 		}
-		if (is_string(self::$args[$arg])) {
-			self::$args[$arg] = $value . self::$args[$arg];
+		if (is_string($this->args[$arg])) {
+			$this->args[$arg] = $value . $this->args[$arg];
 		} else {
-			if (!is_array(self::$args[$arg])) {
-				self::$args[$arg] = array();
+			if (!is_array($this->args[$arg])) {
+				$this->args[$arg] = array();
 			}
 
 			if (is_string($value)) {
-				array_unshift(self::$args[$arg], $value);
+				array_unshift($this->args[$arg], $value);
 			} else {
-				array_merge($value, self::$args[$arg]);
+				array_merge($value, $this->args[$arg]);
 			}
 		}
 
@@ -132,21 +126,21 @@ class Document {
 	 *
 	 * @return bool
 	 */
-	static function appendArg ($arg = null, $value = null) {
+	public function appendArg ($arg = null, $value = null) {
 		if (is_null($arg)) {
 			return false;
 		}
-		if (is_string(self::$args[$arg])) {
-			self::$args[$arg] .= $value;
+		if (is_string($this->args[$arg])) {
+			$this->args[$arg] .= $value;
 		} else {
-			if (!is_array(self::$args[$arg])) {
-				self::$args[$arg] = array();
+			if (!is_array($this->args[$arg])) {
+				$this->args[$arg] = array();
 			}
 
 			if (is_string($value)) {
-				array_push(self::$args[$arg], $value);
+				array_push($this->args[$arg], $value);
 			} else {
-				array_merge(self::$args[$arg], $value);
+				array_merge($this->args[$arg], $value);
 			}
 		}
 
@@ -160,12 +154,12 @@ class Document {
 	 *
 	 * @return mixed
 	 */
-	static function getArg ($arg = null, $filter = null, $seperator = ' ') {
+	public function getArg ($arg = null, $filter = null, $seperator = ' ') {
 		$return = null;
-		if (is_string(self::$args[$arg])) {
-			$return = self::$args[$arg];
-		} elseif (is_array(self::$args[$arg])) {
-			$return = implode($seperator, self::$args[$arg]);
+		if (is_string($this->args[$arg])) {
+			$return = $this->args[$arg];
+		} elseif (is_array($this->args[$arg])) {
+			$return = implode($seperator, $this->args[$arg]);
 		}
 
 		if (is_string($filter)) {
@@ -180,8 +174,8 @@ class Document {
 	 *
 	 * @return bool
 	 */
-	static function setTitle ($value = null) {
-		return self::setArg('title', $value);
+	public function setTitle ($value = null) {
+		return $this->setArg('title', $value);
 	}
 
 	/**
@@ -189,8 +183,8 @@ class Document {
 	 *
 	 * @return bool
 	 */
-	static function prependTitle ($value = null) {
-		return self::prependArg('title', $value);
+	public function prependTitle ($value = null) {
+		return $this->prependArg('title', $value);
 	}
 
 	/**
@@ -198,57 +192,57 @@ class Document {
 	 *
 	 * @return bool
 	 */
-	static function appendTitle ($value = null) {
-		return self::appendArg('title', $value);
+	public function appendTitle ($value = null) {
+		return $this->appendArg('title', $value);
 	}
 
 	/**
 	 * @return mixed|string|void
 	 */
-	static function getTitle () {
-		return self::getArg('title', 'documentTitle', self::getTitleSeparator());
+	public function getTitle () {
+		return $this->getArg('title', 'documentTitle', $this->getTitleSeparator());
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function setTitleSeparator ($value = null) {
-		self::$args['title_separator'] = $value;
+	public function setTitleSeparator ($value = null) {
+		$this->args['title_separator'] = $value;
 	}
 
 	/**
 	 * @return mixed
 	 */
-	static function getTitleSeparator () {
-		return self::$args['title_separator'];
+	public function getTitleSeparator () {
+		return $this->args['title_separator'];
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function setDescription ($value = null) {
-		self::$args['description'] = $value;
+	public function setDescription ($value = null) {
+		$this->args['description'] = $value;
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function prependDescription ($value = null) {
-		self::$args['description'] = $value . self::$args['description'];
+	public function prependDescription ($value = null) {
+		$this->args['description'] = $value . $this->args['description'];
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function appendDescription ($value = null) {
-		self::$args['description'] .= $value;
+	public function appendDescription ($value = null) {
+		$this->args['description'] .= $value;
 	}
 
 	/**
 	 * @return mixed|void
 	 */
-	static function getDescription () {
-		return Filter::exec('documentDescription', self::$args['description']);
+	public function getDescription () {
+		return Filter::exec('document.description', $this->args['description']);
 	}
 
 	/**
@@ -256,8 +250,8 @@ class Document {
 	 *
 	 * @return bool
 	 */
-	static function setKeywords ($value = null) {
-		return self::setArg('keywords', $value);
+	public function setKeywords ($value = null) {
+		return $this->setArg('keywords', $value);
 	}
 
 	/**
@@ -265,8 +259,8 @@ class Document {
 	 *
 	 * @return bool
 	 */
-	static function prependKeywords ($value = null) {
-		return self::prependArg('keywords', $value);
+	public function prependKeywords ($value = null) {
+		return $this->prependArg('keywords', $value);
 	}
 
 	/**
@@ -274,142 +268,142 @@ class Document {
 	 *
 	 * @return bool
 	 */
-	static function appendKeywords ($value = null) {
-		return self::appendArg('keywords', $value);
+	public function appendKeywords ($value = null) {
+		return $this->appendArg('keywords', $value);
 	}
 
 	/**
 	 * @return mixed|string|void
 	 */
-	static function getKeywords () {
-		return self::getArg('keywords', 'documentKeywords', ', ');
+	public function getKeywords () {
+		return $this->getArg('keywords', 'documentKeywords', ', ');
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function setBaseUrl ($value = null) {
-		self::$args['base'] = $value;
+	public function setBaseUrl ($value = null) {
+		$this->args['base'] = $value;
 	}
 
 	/**
 	 * @return mixed
 	 */
-	static function getBaseUrl () {
-		return self::$args['base'];
+	public function getBaseUrl () {
+		return $this->args['base'];
 	}
 
 	/**
 	 * @param bool|true $bool
 	 */
-	static function setIndex ($bool = true) {
-		self::$robots['index'] = (bool) $bool;
+	public function setIndex ($bool = true) {
+		$this->robots['index'] = (bool) $bool;
 	}
 
 	/**
 	 * @return mixed
 	 */
-	static function getIndex () {
-		return self::$robots['index'];
+	public function getIndex () {
+		return $this->robots['index'];
 	}
 
 	/**
 	 * @param bool|true $bool
 	 */
-	static function setFollow ($bool = true) {
-		self::$robots['follow'] = (bool) $bool;
+	public function setFollow ($bool = true) {
+		$this->robots['follow'] = (bool) $bool;
 	}
 
 	/**
 	 * @return mixed
 	 */
-	static function getFollow () {
-		return self::$robots['follow'];
+	public function getFollow () {
+		return $this->robots['follow'];
 	}
 
 	/**
 	 * @param bool|true $bool
 	 */
-	static function setRobots ($bool = true) {
-		self::setIndex($bool);
-		self::setFollow($bool);
+	public function setRobots ($bool = true) {
+		$this->setIndex($bool);
+		$this->setFollow($bool);
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function setEncoding ($value = null) {
-		self::$args['encoding'] = $value;
+	public function setEncoding ($value = null) {
+		$this->args['encoding'] = $value;
 	}
 
 	/**
 	 * @return mixed
 	 */
-	static function getEncoding () {
-		return self::$args['encoding'];
+	public function getEncoding () {
+		return $this->args['encoding'];
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function setLocale ($value = null) {
-		self::$args['locale'] = $value;
+	public function setLocale ($value = null) {
+		$this->args['locale'] = $value;
 	}
 
 	/**
 	 * @return mixed
 	 */
-	static function getLocale () {
-		return self::$args['locale'];
+	public function getLocale () {
+		return $this->args['locale'];
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function setDirection ($value = null) {
-		self::$args['direction'] = $value;
+	public function setDirection ($value = null) {
+		$this->args['direction'] = $value;
 	}
 
 	/**
 	 * @return mixed
 	 */
-	static function getDirection () {
-		return self::$args['direction'];
+	public function getDirection () {
+		return $this->args['direction'];
 	}
 
 	/**
 	 * @param int $value
 	 */
-	static function setVpHeight ($value = 0) {
-		self::$viewport['height'] = ($value === 0 ? 'device-height' : $value);
+	public function setVpHeight ($value = 0) {
+		$this->viewport['height'] = ($value === 0 ? 'device-height' : $value);
 	}
 
 	/**
 	 * @param int $value
 	 */
-	static function setVpWidth ($value = 0) {
-		self::$viewport['width'] = ($value === 0 ? 'device-width' : $value);
+	public function setVpWidth ($value = 0) {
+		$this->viewport['width'] = ($value === 0 ? 'device-width' : $value);
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function setVpInitial ($value = null) {
-		self::$viewport['initial'] = round($value, 2);
+	public function setVpInitial ($value = null) {
+		$this->viewport['initial'] = round($value, 2);
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function setVpMinimum ($value = null) {
-		self::$viewport['minimum'] = round($value, 2);
+	public function setVpMinimum ($value = null) {
+		$this->viewport['minimum'] = round($value, 2);
 	}
 
 	/**
 	 * @param null $value
 	 */
-	static function setVpMaximum ($value = null) {
-		self::$viewport['maximum'] = round($value, 2);
+	public function setVpMaximum ($value = null) {
+		$this->viewport['maximum'] = round($value, 2);
 	}
 
 	/**
@@ -418,14 +412,14 @@ class Document {
 	 *
 	 * @return string|void
 	 */
-	static function addHeadCustom ($content = null, $priority = 5) {
+	public function addHeadCustom ($content = null, $priority = 5) {
 		if (is_null($content)) {
 			return;
 		}
 
 		$hash                           = Helper::getRandomHash();
-		self::$custom[$hash]            = $content;
-		self::$custom['_'][$priority][] = $hash;
+		$this->custom[$hash]            = $content;
+		$this->custom['_'][$priority][] = $hash;
 
 		return $hash;
 	}
@@ -435,13 +429,13 @@ class Document {
 	 *
 	 * @return bool|void
 	 */
-	static function removeHeadCustom ($hash = null) {
+	public function removeHeadCustom ($hash = null) {
 		if (is_null($hash) or strlen($hash) <> 32) {
 			return;
 		}
 
-		if (array_key_exists($hash, self::$custom)) {
-			unset(self::$custom[$hash]);
+		if (array_key_exists($hash, $this->custom)) {
+			unset($this->custom[$hash]);
 
 			return true;
 		}
@@ -455,14 +449,14 @@ class Document {
 	 *
 	 * @return bool|void
 	 */
-	static function addLink ($props = array(), $priority = 5) {
+	public function addLink ($props = array(), $priority = 5) {
 		if (!count($props) or !array_key_exists('rel', $props) or !array_key_exists('href', $props)) {
 			return;
 		}
 
 		$hash                          = md5($props['rel'] . '-' . $props['href']);
-		self::$links[$hash]            = $props;
-		self::$links['_'][$priority][] = $hash;
+		$this->links[$hash]            = $props;
+		$this->links['_'][$priority][] = $hash;
 
 		return true;
 	}
@@ -472,14 +466,14 @@ class Document {
 	 *
 	 * @return bool|void
 	 */
-	static function removeLink ($props = array()) {
+	public function removeLink ($props = array()) {
 		if (!count($props) or !array_key_exists('rel', $props) or !array_key_exists('href', $props)) {
 			return;
 		}
 
 		$hash = md5($props['rel'] . '-' . $props['href']);
-		if (array_key_exists($hash, self::$links)) {
-			unset(self::$links[$hash]);
+		if (array_key_exists($hash, $this->links)) {
+			unset($this->links[$hash]);
 
 			return true;
 		}
@@ -494,19 +488,19 @@ class Document {
 	 *
 	 * @return bool|void
 	 */
-	static function addMeta ($name = null, $content = '', $priority = 5) {
+	public function addMeta ($name = null, $content = '', $priority = 5) {
 		if (!is_string($name) or !is_string($content)) {
 			return;
 		}
 
 		$hash              = md5($name);
-		self::$meta[$hash] = array(
+		$this->meta[$hash] = array(
 			'name'    => $name,
 			'content' => $content
 		);
 
-		self::$meta[$hash]            = Filter::exec('documentAddMeta', self::$meta[$hash]);
-		self::$meta['_'][$priority][] = $hash;
+		$this->meta[$hash]            = Filter::exec('documentAddMeta', $this->meta[$hash]);
+		$this->meta['_'][$priority][] = $hash;
 
 		return true;
 	}
@@ -516,14 +510,14 @@ class Document {
 	 *
 	 * @return bool|void
 	 */
-	static function removeMeta ($name = null) {
+	public function removeMeta ($name = null) {
 		if (!is_string($name)) {
 			return;
 		}
 
 		$hash = md5($name);
-		if (array_key_exists($hash, self::$meta)) {
-			unset(self::$meta[$hash]);
+		if (array_key_exists($hash, $this->meta)) {
+			unset($this->meta[$hash]);
 
 			return true;
 		}
@@ -538,13 +532,13 @@ class Document {
 	 *
 	 * @return bool|void
 	 */
-	static function addStyleContent ($content = null, $priority = 5, $media = 'all') {
+	public function addStyleContent ($content = null, $priority = 5, $media = 'all') {
 		if (!is_string($content)) {
 			return;
 		}
 
 		$hash                = md5($content);
-		self::$styles[$hash] = array(
+		$this->styles[$hash] = array(
 			'@tag'    => 'style',
 			'@markup' => $content,
 			'@props'  => array(
@@ -553,7 +547,7 @@ class Document {
 			)
 		);
 
-		self::$styles['_'][$priority][] = $hash;
+		$this->styles['_'][$priority][] = $hash;
 
 		return true;
 	}
@@ -565,7 +559,7 @@ class Document {
 	 *
 	 * @return bool|void
 	 */
-	static function addStyleInline ($path = null, $priority = 5, $media = 'all') {
+	public function addStyleInline ($path = null, $priority = 5, $media = 'all') {
 		if (!is_string($path)) {
 			return;
 		}
@@ -580,7 +574,7 @@ class Document {
 
 		$content = file_get_contents($path);
 		if ($content) {
-			return self::addStyleContent($content, $priority, $media);
+			return $this->addStyleContent($content, $priority, $media);
 		}
 
 		return false;
@@ -593,12 +587,12 @@ class Document {
 	 *
 	 * @return bool|void
 	 */
-	static function addStyle ($path = null, $priority = 5, $media = 'all') {
+	public function addStyle ($path = null, $priority = 5, $media = 'all') {
 		if (!is_string($path)) {
 			return;
 		}
 
-		return self::addLink(array(
+		return $this->addLink(array(
 			'href'  => $path,
 			'rel'   => 'stylesheet',
 			'media' => $media
@@ -610,12 +604,12 @@ class Document {
 	 *
 	 * @return bool|void
 	 */
-	static function removeStyle ($path = null) {
+	public function removeStyle ($path = null) {
 		if (!is_string($path)) {
 			return;
 		}
 
-		return self::removeLink(array(
+		return $this->removeLink(array(
 			'href' => $path,
 			'rel'  => 'stylesheet'
 		));
@@ -624,25 +618,25 @@ class Document {
 	/**
 	 * @param null $content
 	 * @param int $priority
-	 * @param string $type
+	 * @param string $mime
 	 *
 	 * @return bool|void
 	 */
-	static function addScriptContent ($content = null, $priority = 5, $type = 'text/javascript') {
+	public function addScriptContent ($content = null, $priority = 5, $mime = 'text/javascript') {
 		if (!is_string($content)) {
 			return;
 		}
 
 		$hash                 = md5($content);
-		self::$scripts[$hash] = array(
+		$this->scripts[$hash] = array(
 			'@tag'    => 'script',
 			'@markup' => $content,
 			'@props'  => array(
-				'type' => $type
+				'type' => $mime
 			)
 		);
 
-		self::$scripts['_'][$priority][] = $hash;
+		$this->scripts['_'][$priority][] = $hash;
 
 		return true;
 	}
@@ -650,11 +644,11 @@ class Document {
 	/**
 	 * @param null $path
 	 * @param int $priority
-	 * @param string $type
+	 * @param string $mime
 	 *
 	 * @return bool|void
 	 */
-	static function addScriptInline ($path = null, $priority = 5, $type = 'text/javascript') {
+	public function addScriptInline ($path = null, $priority = 5, $mime = 'text/javascript') {
 		if (!is_string($path)) {
 			return;
 		}
@@ -669,7 +663,7 @@ class Document {
 
 		$content = file_get_contents($path);
 		if ($content) {
-			return self::addScriptContent($content, $priority, $type);
+			return $this->addScriptContent($content, $priority, $mime);
 		}
 
 		return false;
@@ -678,27 +672,27 @@ class Document {
 	/**
 	 * @param null $path
 	 * @param int $priority
-	 * @param string $type
+	 * @param string $mime
 	 * @param array $attributes
 	 *
 	 * @return bool|void
 	 */
-	static function addScript ($path = null, $priority = 5, $type = 'text/javascript', $attributes = array()) {
+	public function addScript ($path = null, $priority = 5, $mime = 'text/javascript', $attributes = array()) {
 		if (!is_string($path)) {
 			return;
 		}
 
 		$hash                 = md5($path);
-		self::$scripts[$hash] = array(
+		$this->scripts[$hash] = array(
 			'@tag'   => 'script',
 			'@props' => array_merge(array(
-				'type' => $type,
+				'type' => $mime,
 				'src'  => $path,
 			), (array) $attributes)
 		);
 
-		self::$scripts[$hash]            = Filter::exec('documentAddScript', self::$scripts[$hash]);
-		self::$scripts['_'][$priority][] = $hash;
+		$this->scripts[$hash]            = Filter::exec('documentAddScript', $this->scripts[$hash]);
+		$this->scripts['_'][$priority][] = $hash;
 
 		return true;
 	}
@@ -708,13 +702,13 @@ class Document {
 	 *
 	 * @return bool|void
 	 */
-	static function removeScript ($path = null) {
+	public function removeScript ($path = null) {
 		if (!is_string($path)) {
 			return;
 		}
 
 		$hash = md5($path);
-		unset(self::$scripts[$hash]);
+		unset($this->scripts[$hash]);
 
 		return true;
 	}
@@ -722,143 +716,146 @@ class Document {
 	/**
 	 * @return mixed|void
 	 */
-	static function getHead () {
-		$cfg =& Snappy::getCfg('document');
+	public function getHead () {
+		$config =& \Snappy::config('document');
 
-		if ($cfg->get('title') and !empty(self::getArg('title'))) {
-			self::setTitle($cfg->get('title'));
+		if ($config->get('title') and !empty($this->getArg('title'))) {
+			$this->setTitle($config->get('title'));
 		}
 
-		if (!self::$args['title_separator']) {
-			self::setTitleSeparator($cfg->get('title_separator', ', '));
+		if (!$this->args['title_separator']) {
+			$this->setTitleSeparator($config->get('title_separator', ', '));
 		}
 
-		if ($cfg->get('keywords') and !empty(self::getArg('keywords'))) {
-			self::setKeywords($cfg->get('keywords'));
+		if ($config->get('keywords') and !empty($this->getArg('keywords'))) {
+			$this->setKeywords($config->get('keywords'));
 		}
 
-		if ($cfg->get('description') and !empty(self::getArg('description'))) {
-			self::setDescription($cfg->get('description'));
+		if ($config->get('description') and !empty($this->getArg('description'))) {
+			$this->setDescription($config->get('description'));
 		}
 
-		if (!self::getArg('robots')) {
-			self::setRobots($cfg->get('robots', true));
+		if (!$this->getArg('robots')) {
+			$this->setRobots($config->get('robots', true));
 		}
 
-		if (class_exists('Language')) {
-			self::setEncoding(Language::getEncoding());
-			self::setLocale(Language::getIso(2));
-			self::setDirection(Language::getDirection());
+
+		// TODO: This should be passed as a param, to be stored in $language, instead of storing a 'copy' on the language instance. Makes more sense!!!
+		if (class_exists('\Snappy\Lib\Language')) {
+			$this->setEncoding(Language::getEncoding());
+			$this->setLocale(Language::getIso(2));
+			$this->setDirection(Language::getDirection());
 		}
 
-		self::addMeta('charset', self::getEncoding());
+//		$this->addMeta('charset', $this->language->getEncoding());
+		$this->addMeta('charset', $this->getEncoding());
 
 		$html = '';
-		if (self::getBaseUrl()) {
+		if ($this->getBaseUrl()) {
 			$html .= Element::html(array(
 					'@tag'   => 'base',
 					'@props' => array(
-						'href' => self::getBaseUrl()
+						'href' => $this->getBaseUrl()
 					)
-				), 'documentBase', true) . self::getEOL();
+				), 'documentBase', true) . $this->getEOL();
 		}
 
-		self::addMeta('generator', 'Snappy ' . Snappy::VERSION);
+		$this->addMeta('generator', 'Snappy ' . \Snappy::VERSION);
 
-		if (self::getDescription()) {
-			self::addMeta('description', self::getDescription());
+		if ($this->getDescription()) {
+			$this->addMeta('description', $this->getDescription());
 		}
 
-		if (self::getKeywords()) {
-			self::addMeta('keywords', self::getKeywords());
+		if ($this->getKeywords()) {
+			$this->addMeta('keywords', $this->getKeywords());
 		}
 
-		self::addMeta('robots', (self::getIndex() ? 'index' : 'noindex') . ',' . (self::getFollow() ? 'follow' : 'nofollow'));
+		$this->addMeta('robots', ($this->getIndex() ? 'index' : 'noindex') . ',' . ($this->getFollow() ? 'follow' : 'nofollow'));
 
 		Event::exec('beforeDocumentGetHead');
 
 		$viewport = array();
-		if (!is_null(self::$viewport['width'])) {
-			$viewport[] = 'width=' . self::$viewport['width'];
+		if (!is_null($this->viewport['width'])) {
+			$viewport[] = 'width=' . $this->viewport['width'];
 		}
 
-		if (!is_null(self::$viewport['height'])) {
-			$viewport[] = 'height=' . self::$viewport['height'];
+		if (!is_null($this->viewport['height'])) {
+			$viewport[] = 'height=' . $this->viewport['height'];
 		}
 
-		if (is_null(self::$viewport['initial']) and is_null(self::$viewport['minimum']) and is_null(self::$viewport['maximum'])) {
+		if (is_null($this->viewport['initial']) and is_null($this->viewport['minimum']) and is_null($this->viewport['maximum'])) {
 			$viewport[] = 'user-scalable=yes';
 		} else {
-			if (!is_null(self::$viewport['minimum'])) {
-				$viewport[] = 'minimum-scale=' . self::$viewport['minimum'];
+			if (!is_null($this->viewport['minimum'])) {
+				$viewport[] = 'minimum-scale=' . $this->viewport['minimum'];
 			}
 
-			if (!is_null(self::$viewport['initial'])) {
-				$viewport[] = 'initial-scale=' . self::$viewport['initial'];
+			if (!is_null($this->viewport['initial'])) {
+				$viewport[] = 'initial-scale=' . $this->viewport['initial'];
 			}
 
-			if (!is_null(self::$viewport['maximum'])) {
-				$viewport[] = 'maximum-scale=' . self::$viewport['maximum'];
+			if (!is_null($this->viewport['maximum'])) {
+				$viewport[] = 'maximum-scale=' . $this->viewport['maximum'];
 			}
 		}
 
-		self::addMeta('viewport', implode(',', $viewport));
+		$this->addMeta('viewport', implode(',', $viewport));
 		unset($viewport);
 
-		if (count(self::$meta['_'])) {
-			ksort(self::$meta['_']);
-			self::$meta = Filter::exec('documentMeta', self::$meta);
-			foreach (self::$meta['_'] as $priority => $hashes) {
+		if (count($this->meta['_'])) {
+			ksort($this->meta['_']);
+			$this->meta = Filter::exec('document.meta', $this->meta);
+			foreach ($this->meta['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
 					$html .= Element::html(array(
 							'@tag'   => 'meta',
 							'@close' => false,
-							'@props' => self::$meta[$hash]
-						), 'documentMeta', true) . self::getEOL();
+							'@props' => $this->meta[$hash]
+						), 'document.meta', true) . $this->getEOL();
 				}
 			}
 		}
 
-		if (self::getArg('title')) {
+		if ($this->getArg('title')) {
 			$html .= Element::html(array(
 					'@tag'    => 'title',
-					'@markup' => self::getTitle()
-				), 'documentTitle') . self::getEOL();
+					'@markup' => $this->getTitle()
+				), 'documentTitle') . $this->getEOL();
 		}
 
-		if (count(self::$links['_'])) {
-			ksort(self::$links['_']);
-			self::$links = Filter::exec('documentLinks', self::$links);
+		if (count($this->links['_'])) {
+			ksort($this->links['_']);
+			$this->links = Filter::exec('documentLinks', $this->links);
 
 			$styles = array();
-			foreach (self::$links['_'] as $priority => $hashes) {
+			foreach ($this->links['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
-					self::$links[$hash]['href'] = Sanitize::forText(self::$links[$hash]['href']);
+					$this->links[$hash]['href'] = Sanitize::forText($this->links[$hash]['href']);
 
 					// Add meta..
 					if (
 
 						// If not a stylesheet..
-						(!array_key_exists('rel', self::$links[$hash]) or self::$links[$hash]['rel'] != 'stylesheet')
+						(!array_key_exists('rel', $this->links[$hash]) or $this->links[$hash]['rel'] != 'stylesheet')
 						or (
 
-							// or isn't in the Snappy url dataironment...
-							strpos(self::$links[$hash]['href'], SNAPPY_PATH) !== 0
+							// or isn't in the Snappy url environment...
+							strpos($this->links[$hash]['href'], SNAPPY_PATH) !== 0
 
-							// nor the Snappy sys dataironment...
-							and !file_exists(SNAPPY_PATH . self::$links[$hash]['href'])
+							// nor the Snappy sys environment...
+							and !file_exists(SNAPPY_PATH . $this->links[$hash]['href'])
 						)
 					) {
 						$html .= Element::html(array(
 								'@tag'   => 'link',
 								'@close' => false,
-								'@props' => self::$links[$hash]
-							), 'documentLink', true) . self::getEOL();
+								'@props' => $this->links[$hash]
+							), 'documentLink', true) . $this->getEOL();
 					} else {
-						if (!array_key_exists(self::$links[$hash]['media'], $styles)) {
-							$styles[self::$links[$hash]['media']] = array();
+						if (!array_key_exists($this->links[$hash]['media'], $styles)) {
+							$styles[$this->links[$hash]['media']] = array();
 						}
-						$styles[self::$links[$hash]['media']][] = self::$links[$hash];
+						$styles[$this->links[$hash]['media']][] = $this->links[$hash];
 					}
 				}
 			}
@@ -866,27 +863,27 @@ class Document {
 			if (count($styles)) {
 				$styles = Filter::exec('documentAssetCacheStyles', $styles);
 				foreach ($styles as $media => $array) {
-					$html .= self::setCssAssetCache($array, $media);
+					$html .= $this->setCssAssetCache($array, $media);
 				}
 			}
 		}
 
-		if (count(self::$styles['_'])) {
-			ksort(self::$styles['_']);
-			self::$styles = Filter::exec('documentHeadStyles', self::$styles);
-			foreach (self::$styles['_'] as $priority => $hashes) {
+		if (count($this->styles['_'])) {
+			ksort($this->styles['_']);
+			$this->styles = Filter::exec('documentHeadStyles', $this->styles);
+			foreach ($this->styles['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
-					$html .= Element::html(self::$styles[$hash], 'documentStyle', true) . self::getEOL();
+					$html .= Element::html($this->styles[$hash], 'document.style', true) . $this->getEOL();
 				}
 			}
 		}
 
-		if (count(self::$custom['_'])) {
-			ksort(self::$custom['_']);
-			self::$custom = Filter::exec('documentHeadCustom', self::$custom);
-			foreach (self::$custom['_'] as $priority => $hashes) {
+		if (count($this->custom['_'])) {
+			ksort($this->custom['_']);
+			$this->custom = Filter::exec('documentHeadCustom', $this->custom);
+			foreach ($this->custom['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
-					$html .= self::$custom[$hash] . self::getEOL();
+					$html .= $this->custom[$hash] . $this->getEOL();
 				}
 			}
 		}
@@ -899,7 +896,7 @@ class Document {
 	/**
 	 * @param array $files
 	 */
-	static function setCssAssetCache ($files = array(), $media = 'all') {
+	public function setCssAssetCache ($files = array(), $media = 'all') {
 		if (($total = count($files)) !== 0) {
 			$hash      = md5(serialize($files));
 			$path      = SNAPPY_PUBLIC_ASSET_PATH . 'cache';
@@ -929,9 +926,9 @@ class Document {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						Snappy::error('Failed to write style cache directory: %1$s', $path);
+						\Snappy::error('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						Snappy::error('Failed to write style cache file: %1$s', $path_file);
+						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						file_put_contents($path_file, $content);
 						return Element::html(array(
@@ -947,7 +944,7 @@ class Document {
 									$path_file
 								)
 							)
-						), 'documentStyle') . self::getEOL();
+						), 'document.style') . $this->getEOL();
 					}
 				}
 			}
@@ -967,9 +964,9 @@ class Document {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						Snappy::error('Failed to write style cache directory: %1$s', $path);
+						\Snappy::error('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						Snappy::error('Failed to write style cache file: %1$s', $path_file);
+						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						$content = file_get_contents($file['href']) . "\n\n";
 						file_put_contents($path_file, $content);
@@ -985,7 +982,7 @@ class Document {
 									array(SNAPPY_ASSET_URL, '/'),
 									$file['href']
 								) . '?' . time()
-							), 'documentStyle')
+							), 'document.style')
 						);
 					}
 				}
@@ -1003,9 +1000,9 @@ class Document {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						Snappy::error('Failed to write style cache directory: %1$s', $path);
+						\Snappy::error('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						Snappy::error('Failed to write style cache file: %1$s', $path_file);
+						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						$content = file_get_contents(SNAPPY_PATH . $file['href']) . "\n\n";
 						file_put_contents($path_file, $content);
@@ -1018,12 +1015,12 @@ class Document {
 								'rel'   => 'stylesheet',
 								'href'  => SNAPPY_ASSET_URL . basename($file['href']) . '?' . time()
 							)
-						), 'documentStyle');
+						), 'document.style');
 					}
 				}
 			}
 
-			return implode(self::getEOL(), $return);
+			return implode($this->getEOL(), $return);
 		}
 
 		return null;
@@ -1032,7 +1029,7 @@ class Document {
 	/**
 	 * @param array $files
 	 */
-	static function setJsAssetCache ($scripts = array()) {
+	public function setJsAssetCache ($scripts = array()) {
 		if (($total = count($scripts)) !== 0) {
 			$hash      = md5(serialize($scripts));
 			$path      = SNAPPY_PUBLIC_ASSET_PATH . 'cache';
@@ -1062,9 +1059,9 @@ class Document {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						Snappy::error('Failed to write directory: %1$s', $path);
+						\Snappy::error('Failed to write directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						Snappy::error('Failed to write file: %1$s', $path_file);
+						\Snappy::error('Failed to write file: %1$s', $path_file);
 					} else {
 						file_put_contents($path_file, $content);
 					}
@@ -1080,7 +1077,7 @@ class Document {
 							$path_file
 						)
 					),
-				), 'documentScript') . self::getEOL();
+				), 'document.script') . $this->getEOL();
 			}
 
 			$return = array();
@@ -1099,9 +1096,9 @@ class Document {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						Snappy::error('Failed to write style cache directory: %1$s', $path);
+						\Snappy::error('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						Snappy::error('Failed to write style cache file: %1$s', $path_file);
+						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						$content = file_get_contents($script['@props']['src']) . "\n\n";
 						file_put_contents($path_file, $content);
@@ -1115,7 +1112,7 @@ class Document {
 									$script['@props']['src'] . '?' . time()
 								)
 							),
-						), 'documentScript');
+						), 'document.script');
 					}
 				}
 
@@ -1133,9 +1130,9 @@ class Document {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						Snappy::error('Failed to write style cache directory: %1$s', $path);
+						\Snappy::error('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						Snappy::error('Failed to write style cache file: %1$s', $path_file);
+						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						$content = file_get_contents(SNAPPY_PATH . $script['@props']['src']) . "\n\n";
 						file_put_contents($path_file, $content);
@@ -1145,12 +1142,12 @@ class Document {
 								'type' => 'text/javascript',
 								'src'  => SNAPPY_ASSET_URL . basename($script['@props']['src']) . '?' . time()
 							),
-						), 'documentScript');
+						), 'document.script');
 					}
 				}
 			}
 
-			return implode(self::getEOL(), $return);
+			return implode($this->getEOL(), $return);
 		}
 
 		return null;
@@ -1159,89 +1156,93 @@ class Document {
 	/**
 	 * @param null $content
 	 */
-	static function setBody ($content = null) {
-		self::$body = array($content);
+	public function setBody ($content = null) {
+		$this->body = array($content);
 	}
 
 	/**
 	 * @param null $content
 	 */
-	static function prependBody ($content = null) {
-		array_unshift(self::$body, $content);
+	public function prependBody ($content = null) {
+		array_unshift($this->body, $content);
 	}
 
 	/**
 	 * @param null $content
 	 */
-	static function appendBody ($content = null) {
-		array_push(self::$body, $content);
+	public function appendBody ($content = null) {
+		array_push($this->body, $content);
 	}
 
 	/**
 	 * @param $value
 	 */
-	static function setEOL ($value) {
-		self::$eol = $value;
+	public function setEOL ($value) {
+		$this->eol = $value;
 	}
 
 	/**
 	 * @return string
 	 */
-	static function getEOL () {
-		return self::$eol;
+	public function getEOL () {
+		return $this->eol;
 	}
 
 	/**
 	 * @return string
 	 */
-	static function getBody () {
-		if (count(self::$scripts['_'])) {
-			ksort(self::$scripts['_']);
-			self::$scripts = Filter::exec('documentScripts', self::$scripts);
+	public function getBody () {
+		if (count($this->scripts['_'])) {
+			ksort($this->scripts['_']);
+			$this->scripts = Filter::exec('document.scripts', $this->scripts);
 
 			$scripts = array();
-			foreach (self::$scripts['_'] as $priority => $hashes) {
+			foreach ($this->scripts['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
-					self::$links[$hash]['@props']['src'] = Sanitize::forText(self::$scripts[$hash]['@props']['src']);
+					$this->links[$hash]['@props']['src'] = Sanitize::forText($this->scripts[$hash]['@props']['src']);
 
 					// Add script..
 					if (
 
 						// If not javascript
-						(array_key_exists('type', self::$scripts[$hash]['@props']) and self::$scripts[$hash]['@props']['type'] != 'text/javascript')
+						(array_key_exists('type', $this->scripts[$hash]['@props'])
+						 and $this->scripts[$hash]['@props']['type'] != 'text/javascript')
 
 						// Has inline markup..
-						or (!empty(self::$scripts[$hash]['@markup']))
+						or (!empty($this->scripts[$hash]['@markup']))
 
 						or (
 
-							// or isn't in the Snappy url dataironment...
-							strpos(self::$scripts[$hash]['@props']['src'], SNAPPY_PATH) !== 0
+							// or isn't in the Snappy url environment...
+							strpos($this->scripts[$hash]['@props']['src'], SNAPPY_PATH) !== 0
 
-							// nor the Snappy sys dataironment...
-							and !file_exists(SNAPPY_PATH . self::$scripts[$hash]['@props']['src'])
+							// nor the Snappy sys environment...
+							and !file_exists(SNAPPY_PATH . $this->scripts[$hash]['@props']['src'])
 						)
 					) {
-						self::appendBody(Element::html(array(
+						$this->appendBody(Element::html(
+							[
 								'@tag'    => 'script',
-								'@markup' => self::$scripts[$hash]['@markup'],
-								'@props'  => self::$scripts[$hash]['@props']
-							), 'documentScript') . self::getEOL());
+								'@markup' => $this->scripts[$hash]['@markup'],
+								'@props'  => $this->scripts[$hash]['@props']
+							],
+							'document.script'
+						) . $this->getEOL());
 					} else {
-						$scripts[] = self::$scripts[$hash];
+						$scripts[] = $this->scripts[$hash];
 					}
 				}
 			}
 
 			if (count($scripts)) {
 				$scripts = Filter::exec('documentAssetCacheScripts', $scripts);
-				self::appendBody(self::setJsAssetCache($scripts));
+				$this->appendBody($this->setJsAssetCache($scripts));
 			}
 		}
 
 		// TODO: Store the head in memory, only clear storage on 'add' functions - perhaps an 'init' event?
 		Event::exec('beforeDocumentGetBody');
-		$return = Filter::exec('documentBody', implode(self::getEOL(), self::$body));
+		$return = Filter::exec('documentBody', implode($this->getEOL(), $this->body));
 		Event::exec('afterDocumentGetBody');
 		return $return;
 	}
@@ -1249,8 +1250,8 @@ class Document {
 	/**
 	 * @return bool
 	 */
-	static function isEmpty () {
-		return !count(self::$body);
+	public function isEmpty () {
+		return !count($this->body);
 	}
 
 	/**
@@ -1258,6 +1259,7 @@ class Document {
 	 */
 	static public function json($content) {
 		header('Content-type: text/json');
+		header('Content-length: ' . strlen($content));
 		die($content);
 	}
 
@@ -1266,24 +1268,19 @@ class Document {
 	 *
 	 * @return mixed|string|void
 	 */
-	static function content ($scope = null) {
+	public function output($scope = null) {
 
 		// Default template name
 		if (!is_string($scope)) {
-			$scope = Filter::exec('documentContentTemplate', 'template.html5');
+			$scope = Filter::exec('documentOutput.template', 'template.html5');
 		}
 
 		// Output
-		$return = Filter::exec('documentContent', Snappy::capture($scope));
+		$value = Filter::exec('documentOutput', \Snappy::capture($scope));
 
 		// Ultimate document event
 		Event::exec('afterDocumentContent');
 
-		// Output content
-		header('Content-type: text/html');
-		echo $return;
+		return $value;
 	}
 }
-
-Event::set('init', array('Document', 'init'));
-//Event::set('init', array('Document', 'content'), 9999);

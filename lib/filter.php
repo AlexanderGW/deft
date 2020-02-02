@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -20,6 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace Snappy\Lib;
 
 class Filter {
 	private static $actions = array();
@@ -93,7 +95,7 @@ class Filter {
 					}
 				}
 
-				Snappy::log( 'filter/' . $name, array(
+				\Snappy::log( 'filter/' . $name, array(
 					'time' => Helper::getMoment( $start ),
 					'callbacks' => $array
 				) );

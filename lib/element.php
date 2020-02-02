@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,6 +21,8 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace Snappy\Lib;
+
 class Element {
 
 	/**
@@ -31,7 +33,7 @@ class Element {
 	private static $initialized = false;
 
 	private static $patterns = [
-		'prop.key' => '/([^0-9A-Za-z:_\xB7\x{0300}-\x{036F}\x{203F}-\x{2040}]+)/u',
+		'prop.key' => '/([^0-9A-Za-z:_\-\xB7\x{0300}-\x{036F}\x{203F}-\x{2040}]+)/u',
 		'prop.value' => null
 	];
 
@@ -191,7 +193,7 @@ class Element {
 				$value['@markup'] = null;
 		}
 
-		Snappy::log('element/' . $filter, array(
+		\Snappy::log('element/' . $filter, array(
 			'time'     => Helper::getMoment( $start ),
 			'element' => $value
 		));
@@ -200,4 +202,4 @@ class Element {
 	}
 }
 
-Event::set('init', array('Element', 'init'));
+Event::set('init', '\Snappy\Lib\Element::init');

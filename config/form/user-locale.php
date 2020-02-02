@@ -8,14 +8,14 @@
 
 return array(
 	'0' => array(
-		'tag' => 'input',
+		'@tag' => 'input',
 		'label' => 'Idioma',
 		'description' => 'Select a locale then click Submit to save your preferences.',
 		'options' => array(
 			'en-GB' => 'en-GB',
 			'es-ES' => 'es-ES'
 		),
-		'props' => array(
+		'@props' => array(
 			'type' => 'radio',
 			'name' => 'locale',
 			'id' => null,
@@ -23,14 +23,14 @@ return array(
 		)
 	),
 	'1' => array(
-		'tag' => 'input',
+		'@tag' => 'input',
 		'label' => 'Idioma',
 		'description' => 'Select a locale then click Submit to save your preferences.',
 		'options' => array(
 			'en-GB' => 'en-GB',
 			'es-ES' => 'es-ES'
 		),
-		'props' => array(
+		'@props' => array(
 			'type' => 'checkbox',
 			'name' => 'locale2',
 			'id' => null,
@@ -38,14 +38,14 @@ return array(
 		)
 	),
 	'2' => array(
-		'tag' => 'select',
+		'@tag' => 'select',
 		'label' => 'Idioma',
 		'description' => 'Select a locale then click Submit to save your preferences.',
 		'options' => array(
 			'en-GB' => 'en-GB',
 			'es-ES' => 'es-ES'
 		),
-		'props' => array(
+		'@props' => array(
 			'type' => null,
 			'name' => 'locale3',
 			'id' => null,
@@ -53,12 +53,12 @@ return array(
 		)
 	),
 	'3' => array(
-		'tag' => 'input',
+		'@tag' => 'input',
 		'label' => 'Input (text)',
 		'description' => 'Input text test',
 		'options' => array(
 		),
-		'props' => array(
+		'@props' => array(
 			'type' => 'text',
 			'name' => 'field-2b7ffdab0d1b1f9f00408d2b76cbff60',
 			'id' => null,
@@ -66,12 +66,12 @@ return array(
 		)
 	),
 	'4' => array(
-		'tag' => 'input',
+		'@tag' => 'input',
 		'label' => 'Input (color)',
 		'description' => 'Input color test',
 		'options' => array(
 		),
-		'props' => array(
+		'@props' => array(
 			'type' => 'color',
 			'name' => 'field-551fb9b04c5a73bd8ed46e2b2872d58f',
 			'id' => null,
@@ -79,12 +79,12 @@ return array(
 		)
 	),
 	'5' => array(
-		'tag' => 'input',
+		'@tag' => 'input',
 		'label' => 'Input (number)',
 		'description' => 'Input number test',
 		'options' => array(
 		),
-		'props' => array(
+		'@props' => array(
 			'type' => 'number',
 			'name' => 'field-194849d097897adc2773e5fe2885b1c1',
 			'id' => null,
@@ -92,12 +92,12 @@ return array(
 		)
 	),
 	'6' => array(
-		'tag' => 'input',
+		'@tag' => 'input',
 		'label' => 'Input (range)',
 		'description' => 'Input range test',
 		'options' => array(
 		),
-		'props' => array(
+		'@props' => array(
 			'type' => 'range',
 			'name' => 'field-c4ef9a57d439208de5d25660b12c81af',
 			'id' => null,
@@ -108,12 +108,12 @@ return array(
 		)
 	),
 	'7' => array(
-		'tag' => 'textarea',
+		'@tag' => 'textarea',
 		'label' => 'Textarea',
 		'description' => 'Textarea test',
 		'options' => array(
 		),
-		'props' => array(
+		'@props' => array(
 			'type' => null,
 			'name' => 'field-9315805eaedf4f0540a5ee29b8fc5360',
 			'id' => null,
@@ -122,12 +122,12 @@ return array(
 		)
 	),
 	'8' => array(
-		'tag' => 'input',
+		'@tag' => 'input',
 		'label' => null,
 		'description' => null,
 		'options' => array(
 		),
-		'props' => array(
+		'@props' => array(
 			'type' => 'submit',
 			'name' => 'field-d8bf69c448627bcb8f2447eac2971044',
 			'id' => null,

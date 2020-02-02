@@ -14,8 +14,10 @@ xhr.onreadystatechange = function () {
 			for (key in debug) {
 				switch (typeof debug[key]) {
 					case 'object':
+						html += '<section class="expanded">';
 						html += '<h3>'+key+'</h3>';
-						html += Snappy.debug.recursiveTableObject(debug[key]);
+						html += Snappy.debug.recursiveTableObject(debug[key], 0, key);
+						html += '</section>';
 						break;
 				}
 			}
@@ -32,7 +34,13 @@ xhr.onreadystatechange = function () {
 Snappy.debug = {};
 
 /* Recursivly render object as an HTML table */
-Snappy.debug.recursiveTableObject = function(thing){
+Snappy.debug.recursiveTableObject = function(thing, depth, label){
+	if (typeof depth == 'undefined') {
+		depth = 0;
+	}
+	if (typeof label == 'undefined') {
+		label = '';
+	}
 	var html = '';
 	if (typeof thing == 'object') {
 
@@ -52,7 +60,7 @@ Snappy.debug.recursiveTableObject = function(thing){
 				var type = typeof thing[key];
 
 				// Item row
-				html += '<tr><td>'+(key.length > 0 ? key : '<i>NULL</i>')+'</td><td>';
+				html += '<tr><td'+(!depth ? ' data-label="'+label+'"' : '')+'><span>'+(key.length > 0 ? key : '<i>NULL</i>')+'</span></td><td>';
 
 				// Item type
 				html += type;
@@ -62,7 +70,7 @@ Snappy.debug.recursiveTableObject = function(thing){
 
 					// Item has other things, recurse
 					case 'object':
-						html += Snappy.debug.recursiveTableObject(thing[key]);
+						html += Snappy.debug.recursiveTableObject(thing[key], depth+1);
 						break;
 
 					// Item is a number, string, or bool

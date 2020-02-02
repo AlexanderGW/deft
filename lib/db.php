@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -77,15 +77,15 @@ class Db extends Snappy_Concrete {
 	 * @return array
 	 */
 	public static function getArgs ($args = array()) {
-		$cfg  =& Snappy::getCfg();
+		$config  =& \Snappy::config();
 		$args = array_merge(array(
-			'driver'       => $cfg->get('db_driver', 'mysql'),
-			'host'         => $cfg->get('db_hostname', 'localhost'),
-			'username'     => $cfg->get('db_username', 'root'),
-			'password'     => $cfg->get('db_password', ''),
-			'dbname'       => $cfg->get('db_dbname', 'mysql'),
-			'table_prefix' => $cfg->get('db_table_prefix'),
-			'port'         => $cfg->get('db_port', 3306)
+			'driver'       => $config->get('db_driver', 'mysql'),
+			'host'         => $config->get('db_hostname', 'localhost'),
+			'username'     => $config->get('db_username', 'root'),
+			'password'     => $config->get('db_password', ''),
+			'dbname'       => $config->get('db_dbname', 'mysql'),
+			'table_prefix' => $config->get('db_table_prefix'),
+			'port'         => $config->get('db_port', 3306)
 		), $args);
 
 		return $args;
@@ -123,7 +123,7 @@ class Db extends Snappy_Concrete {
 				'#\\?#',
 				function($match) use ($db, &$values) {
 					if (empty($values)) {
-						Snappy::error('Query has missing parameters.');
+						\Snappy::error('Query has missing parameters.');
 					}
 					$value = array_shift($values);
 
@@ -194,7 +194,7 @@ class Db extends Snappy_Concrete {
 					'query' => $query
 				);
 
-				Snappy::log($this->stack . '/queries', $entry);
+				\Snappy::log($this->stack . '/queries', $entry);
 
 				switch (SNAPPY_DEBUG) {
 					case 2 :
@@ -214,7 +214,7 @@ class Db extends Snappy_Concrete {
 									'explain' => $resource->fetchAll(PDO::FETCH_ASSOC)
 								);
 
-								Snappy::log($this->stack . '/queries', $entry);
+								\Snappy::log($this->stack . '/queries', $entry);
 							}
 						}
 						break;

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,11 +21,13 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Document::prependTitle(__('cURL request'));
+use Snappy\Lib\Http;
+
+Snappy::response()->prependTitle(__('cURL request'));
 
 // Send a POST request to "/response" on the example plugin
 $request = Http::request(
-// URI
+	// URI
 	SNAPPY_URL . '/response',
 
 	// cURL options
@@ -33,7 +35,7 @@ $request = Http::request(
 
 	// POST data
 	array(
-		'foobar' => "Testing post"
+		'foobar' => 'Testing post'
 	)
 );
 
@@ -42,11 +44,21 @@ ob_start();
 var_dump($request);
 $result = ob_get_clean();
 
-$form = Snappy::getForm();
-$form->field('textarea')->label('Response')->description('API call response')->value($result)->readOnly(true)->cols(40)->rows(20);
+$form = Snappy::form('example')
+	->field('textarea')
+	->label('Response')
+	->description('Output of the request')
+	->value($result)
+	->readOnly(true)
+	->cols(40)
+	->rows(20);
 
 ?>
-	<h3><?php ___('Snappy &ndash; The cURL request helper') ?></h3>
-	<p><a href="./">Return to previous page.</a><br>A brief example of the URI based request helper and the information
-		provided using the <code>Http::request()</code> function.</p>
-<?php echo $form;
+<div>
+	<div>
+		<h1><?php ___('Snappy &ndash; The cURL request helper') ?></h1>
+		<p><a href="./">Return to previous page.</a><br>A brief example of the URI based request helper and the information
+			provided using the <code>Snappy\Lib\Http::request()</code> function.</p>
+	</div>
+	<?php echo $form->content() ?>
+</div>

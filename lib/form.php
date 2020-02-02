@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,12 +21,17 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Form extends Snappy_Concrete {
+namespace Snappy\Lib;
+
+use Snappy\Lib\Helper;
+
+class Form extends \Snappy_Concrete {
 	private $element = array();
 	private $fields = array();
 
 	function __construct ($value = null) {
-		$this->element['tag'] = 'form';
+		$this->element['@tag'] = 'form';
+		$this->element['@props']['method'] = 'POST';
 		if (is_null($value)) {
 			$this->prop('id', 'sf_' . Helper::getRandomChars(5));
 		}
@@ -52,13 +57,25 @@ class Form extends Snappy_Concrete {
 	/**
 	 * @param null $value
 	 *
+	 * @return mixed
+	 */
+	public function validate ($form = null, $state = null) {
+		if (\Snappy::request()->isPost()) {
+//			var_dump($form, $state);
+//			die('validate form');
+		}
+	}
+
+	/**
+	 * @param null $value
+	 *
 	 * @return $this|null
 	 */
 	public function post ($value = null) {
 		if (is_null($value)) {
-			return $this->props('method') === 'post';
+			return $this->props('method') === 'POST';
 		}
-		$this->prop('method', (bool) $value === true ? 'post' : 'get');
+		$this->prop('method', (bool) $value === true ? 'POST' : 'GET');
 
 		return $this;
 	}
@@ -70,11 +87,11 @@ class Form extends Snappy_Concrete {
 	 */
 	public function props ($value = null) {
 		if (is_null($value)) {
-			return $this->element['props'];
+			return $this->element['@props'];
 		}
 
-		$this->element['props'] = array(
-			                          'id' => $this->element['props']['id']
+		$this->element['@props'] = array(
+			                          'id' => $this->element['@props']['id']
 		                          ) + (array) $value;
 
 		return $this;
@@ -86,11 +103,13 @@ class Form extends Snappy_Concrete {
 	 * @return mixed
 	 */
 	public function prop ($name = null, $value = null) {
-		if (is_null($value)) {
-			return $this->element['props'][$name];
-		}
 		if (!is_null($name)) {
-			$this->element['props'][$name] = $value;
+			if (is_null($value)) {
+				return $this->element['@props'][$name];
+			}
+			if (!is_null($name)) {
+				$this->element['@props'][$name] = $value;
+			}
 		}
 
 		return $this;
@@ -115,9 +134,9 @@ class Form extends Snappy_Concrete {
 				list($tag, $type, $name, $id) = explode('.', $scope);
 			}
 			if (empty($id)) {
-				$id = 'sy-field-' . md5($tag . $type . $name);
+				$id = 'syf__' . ($name ? $name : ($type ? $tag . '_' . $type : $tag));
 			}
-			$this->fields[$scope] = new FormField($tag, $type, $name, $id);
+			$this->fields[$scope] = new formField($tag, $type, $name, $id);
 		}
 
 		return $this->fields[$scope];
@@ -131,23 +150,23 @@ class Form extends Snappy_Concrete {
 			if ($field->prop('type') == 'file' and !$this->prop('enctype')) {
 				$this->prop('enctype', 'multipart/form-data');
 			}
-			$this->element['markup'] .= $field->content();
+			$this->element['@markup'] .= $field->content();
 		}
 
-		return Html::element($this->element, 'elementForm_' . $this->prop('id'));
+		return Element::html($this->element, $this->prop('id') ? 'element.form.' . $this->prop('id') : 'element.form');
 	}
 
 	public function save () {
-		$config =& Snappy::getCfg('config.form.' . $this->prop('id'));
+		$config =& \Snappy::config('config.form.' . $this->prop('id'));
 
 		$array = array();
 		foreach ($this->fields as $field) {
 			array_push($array, array(
-				'tag'         => $field->tag(),
+				'@tag'         => $field->tag(),
 				'label'       => $field->label(),
 				'description' => $field->description(),
 				'options'     => $field->options(),
-				'props'       => $field->props()
+				'@props'       => $field->props()
 			));
 		}
 
@@ -157,7 +176,7 @@ class Form extends Snappy_Concrete {
 	}
 }
 
-class FormField {
+class formField {
 
 	/**
 	 * @var null
@@ -185,7 +204,7 @@ class FormField {
 	private $options = array();
 
 	/**
-	 * FormField constructor.
+	 * form.field. constructor.
 	 *
 	 * @param null $tag
 	 * @param null $type
@@ -202,7 +221,7 @@ class FormField {
 		}
 		$this->props['type'] = $type;
 		$this->props['name'] = $name;
-		$this->props['id']   = $id;
+		$this->props['id']   = str_replace('-', '_', $id);
 	}
 
 	/**
@@ -501,6 +520,17 @@ class FormField {
 
 		// TODO: Check if in cache, return if we have a value
 
+		if ($this->label() && !array_key_exists('aria-labelledby', $this->props)) {
+			$this->props['aria-labelledby'] = $this->id() .'_label';
+		}
+
+		if ($this->description() && !array_key_exists('aria-describedby', $this->props)) {
+			$this->props = array_merge(array(
+				'aria-describedby' => $this->id() . '_description'
+			), $this->props);
+			$this->props['aria-describedby'] = $this->id() .'_description';
+		}
+
 		switch ($this->tag) {
 
 			/**
@@ -523,15 +553,23 @@ class FormField {
 
 							// Build options
 							$elements = '';
+							$i = 0;
 							foreach ($this->options as $value => $label) {
+								$option_id = $this->id();
+								if ($i) {
+									$option_id .= '_' . $i;
+								}
+
+								$option_label_id = $option_id . '_label';
 
 								// Build props
 								$props = array(
-									         'type'            => 'checkbox',
-									         'value'           => $value,
-									         'name'            => $this->prop('name') . '[]',
-									         'aria-labelledby' => 'sy-field-label-' . $this->id()
-								         ) + $this->props;
+							         'type'            => 'checkbox',
+							         'value'           => $value,
+							         'name'            => $this->prop('name') . '[]',
+							         'id'              => $option_id,
+							         'aria-labelledby' => $option_label_id
+						         ) + $this->props;
 
 								// Is option the current state value?
 								if ($prop_value and $value == $prop_value) {
@@ -539,31 +577,37 @@ class FormField {
 								}
 
 								// Control element
-								$element = Html::element(array(
-									'tag'   => 'input',
-									'close' => false,
-									'props' => $props
-								), 'elementInputCheckboxFormFieldOption');
+								$element = Element::html(array(
+									'@tag'   => 'input',
+									'@close' => false,
+									'@props' => $props
+								), 'form.field.control.input.checkbox');
 
 								// Control element template
-								$template = Html::element(array(
-									'tag'    => 'label',
-									'markup' => array(
+								$template = Element::html(array(
+									'@tag'    => 'div',
+									'@markup' => array(
 										'%1$s',
 										array(
-											'tag'    => 'span',
-											'props'  => array(
-												'id' => 'sy-field-label-' . $this->id()
+											'@tag'    => 'label',
+											'@props'  => array(
+												'for' => $option_id,
+												'id' => $option_label_id
 											),
-											'markup' => '%2$s'
+											'@markup' => '%2$s'
 										)
+									),
+									'@props'  => array(
+										'class' => 'option'
 									)
-								), 'elementInputCheckboxFormFieldOptionTemplate');
+								), 'form.field.control.template.input.checkbox');
 								if (!empty($template)) {
 									$elements .= sprintf($template, $element, $label);
 								} else {
 									$elements .= $element;
 								}
+
+								$i++;
 							}
 						}
 						break;
@@ -583,14 +627,22 @@ class FormField {
 
 							// Build options
 							$elements = '';
+							$i = 0;
 							foreach ($this->options as $value => $label) {
+								$option_id = $this->id();
+								if ($i) {
+									$option_id .= '_' . $i;
+								}
+
+								$option_label_id = $option_id . '_label';
 
 								// Build props
 								$props = array(
 									         'type'            => 'radio',
 									         'value'           => $value,
 									         'name'            => $this->prop('name'),
-									         'aria-labelledby' => 'sy-field-label-' . $this->id()
+									         'id'              => $option_id,
+									         'aria-labelledby' => $option_label_id
 								         ) + $this->props;
 
 								// Is option the current state value?
@@ -599,31 +651,37 @@ class FormField {
 								}
 
 								// Control element
-								$element = Html::element(array(
-									'tag'   => 'input',
-									'close' => false,
-									'props' => $props
-								), 'elementInputRadioFormFieldOption');
+								$element = Element::html(array(
+									'@tag'   => 'input',
+									'@close' => false,
+									'@props' => $props
+								), 'form.field.control.input.radio');
 
 								// Control element template
-								$template = Html::element(array(
-									'tag'    => 'label',
-									'markup' => array(
+								$template = Element::html(array(
+									'@tag'    => 'div',
+									'@markup' => array(
 										'%1$s',
 										array(
-											'tag'    => 'span',
-											'markup' => '%2$s'
+											'@tag'    => 'label',
+											'@props'  => array(
+												'for' => $option_id,
+												'id' => $option_label_id
+											),
+											'@markup' => '%2$s'
 										)
 									),
-									'props'  => array(
-										'id' => 'sy-field-label-' . $this->id()
+									'@props'  => array(
+										'class' => 'option'
 									)
-								), 'elementInputRadioFormFieldOptionTemplate');
+								), 'form.field.control.template.input.radio');
 								if (!empty($template)) {
 									$elements .= sprintf($template, $element, $label);
 								} else {
 									$elements .= $element;
 								}
+
+								$i++;
 							}
 						}
 						break;
@@ -655,17 +713,17 @@ class FormField {
 					}
 
 					// Control elements
-					$this->markup .= Html::element(array(
-						'tag'    => 'option',
-						'markup' => $label,
-						'props'  => $props
-					), 'elementSelectOptionFormFieldOption');
+					$this->markup .= Element::html(array(
+						'@tag'    => 'option',
+						'@markup' => $label,
+						'@props'  => $props
+					), 'form.field.control.select.option');
 				}
 
-				$elements = Html::element(array(
-					'tag'    => 'select',
-					'markup' => $this->markup,
-					'props'  => $this->props
+				$elements = Element::html(array(
+					'@tag'    => 'select',
+					'@markup' => $this->markup,
+					'@props'  => $this->props
 				));
 				break;
 
@@ -676,14 +734,14 @@ class FormField {
 
 				// Remove value prop, set as markup
 				if ($prop_value = $this->prop('value')) {
-					$this->markup = Html::escape($prop_value);
+					$this->markup = Sanitize::forHtml($prop_value);
 					unset($this->props['value']);
 				}
 
-				$elements = Html::element(array(
-					'tag'    => 'textarea',
-					'markup' => $this->markup,
-					'props'  => $this->props
+				$elements = Element::html(array(
+					'@tag'    => 'textarea',
+					'@markup' => $this->markup,
+					'@props'  => $this->props
 				));
 				break;
 		}
@@ -691,67 +749,63 @@ class FormField {
 		// Field label
 		$label = '';
 		if ($this->label()) {
-			$label = Html::element(array(
-				'tag'    => 'label',
-				'markup' => $this->label(),
-				'props'  => array(
-					'id' => 'label-' . $this->id()
+			$label = Element::html(array(
+				'@tag'    => 'label',
+				'@markup' => $this->label(),
+				'@props'  => array(
+					'id' => $this->id() . '_label'
 				)
-			), 'formFieldLabelTemplate');
+			), 'form.field.label.template');
 		}
 
 		// Field description
 		$description = '';
 		if ($this->description()) {
-			$description = Html::element(array(
-				'tag'    => 'p',
-				'markup' => $this->description(),
-				'props'  => array(
-					'id' => 'desc-' . $this->id()
+			$description = Element::html(array(
+				'@tag'    => 'p',
+				'@markup' => $this->description(),
+				'@props'  => array(
+					'id' => $this->id() . '_description'
 				)
-			), 'formFieldDescriptionTemplate');
+			), 'form.field.description.template');
 		}
 
 		// Field control
 		if (is_null($elements)) {
-			$this->props = array_merge(array(
-				'aria-labelledby'  => 'label-' . $this->id(),
-				'aria-describedby' => 'desc-' . $this->id()
-			), $this->props);
-
-			$elements = Html::element(array(
-				'tag'    => $this->tag,
-				'close'  => ($this->tag == 'input'),
-				'markup' => $this->markup,
-				'props'  => $this->props
-			), 'element' . ucfirst($this->tag) . '_' . strtolower($this->prop('type')) . '_' . ucfirst($this->prop('name')));
+			$elements = Element::html(array(
+				'@tag'    => $this->tag,
+				'@close'  => ($this->tag == 'input'),
+				'@markup' => $this->markup,
+				'@props'  => $this->props
+			), strtolower('element.' . $this->tag). '.' . $this->prop('type') . ($this->prop('name') ? '.' . $this->prop('name') : ''));
 		}
 
 		// Field control template
-		$template = Html::element(array(
-			'tag'    => 'div',
-			'props'  => array(
+		$template = Element::html(array(
+			'@tag'    => 'div',
+			'@props'  => array(
 				'class' => array(
 					'control'
 				),
 			),
-			'markup' => '%s'
-		), 'formFieldControlTemplate');
+			'@markup' => '%s'
+		), 'form.field.control.template');
 		if (!empty($template)) {
 			$elements = sprintf($template, $elements);
 		}
 
 		// Field template
-		$template = Html::element(array(
-			'tag'    => 'div',
-			'markup' => '%1$s%2$s%3$s',
-			'props'  => array(
+		$template = Element::html(array(
+			'@tag'    => 'div',
+			'@markup' => '%1$s%2$s%3$s',
+			'@props'  => array(
 				'class' => array(
 					'sy-field',
+					$this->prop('type'),
 					$this->prop('name')
 				)
 			)
-		), 'formFieldTemplate');
+		), 'form.field..template');
 		if (!empty($template)) {
 			return sprintf($template, $label, $description, $elements);
 		} else {

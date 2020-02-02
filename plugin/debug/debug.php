@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,23 +21,31 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Debug_Plugin {
+namespace Snappy\Plugin;
+
+use Snappy\Lib\Route;
+use Snappy\Lib\Event;
+use Snappy\Lib\Filter;
+use Snappy\Lib\Element;
+
+class Debug {
 	private static $hash;
 
 	public static function init () {
-		Route::add('debug', 'debug', null, array('Debug_Plugin', 'returnSetting'));
+		Route::add('debug', 'debug', null, '\\Snappy\\Plugin\\Debug::returnSetting');
 		Route::add('debug.request', 'debug/request/[hash]', array(
 			'hash' => '[0-9a-z]{32}'
-		), array('Debug_Plugin', 'returnRequest'));
+		), '\\Snappy\\Plugin\\Debug::returnRequest');
 
 		$hash = self::getHash();
-		Document::addScriptContent("var Snappy = Snappy || {}; Snappy.debugHash = '{$hash}';");
-		Document::addScript('plugin/debug/asset/debug.js');
-		Document::addStyle('plugin/debug/asset/debug.css');
+		$res =& \Snappy::response();
+		$res->addScriptContent("var Snappy = Snappy || {}; Snappy.debugHash = '{$hash}';");
+		$res->addScript('plugin/debug/asset/debug.js');
+		$res->addStyle('plugin/debug/asset/debug.css');
 
-		Event::add('onConfigConstruct', function($instance){
-			var_dump($instance);
-		});
+//		Event::set('onConstruct', function($instance){
+//			var_dump($instance);
+//		});
 	}
 
 	public static function getHash() {
@@ -54,14 +62,14 @@ class Debug_Plugin {
 	public static function returnSetting () {
 
 		// Get current debug state
-		$cfg   =& Snappy::getCfg();
-		if ($debug = Http::post('debug')) {
-			$cfg->set('debug', $debug);
-			$cfg->save();
+		$config   =& \Snappy::config();
+		if ($debug = \Snappy::request()->post('debug')) {
+			$config->set('debug', $debug);
+			$config->save();
 		}
 
 		// Create the form
-		$form =& Snappy::getForm('debug');
+		$form =& \Snappy::form('debug');
 
 		// Set as POST
 		$form->post(true);
@@ -82,36 +90,37 @@ class Debug_Plugin {
 		))
 
 		// Set current value
-		->value($cfg->get('debug'));
+		->value($config->get('debug'));
 
 		// Add submit control
 		$form->field('input.submit');
 
-		Document::appendBody(Html::element(array(
-			'tag' => 'h3',
-			'markup' => __('Snappy / Debug')
+		\Snappy::response()->appendBody(Element::html(array(
+			'@tag' => 'h3',
+			'@markup' => __('Snappy / Debug')
 		)));
 
 		// Add form markup to document
-		Document::appendBody($form);
+		\Snappy::response()->appendBody($form);
 	}
 
 	public static function returnRequest() {
-//		Http::header('Content-type: text/json');
-		die(file_get_contents(self::getPath() . DS . Route::getData('hash') . '.json'));
+		$content = file_get_contents(self::getPath() . DS . Route::getParam('hash') . '.json');
+		\Snappy::response()->json($content);
+	}
+
+	public static function end() {
+
+		// Create debugging report for API query
+		if (SNAPPY_DEBUG) {
+			$path = self::getPath();
+			if (!is_dir($path)) {
+				mkdir($path);
+			}
+			file_put_contents($path . DS . self::getHash() . '.json', \Snappy::capture('plugin.debug.template.debug'));
+		}
 	}
 }
 
-// Append debuggingvagrant up
-if (SNAPPY_DEBUG) {
-	Event::add('afterDocumentContent', function() {
-		$path = Debug_Plugin::getPath();
-		if (!is_dir($path)) {
-			mkdir($path);
-		}
-		file_put_contents($path . DS . Debug_Plugin::getHash() . '.json', Snappy::capture('plugin.debug.template.debug'));
-	}, 999);
-}
-
-Event::add('init', array('Debug_Plugin', 'init'));
-Event::add('init', array('Debug_Plugin', 'dump'), 999999);
+Event::set('init', '\Snappy\Plugin\Debug::init');
+Event::set('exit', '\Snappy\Plugin\Debug::end', 99);

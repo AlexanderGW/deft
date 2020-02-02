@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,6 +21,8 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use Snappy\Lib\Helper;
+
 $array = array(
 	'time' => sprintf('%4.4f', Helper::getMoment()),
 	'memory' => Helper::getShnoFromBytes( memory_get_usage() ),
@@ -33,7 +35,7 @@ $array = array(
 	'filter' => array()
 );
 
-foreach( Snappy::getLog() as $stack => $events ) {
+foreach( \Snappy::getLog() as $stack => $events ) {
 	$scope = explode( '/', $stack );
 
 	if( $scope[0] == 'instance') {

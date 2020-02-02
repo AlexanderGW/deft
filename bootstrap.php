@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -24,11 +24,5 @@
 // Get the framework
 require 'snappy.php';
 
-// Initialise
-Snappy::init( require 'config/snappy.php' );
-
-echo Document::content();
-
-/*
- * Document::beforeDocumentGetBody the resource info for this debug stack, debug.js etc etc to API REST the JSON
- * */
+// Init Snappy
+\Snappy::init(require 'config/snappy.php');

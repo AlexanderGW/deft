@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,6 +21,8 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace Snappy\Lib;
+
 class Token {
 	/**
 	 * Set TRUE once init() executes.
@@ -31,6 +33,7 @@ class Token {
 
 	private static $props = array();
 	private static $cookie = false;
+	private static $consent = false;
 
 	/**
 	 *
@@ -51,7 +54,11 @@ class Token {
 		}
 
 		if( is_string( $data ) )
-			self::$props = (array)Snappy::decode( $data );
+			self::$props = (array)\Snappy::decode( $data );
+
+		if(array_key_exists('consent', self::$props) and self::$props['consent'] != false) {
+			self::$consent = true;
+		}
 
 		self::$initialized = true;
 	}
@@ -60,15 +67,15 @@ class Token {
 	 * @return string
 	 */
 	public static function getHash() {
-		$cfg =& Snappy::getCfg();
-		$hash = $cfg->get( 'token_hash' );
+		$config =& \Snappy::config();
+		$hash = $config->get( 'token_hash' );
 		if( is_null( $hash ) ) {
 			$hash = Helper::getRandomHash();
-			$cfg->set( array(
+			$config->set( array(
 				'token_hash' => $hash,
 				'token_timeout' => 2592000
 			) );
-			$cfg->save();
+			$config->save();
 		}
 
 		return $hash;
@@ -82,7 +89,7 @@ class Token {
 
 		$hash = self::getHash();
 		self::$props = Filter::exec( 'tokenSave', self::$props );
-		$_SESSION[ $hash ] = Snappy::encode( self::$props );
+		$_SESSION[ $hash ] = \Snappy::encode( self::$props );
 		return true;
 	}
 
@@ -92,14 +99,14 @@ class Token {
 	public static function saveCookie() {
 		self::save();
 		$hash = self::getHash();
-		$timeout = (int)Snappy::getCfg()->get( 'token_timeout', 2592000 );
+		$timeout = (int)\Snappy::config()->get( 'token_timeout', 2592000 );
 		$expire = ( ( TIME_UTC + ( 3600 * (float)self::get( 'timezone' ) ) ) + $timeout );
 
 		if( !count( self::$props ) ) {
 			$encoded = -1;
 			$expire = time() - 86400;
 		} else
-			$encoded = Snappy::encode( self::$props );
+			$encoded = \Snappy::encode( self::$props );
 
 		setcookie( $hash, $encoded, $expire, SNAPPY_URL_PATH, $_SERVER['HTTP_HOST'] );
 		return true;
@@ -148,6 +155,15 @@ class Token {
 		if( !is_null( self::$props ) )
 			return true;
 		return false;
+	}
+
+	/**
+	 *
+	 */
+	public static function haveConsent() {
+		self::init();
+
+		return self::$consent;
 	}
 
 	/**

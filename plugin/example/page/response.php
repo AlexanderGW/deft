@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,8 +21,8 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if( ( $value = Http::post( 'foobar' ) ) != false ) {
-	echo serialize( array( 'value' => $value ) );
+if(($value = \Snappy::request()->post('foobar')) !== NULL) {
+	\Snappy::response()->json(json_encode([
+		'value' => \Snappy\Lib\Sanitize::forHtml($value)
+	]));
 }
-
-exit;

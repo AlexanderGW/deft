@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,11 +21,13 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Filter::add( 'elementBody', function( $array ) {
-	if( array_key_exists( 'class', $array['props'] ) )
-		$array['props']['class'] .= ' http-404';
+use Snappy\Lib\Filter;
+
+Filter::add( 'element.body', function( $array ) {
+	if( array_key_exists( 'class', $array['@props'] ) )
+		$array['@props']['class'] .= ' http-404';
 	else
-		$array['props']['class'] = 'http-404';
+		$array['@props']['class'] = 'http-404';
 	return $array;
 } );
 

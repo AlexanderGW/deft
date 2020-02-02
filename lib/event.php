@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,10 +21,14 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace Snappy\Lib;
+
+use Snappy\Lib\Helper;
+
 class Event {
 	private static $actions = array();
 
-	static function set ($name = null, $function = null, $priority = 10, $arg_count = 1) {
+	static function set ($name = null, $function = null, $priority = 100, $arg_count = 1) {
 		if (!is_null($name) and !is_null($function)) {
 			if (!array_key_exists($name, self::$actions)) {
 				self::$actions[$name] = array();
@@ -109,7 +113,7 @@ class Event {
 					}
 				}
 
-				Snappy::log('event/' . $name, array(
+				\Snappy::log('event/' . $name, array(
 					'time'      => Helper::getMoment($start),
 					'callbacks' => $array
 				));

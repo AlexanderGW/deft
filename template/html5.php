@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,24 +21,26 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-$markup = "\r\n" . Html::element( array(
-	'tag' => 'head',
-	'markup' => Document::getHead()
-), 'elementHead' ) .
-	  "\r\n" . Html::element( array(
-	'tag' => 'body',
-	'markup' => Document::getBody()
-), 'elementBody' );
+use \Snappy\Lib\Element;
+
+$markup = "\r\n" . Element::html( array(
+	'@tag' => 'head',
+	'@markup' => \Snappy::response()->getHead()
+), 'element.head' ) .
+	  "\r\n" . Element::html( array(
+	'@tag' => 'body',
+	'@markup' => \Snappy::response()->getBody() . '<!--Rendered: ' . date('Y-m-d H:i:s') . '-->'
+), 'element.body' );
 
 $props = array(
-	'lang' => Document::getLocale()
+	'lang' => \Snappy::response()->getLocale()
 );
-if( Document::getDirection() != 'ltr' )
-	$props['dir'] = Document::getDirection();
+if( \Snappy::response()->getDirection() != 'ltr' )
+	$props['dir'] = \Snappy::response()->getDirection();
 
 ?><!DOCTYPE html>
-<?php echo Html::element( array(
-	'tag' => 'html',
-	'markup' => $markup,
-	'props' => $props
-), 'elementHtml' ) ?>
+<?php echo Element::html( array(
+	'@tag' => 'html',
+	'@markup' => $markup,
+	'@props' => $props
+), 'element.html' ) ?>

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -20,6 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace Snappy\Lib;
 
 class Route {
 	/**
@@ -48,12 +50,37 @@ class Route {
 			return;
 		}
 
-		$cfg =& Snappy::getCfg( 'config.route' );
-		if( !$cfg->isEmpty() ) {
-			$routes = $cfg->get( 'routes', array() );
-			if( count( $routes ) ) {
-				foreach( $routes as $path => $rule )
+		// Requested route relative to Snappy URL.
+		define('SNAPPY_ROUTE',
+			Sanitize::forHtml(
+				Sanitize::forText(
+					substr(
+						\Snappy::request()->path(),
+						(strlen(SNAPPY_URL_PATH) + 1)
+					)
+				)
+			)
+		);
+
+		// Process request query string
+//		if ($query = \Snappy::request()->query()) {
+//			if (count($query)) {
+//				foreach ($query as $key => $val) {
+//					$key        = Sanitize::forText($key);
+//					$val        = Sanitize::fortext($val);
+//					$_GET[$key] = $val;
+//				}
+//			}
+//		}
+
+		// Load config based routes
+		$config =& \Snappy::config( 'config.route' );
+		if ( ! $config->isEmpty() ) {
+			$routes = $config->get( 'routes', array() );
+			if ( count( $routes ) ) {
+				foreach ( $routes as $path => $rule ) {
 					Route::add( $path, $rule );
+				}
 			}
 		}
 
@@ -68,21 +95,23 @@ class Route {
 			return;
 		}
 
+		$start = Helper::getMicroTime();
+
 		// Process requested route
 		self::$route = self::get( SNAPPY_ROUTE );
 
 		// No match
-		if( self::$route === null and strlen( SNAPPY_ROUTE ) ) {
-			$routes = self::getRules();
-			$divider = Snappy::getCfg()->get( 'url_separator', '/' );
+		if ( self::$route === null and strlen( SNAPPY_ROUTE ) ) {
+			$routes  = self::getRules();
+			$divider = \Snappy::config()->get( 'url_separator', '/' );
 
 			$request = explode( $divider, SNAPPY_ROUTE );
 			array_pop( $request );
 			$max = count( $request );
 			//$request = implode( $divider, $request );
 
-			foreach( $routes as $path => $args ) {
-				if(
+			foreach ( $routes as $path => $args ) {
+				if (
 
 					// Check for potentials with the same depth (path dividers), which also has placeholder(s)
 					substr_count( $path, $divider ) == $max
@@ -91,33 +120,35 @@ class Route {
 					and strpos( $path, '[' ) !== false
 					and strpos( $path, ']' ) !== false
 
-					// Has placeholder patterns
-					and array_key_exists( 'pattern', $args )
-					and count( $args['pattern'] )
+				    // Has placeholder patterns
+				    and array_key_exists( 'pattern', $args )
+			        and count( $args['pattern'] )
 				) {
 
 					// Build pattern
 					$path_pattern = '#^' . $path . '$#';
-					foreach( $args['pattern'] as $name => $pattern )
+					foreach ( $args[ 'pattern' ] as $name => $pattern ) {
 						$path_pattern = str_replace(
 							'[' . $name . ']',
 							'(' . $pattern . ')',
 							$path_pattern
 						);
+					}
 
 					// Run pattern
 					preg_match( $path_pattern, SNAPPY_ROUTE, $matches );
-					if( count( $matches ) ) {
+					if ( count( $matches ) ) {
 						preg_match_all( '#\[([a-z0-9]+)\]#', $path, $keys );
 						array_shift( $matches );
 
-						foreach( $matches as $i => $match )
-							$args['data'][ $keys[1][ $i ] ] = $match;
+						foreach ( $matches as $i => $match ) {
+							$args[ 'data' ][ $keys[ 1 ][ $i ] ] = $match;
+						}
 
 						self::$route = array_merge(
 							$args,
 							array(
-								'path' => $path,
+								'path'    => $path,
 								'pattern' => $path_pattern
 							)
 						);
@@ -128,31 +159,33 @@ class Route {
 			}
 		}
 
-		// Apply route dataironment
-		if( is_array( self::$route['data'] ) ) {
-			foreach( self::$route['data'] as $key => $value ) {
-				$key = Helper::trimAllCtrlChars( $key );
-				$value = Helper::trimAllCtrlChars( $value );
-				self::$route['data'][ $key ] = $value;
+		// Apply route environment
+		if ( is_array( self::$route[ 'data' ] ) ) {
+			foreach ( self::$route[ 'data' ] as $key => $value ) {
+				$key                           = Sanitize::forText( $key );
+				$value                         = Sanitize::forText( $value );
+				self::$route[ 'data' ][ $key ] = $value;
 			}
 		}
 
 		// Route callback
-		if( is_callable( self::$route['callback'] ) )
-			call_user_func( self::$route['callback'] );
+		if ( is_callable( self::$route[ 'callback' ] ) ) {
+			call_user_func( self::$route[ 'callback' ] );
+		}
 
 		// Logging
-		Snappy::log( 'route/' . self::$route['name'], array(
-			'name' => self::$route['name'],
-			'request' => SNAPPY_ROUTE,
-			'path' => self::$route['path'],
-			'pattern' => self::$route['pattern'],
-			'data' => self::$route['data'],
-			'callback' => self::$route['callback']
+		\Snappy::log( 'route/' . self::$route[ 'name' ], array(
+			'time'     => Helper::getMoment( $start ),
+			'name'     => self::$route[ 'name' ],
+			'request'  => SNAPPY_ROUTE,
+			'path'     => self::$route[ 'path' ],
+			'pattern'  => self::$route[ 'pattern' ],
+			'data'     => self::$route[ 'data' ],
+			'callback' => self::$route[ 'callback' ]
 		) );
 
-		if (self::$route === null) {
-			Http::status(404);
+		if ( self::$route === null ) {
+			\Snappy::response()->status( 404 );
 		}
 
 		self::$parsed = true;
@@ -162,10 +195,13 @@ class Route {
 	 * Returns the currently patched route. Provide a value for a particular route key, or return the whole object.
 	 */
 	public static function current( $arg = null ) {
-		if( is_null( $arg ) )
-			return (object)self::$route;
-		if( is_array(self::$route) and array_key_exists( $arg, self::$route ) )
+		if ( is_null( $arg ) ) {
+			return (object) self::$route;
+		}
+		if ( is_array( self::$route ) and array_key_exists( $arg, self::$route ) ) {
 			return self::$route[ $arg ];
+		}
+
 		return;
 	}
 
@@ -177,49 +213,54 @@ class Route {
 
 		// TODO: Need to split path by separator
 
-		if( is_null( $path ) )
+		if ( is_null( $path ) ) {
 			return;
+		}
 
-		if( is_null( $name ) )
+		if ( is_null( $name ) ) {
 			$name = md5( $path );
+		}
 
-		$sep = Snappy::getCfg()->get( 'url_separator', '/' );
-		if( strpos( $path, $sep ) === 0 )
-			$path = substr( $path, strlen($sep) );
+		$sep = \Snappy::config()->get( 'url_separator', '/' );
+		if ( strpos( $path, $sep ) === 0 ) {
+			$path = substr( $path, strlen( $sep ) );
+		}
 
-		if( !$path )
+		if ( ! $path ) {
 			$path = '';
+		}
 
 		// Process route arguments
-		if( is_array( $args ) and count( $args ) ) {
+		if ( is_array( $args ) and count( $args ) ) {
 			$patterns = $errors = array();
 
 			// Test for route placeholders
 			preg_match_all( '#\[([a-z0-9]+)\]#', $path, $matches );
-			if( count( $matches ) ) {
-				foreach( $matches[1] as $label ) {
+			if ( count( $matches ) ) {
+				foreach ( $matches[ 1 ] as $label ) {
 
 					// Placeholder pattern not found in route rule list
-					if( !array_key_exists( $label, $args ) )
+					if ( ! array_key_exists( $label, $args ) ) {
 						$errors[] = $label;
-					else {
+					} else {
 						$patterns[ $label ] = $args[ $label ];
 						unset( $args[ $label ] );
 					}
 				}
 
 				// Throw route rule pattern errors
-				if( count( $errors ) )
-					Snappy::error( 'Route rule "%1$s" missing required parameter(s): %2$s', $path, implode( ', ', $errors ) );
+				if ( count( $errors ) ) {
+					\Snappy::error( 'Route rule "%1$s" missing required parameter(s): %2$s', $path, implode( ', ', $errors ) );
+				}
 			}
 		}
 
 		// Store rule
 		self::$rules[ $path ] = array(
-			'name' => $name,
-			'data' => $args,
-			'pattern' => $patterns,
-			'callback' => ( is_array( $callback ) ? $callback[0] . '::' . $callback[1] : $callback )
+			'name'     => $name,
+			'data'     => $args,
+			'pattern'  => $patterns,
+			'callback' => ( is_array( $callback ) ? $callback[ 0 ] . '::' . $callback[ 1 ] : $callback )
 		);
 
 		return true;
@@ -229,12 +270,15 @@ class Route {
 	 * @param null $path
 	 */
 	public static function get( $path = null ) {
-		if( is_null( $path ) )
+		if ( is_null( $path ) ) {
 			return null;
+		}
 
-		$sep = Snappy::getCfg()->get( 'url_separator', '/' );
-		if( strpos( $path, $sep ) === 0 )
+		$sep = \Snappy::config()->get( 'url_separator', '/' );
+		if ( strpos( $path, $sep ) === 0 ) {
 			$path = substr( $path, strlen( $sep ) );
+		}
+
 		return self::$rules[ $path ];
 	}
 
@@ -249,10 +293,12 @@ class Route {
 	 * @param null $path
 	 */
 	public static function remove( $path = null ) {
-		if( strpos( $path, '/' ) === 0 )
+		if ( strpos( $path, '/' ) === 0 ) {
 			$path = substr( $path, 1 );
-		if( array_key_exists( $path, self::$rules ) )
+		}
+		if ( array_key_exists( $path, self::$rules ) ) {
 			unset( self::$rules[ $path ] );
+		}
 	}
 
 	/**
@@ -273,9 +319,9 @@ class Route {
 	 *
 	 */
 	public static function save() {
-		$cfg =& Snappy::getCfg( 'config.route' );
-		$cfg->set( self::getRules() );
-		$cfg->save();
+		$config =& \Snappy::config( 'config.route' );
+		$config->set( self::getRules() );
+		$config->save();
 	}
 
 	/**
@@ -284,37 +330,37 @@ class Route {
 	 * @return mixed|object|void
 	 */
 	public static function getName() {
-		return self::current('name');
+		return self::current( 'name' );
 	}
 
-	public static function getRequest() {
-		return self::current('request');
+	public static function request() {
+		return self::current( 'request' );
 	}
 
 	public static function getPath() {
-		return self::current('path');
+		return self::current( 'path' );
 	}
 
 	public static function getPattern() {
-		return self::current('pattern');
+		return self::current( 'pattern' );
 	}
 
-	public static function getData($key = null) {
-		$data = self::current('data');
-		if (is_array($data)) {
-			if (array_key_exists($key,$data)) {
-				return $data[$key];
+	public static function getParam( $key = null ) {
+		$data = self::current( 'data' );
+		if ( is_array( $data ) ) {
+			if ( array_key_exists( $key, $data ) ) {
+				return $data[ $key ];
 			}
 		}
 	}
 
 	public static function getCallback() {
-		return self::current('callback');
+		return self::current( 'callback' );
 	}
 }
 
 // Load route rules
-Event::add( 'init', array( 'Route', 'init' ), 1 );
+Event::set( 'init', '\Snappy\Lib\Route::init', 10 );
 
 // Process HTTP request against available route rules
-Event::add( 'init', array( 'Route', 'parse' ), 999 );
+Event::set( 'init', '\Snappy\Lib\Route::parse', 500 );

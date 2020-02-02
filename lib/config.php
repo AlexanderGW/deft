@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snappy, a PHP framework for PHP 5.3+
+ * Snappy, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
@@ -21,7 +21,9 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Config extends Snappy_Concrete {
+namespace Snappy\Lib;
+
+class Config extends \Snappy_Concrete {
 	private $path = null;
 	private $exists = false;
 	private $type;
@@ -37,7 +39,7 @@ class Config extends Snappy_Concrete {
 	 */
 	function __construct ($scope = null) {
 		$this->scope = self::getArgs($scope);
-		$this->type = Snappy::support('yaml') ? 'yml' : 'php';
+		$this->type = \Snappy::support('yaml') ? 'yml' : 'php';
 		$this->path = SNAPPY_PATH . str_replace('.', DS, $this->scope) . '.' . $this->type;
 
 		if (file_exists($this->path)) {
@@ -68,10 +70,6 @@ class Config extends Snappy_Concrete {
 	 * @return null|string
 	 */
 	public static function getArgs ($args = null) {
-		if (!is_string($args)) {
-			$args = 'config.snappy';
-		}
-
 		return $args;
 	}
 
@@ -81,13 +79,13 @@ class Config extends Snappy_Concrete {
 	 *
 	 * @return array|null|string|void
 	 */
-	function get ($arg = - 1, $fallback = null) {
-		if (is_null($arg)) {
-			return;
+	function get ($arg = -1, $fallback = null) {
+		if ($arg === -1) {
+			return $this->fields;
 		}
 
-		if ($arg < 0) {
-			return $this->fields;
+		if (is_null($arg)) {
+			return;
 		}
 
 		if (array_key_exists($arg, $this->fields)) {
@@ -218,7 +216,7 @@ class Config extends Snappy_Concrete {
 				} else {
 					$path = $this->path;
 				}
-				Snappy::error('Failed to open configuration file: %1$s', $path);
+				\Snappy::error('Failed to open configuration file: %1$s', $path);
 			} else {
 				fwrite($fp, $content);
 				fclose($fp);

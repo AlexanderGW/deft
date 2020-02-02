@@ -21,18 +21,34 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-return array(
-	array(
-		'direction' => 'ltr',
-		'encoding' => 'utf-8',
-		'iso2' => 'es',
-		'iso3' => 'esp',
-		'locale' => 'es-ES'
-	),
-	array(
-		'Environment settings' => 'La configuración del entorno',
-		'Hello' => 'Hola',
-		'Language' => 'Idioma',
-		'Welcome' => 'Bienvenido'
-	)
-);
+namespace Snappy\Lib;
+
+class Sanitize {
+
+	/**
+	 * @param $string
+	 *
+	 * @return string
+	 */
+	public static function forText( $string ) {
+		return preg_replace( '/[\x00-\x1F\x80-\x9F]/u', '', $string );
+	}
+
+	/**
+	 * @param $string
+	 *
+	 * @return string
+	 */
+	public static function forTextBlock( $string ) {
+		return preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '', $string );
+	}
+
+	/**
+	 * @param $string
+	 *
+	 * @return string
+	 */
+	public static function forHtml( $string ) {
+		return htmlentities( $string, ENT_QUOTES, 'UTF-8' );
+	}
+}
