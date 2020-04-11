@@ -107,53 +107,6 @@ class Helper {
 	}
 
 	/**
-	 * @return float
-	 */
-	public static function getRandomSeed() {
-		return ( self::getMicroTime() * 1000000 + ( time() / 2 ) );
-	}
-
-	/**
-	 * @return string
-	 */
-	public static function getRandomHash() {
-		mt_srand( self::getRandomSeed() );
-		return md5( uniqid( mt_rand() ) );
-	}
-
-	/**
-	 * @param int $length
-	 * @param bool|false $extended
-	 * @param string $exception
-	 *
-	 * @return string
-	 */
-	public static function getRandomChars( $length = 0, $extended = false, $exception = '' ) {
-		$map = self::ALPHANUMERIC_CHARS;
-		if( $extended )
-			$map .= self::EXTENDED_CHARS;
-		$map_length = ( strlen( $map ) - 1 );
-
-		$string = '';
-		for( $i = 0; $i < $length; $i++ ) {
-			mt_srand( (int)self::getRandomSeed() );
-			$offset = mt_rand( 0, $map_length );
-			if( strpos( $exception, $map{ $offset } ) !== false )
-				$i--;
-			else
-				$string .= $map{ $offset };
-		}
-		return $string;
-	}
-
-	/**
-	 * @return string
-	 */
-	public static function getSalt() {
-		return self::getRandomChars( 3, true );
-	}
-
-	/**
 	 * Gets token hash for CSRF, creates if one does not exist
 	 *
 	 * @return string
@@ -166,7 +119,7 @@ class Helper {
 		}
 
 		if( !$hash ) {
-			$hash = self::getRandomHash();
+			$hash = Random::getMd5();
 			Token::set( array(
 				'csrf' => $hash,
 				'csrf_time' => time()

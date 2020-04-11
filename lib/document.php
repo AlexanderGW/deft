@@ -60,7 +60,7 @@ class Document extends \Snappy_Concrete {
 	private $body = array();
 
 	/**
-	 * Db constructor.
+	 * Database constructor.
 	 *
 	 * @param array $args
 	 */
@@ -417,7 +417,7 @@ class Document extends \Snappy_Concrete {
 			return;
 		}
 
-		$hash                           = Helper::getRandomHash();
+		$hash                           = Random::getMd5();
 		$this->custom[$hash]            = $content;
 		$this->custom['_'][$priority][] = $hash;
 

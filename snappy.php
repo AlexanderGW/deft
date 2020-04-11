@@ -128,6 +128,7 @@ class Snappy {
 			'filter',
 			'cache.memcached',
 			'config',
+			'random',
 			'helper',
 			'http',
 			'element',
@@ -499,7 +500,7 @@ class Snappy {
 		$config  =& \Snappy::config();
 		$hash = $config->get('capture_hash');
 		if (is_null($hash)) {
-			$hash = \Snappy\Lib\Helper::getRandomHash();
+			$hash = \Snappy\Lib\Random::getMd5();
 			$config->set('capture_hash', $hash);
 			$config->save();
 		}
