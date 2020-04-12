@@ -38,7 +38,14 @@ class Config extends \Snappy_Concrete {
 	 * @param null $args
 	 */
 	function __construct ($scope = null) {
-		$this->scope = self::getArgs($scope);
+		$this->scope =
+
+			// The initial Snappy config is always passed as an array, so default to 'config.snappy'
+			is_array($scope) ? 'config.snappy'
+
+			// Otherwise it should be a scope string
+			: self::getArgs($scope);
+
 		$this->type = \Snappy::support('yaml') ? 'yml' : 'php';
 		$this->path = SNAPPY_PATH . str_replace('.', DS, $this->scope) . '.' . $this->type;
 
@@ -67,7 +74,7 @@ class Config extends \Snappy_Concrete {
 	/**
 	 * @param null $args
 	 *
-	 * @return null|string
+	 * @return string
 	 */
 	public static function getArgs ($args = null) {
 		return $args;
