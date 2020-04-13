@@ -1,12 +1,34 @@
 <?php
 
 /**
- * test snappy.php
+ * Snappy, a micro framework for PHP.
+ *
+ * @author Alexander Gailey-White <alex@gailey-white.com>
+ *
+ * This file is part of Snappy.
+ *
+ * Snappy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Snappy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Here is my attempt to convey my thought process for Snappy core, and how it should work.
+ *
+ * Class SnappyIntegrationTest
  *
  * @group core.integration
  */
-
-class SnappyIntegrationTest extends \PHPUnit\Framework\TestCase {
+class SnappyCoreIntegrationTest extends \PHPUnit\Framework\TestCase {
 	private $response = NULL;
 	protected function setUp(): void {
 		parent::setUp();
@@ -115,6 +137,79 @@ class SnappyIntegrationTest extends \PHPUnit\Framework\TestCase {
 			$path_route,
 			SNAPPY_ROUTE,
 			"The SNAPPY_ROUTE (The path relative to Snappy URL) '" . SNAPPY_ROUTE . "' does not match '$path_route'"
+		);
+	}
+
+	/**
+	 * Test plugin management
+	 */
+	public function test_plugin_management() {
+		$plugins = \Snappy::config()->get('plugins');
+
+		// We only have the 'example' plugin.
+		$this->assertEquals(
+			[
+				'example',
+				'test'
+			],
+			$plugins,
+			"The 'example' and 'test' plugins was not present in the 'plugins' config"
+		);
+
+		$log = Snappy::getLog("plugin/example");
+		$count = count($log);
+
+		// Check that 1 stack log exists for the directory-based 'example' plugin
+		$this->assertCount(
+			1,
+			$log,
+			"Stack log for plugin 'example' count returned $count, instead of 1"
+		);
+
+		// Is the state of the 'example' plugin, Snappy::PLUGIN_LOADED.
+		$state = $log[0]['loaded'];
+
+		$this->assertEquals(
+			Snappy::PLUGIN_LOADED,
+			$state,
+			"The 'example' plugin is not in the loaded state"
+		);
+
+		// Is the 'example' plugin load time, greater than 0
+		$time = $log[0]['time'];
+
+		$this->assertGreaterThan(
+			0,
+			$time,
+			"The 'example' plugin time returned 0"
+		);
+
+		$log = Snappy::getLog("plugin/test");
+		$count = count($log);
+
+		// Check that 1 stack log exists for the file-based 'test' plugin
+		$this->assertCount(
+			1,
+			$log,
+			"Stack log for plugin 'test' count returned $count, instead of 1"
+		);
+
+		// Is the state of the 'test' plugin, Snappy::PLUGIN_LOADED.
+		$state = $log[0]['loaded'];
+
+		$this->assertEquals(
+			Snappy::PLUGIN_LOADED,
+			$state,
+			"The 'test' plugin is not in the loaded state"
+		);
+
+		// Is the 'test' plugin load time, greater than 0
+		$time = $log[0]['time'];
+
+		$this->assertGreaterThan(
+			0,
+			$time,
+			"The 'test' plugin time returned 0"
 		);
 	}
 
