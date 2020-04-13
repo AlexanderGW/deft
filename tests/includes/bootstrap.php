@@ -24,7 +24,8 @@ require 'snappy.php';
 // Init Snappy with a test config
 \Snappy::init([
 	'plugins' => [
-		'example'
+		'example',
+		'test'
 	],
 	'token_timeout' => 1
 ]);
