@@ -76,14 +76,25 @@ class Response extends \Snappy\Lib\Document {
 
 				// Informational
 				200 => 'OK',
+				201 => 'Created',
+				204 => 'No Content',
 
 				// Redirection
+				300 => 'Multiple Choice',
 				301 => 'Moved Permanently',
+				304 => 'Not Modified',
+				307 => 'Temporary Redirect',
+				308 => 'Permanent Redirect',
 
 				// Client Error
+				400 => 'Bad Request',
 				401 => 'Unauthorized',
 				403 => 'Forbidden',
 				404 => 'Not Found',
+				405 => 'Method Not Allowed',
+				406 => 'Not Acceptable',
+				418 => 'I\'m a teapot',
+				429 => 'Too Many Requests',
 
 				// Server Error
 				500 => 'Internal Server Error',
