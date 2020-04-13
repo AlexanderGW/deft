@@ -33,7 +33,7 @@ class Helper {
 	/**
 	 * Basic set of extended ASCII characters
 	 */
-	const EXTENDED_CHARS = '!#$%^&()*+-.,:;<=>?@[]_';
+	const EXTENDED_CHARS = '!#$%^&()*+-.,:;<=>?@[]_{|}~';
 
 	/**
 	 * @param null $arg

@@ -25,10 +25,10 @@ namespace Snappy\Lib;
 
 class Config extends \Snappy_Concrete {
 	private $path = null;
-	private $exists = false;
+	private $exists = FALSE;
 	private $type;
-	private $readable = false;
-	private $empty = true;
+	private $readable = FALSE;
+	private $empty = TRUE;
 	private $fields = array();
 	private $exception = null;
 
@@ -37,7 +37,7 @@ class Config extends \Snappy_Concrete {
 	 *
 	 * @param null $args
 	 */
-	function __construct ($scope = null) {
+	function __construct ($scope = null, $class = __CLASS__) {
 		$this->scope =
 
 			// The initial Snappy config is always passed as an array, so default to 'config.snappy'
@@ -46,29 +46,34 @@ class Config extends \Snappy_Concrete {
 			// Otherwise it should be a scope string
 			: self::getArgs($scope);
 
-		$this->type = \Snappy::support('yaml') ? 'yml' : 'php';
-		$this->path = SNAPPY_PATH . str_replace('.', DS, $this->scope) . '.' . $this->type;
+		if (is_array($scope)) {
+			$this->fields = $scope;
+			$this->empty  = FALSE;
+		} else {
+			$this->type = \Snappy::support('yaml') ? 'yml' : 'php';
+			$this->path = SNAPPY_PATH . str_replace('.', DS, $this->scope) . '.' . $this->type;
 
-		if (file_exists($this->path)) {
-			$this->exists = true;
-			if (is_readable($this->path)) {
-				$this->readable = true;
+			if (file_exists($this->path)) {
+				$this->exists = TRUE;
+				if (is_readable($this->path)) {
+					$this->readable = TRUE;
 
-				try {
-					$array = include $this->path;
-				}
-				catch (Exception $e) {
-					$this->exception = $e;
-				}
+					try {
+						$array = include $this->path;
+					}
+					catch (Exception $e) {
+						$this->exception = $e;
+					}
 
-				if (isset($array) and is_array($array)) {
-					$this->fields = $array;
-					$this->empty  = false;
+					if (isset($array) and is_array($array)) {
+						$this->fields = $array;
+						$this->empty  = FALSE;
+					}
 				}
 			}
 		}
 
-		parent::__construct(__CLASS__, $this->scope);
+		parent::__construct($this->scope, $class);
 	}
 
 	/**
@@ -128,13 +133,13 @@ class Config extends \Snappy_Concrete {
 	 * @return bool
 	 */
 	function remove ($field) {
-		if (array_key_exists($field, $this->fields) !== false) {
+		if (array_key_exists($field, $this->fields) !== FALSE) {
 			unset($this->fields[$field]);
 
-			return true;
+			return TRUE;
 		}
 
-		return false;
+		return FALSE;
 	}
 
 	/**
@@ -216,6 +221,9 @@ class Config extends \Snappy_Concrete {
 				$content .= ");";
 			}
 
+			if (defined('SNAPPY_TESTING'))
+				return TRUE;
+
 			$fp = fopen($this->path, 'wb');
 			if (!$fp) {
 				if (!SNAPPY_DEBUG) {
@@ -228,11 +236,11 @@ class Config extends \Snappy_Concrete {
 				fwrite($fp, $content);
 				fclose($fp);
 
-				return true;
+				return TRUE;
 			}
 		}
 
-		return false;
+		return FALSE;
 	}
 
 	/**

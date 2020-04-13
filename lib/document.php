@@ -70,15 +70,6 @@ class Document extends \Snappy_Concrete {
 	}
 
 	/**
-	 * @param array $args
-	 *
-	 * @return array
-	 */
-	public static function getArgs ($args = array()) {
-		return $args;
-	}
-
-	/**
 	 * @param null $arg
 	 * @param null $value
 	 *
@@ -107,7 +98,7 @@ class Document extends \Snappy_Concrete {
 			$this->args[$arg] = $value . $this->args[$arg];
 		} else {
 			if (!is_array($this->args[$arg])) {
-				$this->args[$arg] = array();
+				$this->args[$arg] = array($this->args[$arg]);
 			}
 
 			if (is_string($value)) {
