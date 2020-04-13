@@ -294,7 +294,7 @@ class SnappyCoreIntegrationTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(
 			'baz bar',
 			$value,
-			"Value prepended to 'foo' should be 'baz' for 'baz bar', instead '$result'"
+			"Value prepended to 'foo' should be 'baz' for 'baz bar', instead '$value'"
 		);
 
 		// Append argument 'foo' with 'baz'
@@ -311,7 +311,7 @@ class SnappyCoreIntegrationTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(
 			'baz bar qux',
 			$value,
-			"Value prepended to 'foo' should be 'qux' for 'baz bar qux', instead '$result'"
+			"Value prepended to 'foo' should be 'qux' for 'baz bar qux', instead '$value'"
 		);
 	}
 }
