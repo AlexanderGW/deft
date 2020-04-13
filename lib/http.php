@@ -38,9 +38,9 @@ class Http {
 		$parts = parse_url( $url );
 		extract( $parts );
 		if( !isset( $scheme ) )
-			$scheme = 'http';
+			$scheme = \Snappy::request()->scheme();
 		if( empty( $host ) )
-			$host = $_SERVER['HTTP_HOST'];
+			$host = \Snappy::request()->host();
 		if( !empty( $query ) )
 			parse_str( $query, $query );
 

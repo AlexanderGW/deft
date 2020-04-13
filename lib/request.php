@@ -57,8 +57,12 @@ class Request extends \Snappy_Concrete {
 			} else
 				$path = urldecode($request);
 
+			// Strip the port number if present
+			$host = strtok($_SERVER['HTTP_HOST'], ':');
+
+			// Build the request URL
 			$this->url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https:" : "http:")
-			       . "//{$_SERVER['HTTP_HOST']}"
+			       . "//{$host}"
 	               . ($_SERVER['SERVER_PORT'] ? ':' . $_SERVER['SERVER_PORT'] : NULL)
 			       . $path
 			       . ($this->query ? '?' . $this->query : NULL);
@@ -76,7 +80,6 @@ class Request extends \Snappy_Concrete {
 					INPUT_POST,
 					FILTER_SANITIZE_STRING
 				));
-//				var_dump('POST:',$this->post);
 			}
 
 			// Process uploaded files
