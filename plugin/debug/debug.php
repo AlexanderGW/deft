@@ -56,7 +56,7 @@ class Debug {
 	}
 
 	public static function getPath() {
-		return SNAPPY_PLUGIN_PATH . 'debug' . DS . 'cache';
+		return SNAPPY_PLUGIN_PATH . DS . 'debug' . DS . 'cache';
 	}
 
 	public static function returnSetting () {

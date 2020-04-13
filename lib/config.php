@@ -51,7 +51,7 @@ class Config extends \Snappy_Concrete {
 			$this->empty  = FALSE;
 		} else {
 			$this->type = \Snappy::support('yaml') ? 'yml' : 'php';
-			$this->path = SNAPPY_PATH . str_replace('.', DS, $this->scope) . '.' . $this->type;
+			$this->path = SNAPPY_PATH . DS . str_replace('.', DS, $this->scope) . '.' . $this->type;
 
 			if (file_exists($this->path)) {
 				$this->exists = TRUE;
@@ -208,7 +208,7 @@ class Config extends \Snappy_Concrete {
 			if (!$content) {
 				$content = "<" . "?php" . PHP_EOL . PHP_EOL
 				           . "/" . "**" . PHP_EOL
-				           . " * File: " . str_replace(SNAPPY_PATH, '', $this->path) . PHP_EOL
+				           . " * File: " . str_replace(SNAPPY_PATH . DS, '', $this->path) . PHP_EOL
 				           . " * Date: " . gmdate('Y-m-d H:i:s') . PHP_EOL
 				           . " * Auto-generated configuration by the Snappy Framework" . PHP_EOL
 				           . " */" . PHP_EOL . PHP_EOL

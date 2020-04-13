@@ -563,7 +563,7 @@ class Document extends \Snappy_Concrete {
 		}
 
 		if (strpos($path, SNAPPY_PATH) !== 0) {
-			$path = SNAPPY_PATH . $path;
+			$path = SNAPPY_PATH . DS . $path;
 		}
 
 		if (!file_exists($path)) {
@@ -652,7 +652,7 @@ class Document extends \Snappy_Concrete {
 		}
 
 		if (strpos($path, SNAPPY_PATH) !== 0) {
-			$path = SNAPPY_PATH . $path;
+			$path = SNAPPY_PATH . DS . $path;
 		}
 
 		if (!file_exists($path)) {
@@ -841,7 +841,7 @@ class Document extends \Snappy_Concrete {
 							strpos($this->links[$hash]['href'], SNAPPY_PATH) !== 0
 
 							// nor the Snappy sys environment...
-							and !file_exists(SNAPPY_PATH . $this->links[$hash]['href'])
+							and !file_exists(SNAPPY_PATH . DS . $this->links[$hash]['href'])
 						)
 					) {
 						$html .= Element::html(array(
@@ -897,7 +897,7 @@ class Document extends \Snappy_Concrete {
 	public function setCssAssetCache ($files = array(), $media = 'all') {
 		if (($total = count($files)) !== 0) {
 			$hash      = md5(serialize($files));
-			$path      = SNAPPY_PUBLIC_ASSET_PATH . 'cache';
+			$path      = SNAPPY_PUBLIC_ASSET_PATH . DS . 'cache';
 			$path_file = $path . '/' . $hash . '.css';
 
 			$content = '';
@@ -911,8 +911,8 @@ class Document extends \Snappy_Concrete {
 						if (strpos($file['href'], SNAPPY_PATH) === 0) {
 							$content .= file_get_contents($file['href']) . "\n\n";
 						} // Relative to Snappy path
-						elseif (file_exists(SNAPPY_PATH . $file['href'])) {
-							$content .= file_get_contents(SNAPPY_PATH . $file['href']) . "\n\n";
+						elseif (file_exists(SNAPPY_PATH . DS . $file['href'])) {
+							$content .= file_get_contents(SNAPPY_PATH . DS . $file['href']) . "\n\n";
 						}
 					}
 
@@ -986,8 +986,8 @@ class Document extends \Snappy_Concrete {
 				}
 
 				// Relative to Snappy path
-				elseif (file_exists(SNAPPY_PATH . $file['href'])) {
-					$path      = SNAPPY_PUBLIC_ASSET_PATH;
+				elseif (file_exists(SNAPPY_PATH . DS . $file['href'])) {
+					$path      = SNAPPY_PUBLIC_ASSET_PATH . DS;
 					$path_file = $path . basename($file['href']);
 
 					// Attempt to create
@@ -1002,7 +1002,7 @@ class Document extends \Snappy_Concrete {
 					} elseif (!is_writable($path_file)) {
 						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
-						$content = file_get_contents(SNAPPY_PATH . $file['href']) . "\n\n";
+						$content = file_get_contents(SNAPPY_PATH . DS . $file['href']) . "\n\n";
 						file_put_contents($path_file, $content);
 						$return[] = Element::html(array(
 							'@tag'   => 'link',
@@ -1030,7 +1030,7 @@ class Document extends \Snappy_Concrete {
 	public function setJsAssetCache ($scripts = array()) {
 		if (($total = count($scripts)) !== 0) {
 			$hash      = md5(serialize($scripts));
-			$path      = SNAPPY_PUBLIC_ASSET_PATH . 'cache';
+			$path      = SNAPPY_PUBLIC_ASSET_PATH . DS . 'cache';
 			$path_file = $path . '/' . $hash . '.js';
 
 			$content = '';
@@ -1044,8 +1044,8 @@ class Document extends \Snappy_Concrete {
 						if (strpos($script['@props']['src'], SNAPPY_PATH) === 0) {
 							$content .= file_get_contents($script['@props']['src']) . "\n\n";
 						} // Relative to Snappy path
-						elseif (file_exists(SNAPPY_PATH . $script['@props']['src'])) {
-							$content .= file_get_contents(SNAPPY_PATH . $script['@props']['src']) . "\n\n";
+						elseif (file_exists(SNAPPY_PATH . DS . $script['@props']['src'])) {
+							$content .= file_get_contents(SNAPPY_PATH . DS . $script['@props']['src']) . "\n\n";
 						}
 					}
 
@@ -1116,7 +1116,7 @@ class Document extends \Snappy_Concrete {
 
 
 				// Relative to Snappy path
-				elseif (file_exists(SNAPPY_PATH . $script['@props']['src'])) {
+				elseif (file_exists(SNAPPY_PATH . DS . $script['@props']['src'])) {
 					$path      = SNAPPY_PUBLIC_ASSET_PATH;
 					$path_file = $path . basename($script['@props']['src']);
 
@@ -1132,7 +1132,7 @@ class Document extends \Snappy_Concrete {
 					} elseif (!is_writable($path_file)) {
 						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
-						$content = file_get_contents(SNAPPY_PATH . $script['@props']['src']) . "\n\n";
+						$content = file_get_contents(SNAPPY_PATH . DS . $script['@props']['src']) . "\n\n";
 						file_put_contents($path_file, $content);
 						$return[] = Element::html(array(
 							'@tag'   => 'script',
@@ -1215,7 +1215,7 @@ class Document extends \Snappy_Concrete {
 							strpos($this->scripts[$hash]['@props']['src'], SNAPPY_PATH) !== 0
 
 							// nor the Snappy sys environment...
-							and !file_exists(SNAPPY_PATH . $this->scripts[$hash]['@props']['src'])
+							and !file_exists(SNAPPY_PATH . DS . $this->scripts[$hash]['@props']['src'])
 						)
 					) {
 						$this->appendBody(Element::html(
