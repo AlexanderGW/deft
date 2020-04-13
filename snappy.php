@@ -102,7 +102,6 @@ class Snappy {
 			'dir_public_asset' => 'asset',
 			'dir_plugin'       => 'plugin',
 			'dir_lib'          => 'lib',
-//			'init_callback'    => array('Snappy\Callback', 'echoResponseOutput'),
 			'plugins'          => array('debug', 'example'),
 			'url_separator'    => '/'
 		), $config);
@@ -190,22 +189,22 @@ class Snappy {
 		// Runtime plugins
 		if (count(self::$config['plugins'])) {
 			foreach (self::$config['plugins'] as $plugin) {
-				$state = 0;
+				$state = Snappy::PLUGIN_MISSING;
 				$path  = SNAPPY_PLUGIN_PATH . DS . $plugin;
+				$ext = '.php';
 
-				if (file_exists($path . '.php')) {
-					$state = true;
-				} elseif (is_dir($path)) {
-					if (file_exists($path . DS . $plugin . '.php')) {
-						$state = 1;
-						$path  = $path . DS . $plugin;
-					}
+				if (file_exists($path . $ext)) {
+					$state = Snappy::PLUGIN_EXISTS;
+				} elseif (is_dir($path) && file_exists($path . DS . $plugin . $ext)) {
+					$state = Snappy::PLUGIN_EXISTS;
+					$path  .= DS . $plugin;
 				}
 
 				$start = 0;
-				if ($state) {
+				if ($state === Snappy::PLUGIN_EXISTS) {
 					$start = \Snappy\Lib\Helper::getMicroTime();
-					include $path . '.php';
+					include $path . $ext;
+					$state = Snappy::PLUGIN_LOADED;
 				}
 
 				self::log('plugin/' . $plugin, array(
@@ -215,24 +214,27 @@ class Snappy {
 			}
 		}
 
-		// Prevent 'init' from being called again...
+		// Prevent 'Snappy::init()' from being called again
 		self::$initialized = true;
 
-		// The very first event...
+		// Run this callback after initialization
+		$callback = self::$config['ready_callback'];
+		if (is_callable($callback)) {
+			\Snappy\Lib\Event::set('ready', $callback);
+		}
+
+		// Execute initialization
 		$init = \Snappy\Lib\Event::exec('init');
 
-		// The initial callback from snappy config
-		$callback = self::$config['init_callback'];
-		if (!is_callable($callback)) {
-			\Snappy\Lib\Event::set('initCallback', $callback);
+		// Execute ready, after initialization
+		$ready = \Snappy\Lib\Event::exec('ready');
+
+		// No content
+		if ($init === FALSE && $ready === FALSE) {
+			self::response()->status(204);
 		}
 
-		$init_callback = \Snappy\Lib\Event::exec('initCallback');
-		if ($init === false and $init_callback === false) {
-			self::error('Dead in the water...');
-		}
-
-		// Exit event...
+		// Execute xxit event
 		\Snappy\Lib\Event::exec('exit');
 	}
 
