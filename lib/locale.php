@@ -25,7 +25,7 @@ namespace Snappy\Lib;
 
 define('SNAPPY_LOCALE_PATH', SNAPPY_PATH . 'locale' . DS);
 
-class Language {
+class Locale {
 	const DEFAULT_LOCALE = 'en-GB';
 
 	/**

@@ -33,12 +33,12 @@ $locale = \Snappy::request()->post('locale');
 
 if ($locale) {
 //	var_dump($locale);exit;
-	$code = Language::negotiate($locale);
+	$code = \Snappy::locale()->negotiate($locale);
 	Token::set('locale', $code);
 	Token::saveCookie();
 //	\Snappy::response()->location('/user');
 } else {
-//	var_dump(Token::get('locale'), Language::getLocale());
+//	var_dump(Token::get('locale'), \Snappy::locale()->getLocale());
 }
 
 /*
@@ -65,7 +65,7 @@ $form->field('input.radio.locale')
      ->label(__('Language'))
      ->description(__('Select a locale then click Submit to save your preferences.'))
      ->options(array_combine($locales, $locales))
-     ->value(Language::getLocale());
+     ->value(\Snappy::locale()->getLocale());
 
 $form->field('input.text')
      ->label(__('Input (text)'))

@@ -35,7 +35,11 @@ define('TIME_UTC', (time() - date('Z')));
  * Class Snappy
  */
 class Snappy {
-	const VERSION = '0.2';
+	const VERSION = '0.3';
+
+	const PLUGIN_LOADED = 2;
+	const PLUGIN_EXISTS = 1;
+	const PLUGIN_MISSING = 0;
 
 	/**
 	 * App parameters
@@ -73,6 +77,13 @@ class Snappy {
 	public static $start = 0;
 
 	/**
+	 * App get() calls
+	 *
+	 * @var array
+	 */
+	private static $calls = [];
+
+	/**
 	 * Initialise Snappy
 	 *
 	 * @param array $args
@@ -86,13 +97,13 @@ class Snappy {
 
 		self::$config = array_merge(array(
 			'config_format'    => 'php',
-			'debug'            => 2,
+			'debug'            => 0,
 			'dir_public'       => 'public',
 			'dir_public_asset' => 'asset',
 			'dir_plugin'       => 'plugin',
 			'dir_lib'          => 'lib',
 //			'init_callback'    => array('Snappy\Callback', 'echoResponseOutput'),
-			'plugin'           => array('debug', 'example'),
+			'plugins'          => array('debug', 'example'),
 			'url_separator'    => '/'
 		), $config);
 
@@ -118,21 +129,18 @@ class Snappy {
 
 		// Libraries to load
 		$array = self::import(
-			'document',
-			'response',
 			'event',
 			'route',
+			'document',
 			'sanitize',
-			'request',
 			'watchdog',
 			'filter',
-			'cache.memcached',
-			'config',
+			'random',
 			'helper',
 			'http',
 			'element',
 			'token',
-			'language'
+			'plugin'
 		);
 		if (count($array)) {
 			self::error('Failed to import core libraries: %1$s', implode(', ', $array));
@@ -148,6 +156,18 @@ class Snappy {
 //		define('SNAPPY_URL', SNAPPY_URL_PATH);
 		define('SNAPPY_ASSET_URL', SNAPPY_URL . '/' . self::$config['dir_public_asset'] . '/');
 		define('SNAPPY_PLUGIN_URL', SNAPPY_URL . self::$config['dir_plugin'] . '/');
+
+		// Requested route relative to Snappy URL.
+		define('SNAPPY_ROUTE',
+			\Snappy\Lib\Sanitize::forHtml(
+				\Snappy\Lib\Sanitize::forText(
+					substr(
+						\Snappy::request()->path(),
+						(strlen(SNAPPY_URL_PATH) + 1)
+					)
+				)
+			)
+		);
 
 		// Snappy init time
 		self::$start = \Snappy\Lib\Helper::getMicroTime();
@@ -244,12 +264,12 @@ class Snappy {
 		$path   = SNAPPY_PLUGIN_PATH . $name;
 		$plugin = self::getLog('plugin/' . $name);
 		if (count($plugin) and $plugin[0]['loaded']) {
-			return 2;
+			return self::PLUGIN_LOADED;
 		} elseif (file_exists($path . '.php') or is_dir($path)) {
-			return 1;
+			return self::PLUGIN_EXISTS;
 		}
 
-		return 0;
+		return self::PLUGIN_MISSING;
 	}
 
 	/**
@@ -314,40 +334,43 @@ class Snappy {
 	 * @param null $scope
 	 * @param array $args
 	 */
-	static function get ($scope = null, $args = array()) {
+	static function &get ($scope = null, $args = array()) {
 		if (!is_string($scope)) {
 			return;
 		}
 
-		if ($scope == 'pdo') {
-			$scope = 'db';
-		}
+		$class = '\\Snappy\\Lib\\' . str_replace(' ', '\\', ucwords(str_replace('.', ' ', $scope)));
 
-		$class = '\\Snappy\\Lib\\' . ucfirst(str_replace('.', '\\', $scope));
+		$stack = "lib/{$scope}";
 
-		// Import if not already
-		if (!class_exists($class)) {
-			$errors = self::import($scope);
-			if (count($errors)) {
-				\Snappy::error('Failed to import and instantiate: %1$s', implode(', ', $errors));
+		$log = self::getLog($stack);
+
+		// First time calls may need to import library
+		if (!count($log)) {
+
+			// Import if not already
+			if (!class_exists($class)) {
+				$offset = 0;
+				$array = [];
+				if (strpos($scope, '.')) {
+					while ($offset < strlen($scope) && ($pos = strpos($scope, '.', $offset)) !== false) {
+						$array[] = substr($scope, 0, $pos);
+						$offset += ($pos+1);
+					}
+				}
+				$array[] = $scope;
+
+				$errors = call_user_func_array([__CLASS__, 'import'], $array);
+				if (count($errors)) {
+					\Snappy::error('Failed to import and instantiate: %1$s', implode(', ', $errors));
+				}
 			}
+
+			self::log($stack);
 		}
 
 		// Generate instance key
 		$key = self::getInstanceKey($class, $args);
-
-		// Get cached object
-//		if ($scope !== 'cache' and strpos($scope, 'cache.') === false) {
-//			$datastore = self::cache()->get($key);
-//			if ($datastore) {
-//				self::$instances[$key] = $datastore;
-//			}
-//		}
-
-		// Get instance data enironment
-//		elseif (method_exists($class, 'getArgs')) {
-//			$args = $class::getArgs($args);
-//		}
 
 		// Check instance cache
 		$result = self::haveInstance($key);
@@ -361,7 +384,7 @@ class Snappy {
 
 		// Create and return
 		$instance = self::newInstance($class, $args);
-//		var_dump($instance);
+
 		return $instance;
 	}
 
@@ -377,8 +400,23 @@ class Snappy {
 		return \Snappy::get('config', $args);
 	}
 
-	public static function database ($args = array()) {
-		return \Snappy::get('db', $args);
+	public static function database ($args = []) {
+		$config  =& \Snappy::config();
+		$args = array_merge(array(
+			'driver'       => $config->get('database.driver'),
+			'host'         => $config->get('database.hostname'),
+			'username'     => $config->get('database.username'),
+			'password'     => $config->get('database.password'),
+			'dbname'       => $config->get('database.name'),
+			'table_prefix' => $config->get('database.table.prefix'),
+			'port'         => $config->get('database.port')
+		), $args);
+
+		$scope = 'storage.database';
+		if ($args['driver'])
+			$scope .= '.'.$args['driver'];
+
+		return \Snappy::get($scope, $args);
 	}
 
 	public static function document ($args = array()) {
@@ -399,8 +437,20 @@ class Snappy {
 		return \Snappy::get('document', $args);
 	}
 
+	public static function event () {
+		return \Snappy::get('event');
+	}
+
+	public static function filter () {
+		return \Snappy::get('filter');
+	}
+
 	public static function form ($id = null) {
 		return \Snappy::get('form', $id);
+	}
+
+	public static function locale () {
+		return \Snappy::get('locale');
 	}
 
 	public static function request () {
@@ -499,7 +549,7 @@ class Snappy {
 		$config  =& \Snappy::config();
 		$hash = $config->get('capture_hash');
 		if (is_null($hash)) {
-			$hash = \Snappy\Lib\Helper::getRandomHash();
+			$hash = \Snappy\Lib\Random::getMd5();
 			$config->set('capture_hash', $hash);
 			$config->save();
 		}
@@ -599,7 +649,7 @@ class Snappy {
 
 		\Snappy\Lib\Event::exec('onSnappyError');
 
-		$template = \Snappy\Lib\Filter::exec('onSnappyError.template', [
+		$template = \Snappy\Lib\Filter::exec('SnappyErrorTemplate', [
 			'@tag' => 'html',
 			'@markup' => [
 				'@tag' => 'body',
@@ -672,7 +722,8 @@ class Snappy_Concrete {
 	 *
 	 * @param array $args
 	 */
-	public function __construct ($class = '', $args = array()) {
+	public function __construct ($args = array(), $class = __CLASS__) {
+		$this->args = self::getArgs($args);
 		$this->stack = 'instance/' . get_class($this) . '/' . \Snappy::getInstanceKey(get_class($this), $args);
 
 		if (is_string($class)) {
@@ -700,12 +751,12 @@ class Snappy_Concrete {
 	/**
 	 * @param null $arg
 	 */
-	public function get ($arg = null) {
-		if ((is_string($arg) or is_integer($arg)) and array_key_exists($arg, $this->args)) {
-			return $this->args[$arg];
+	public function get ($key = null) {
+		if ((is_string($key) or is_integer($key)) and array_key_exists($key, $this->args)) {
+			return $this->args[$key];
 		}
 
-		return;
+		return NULL;
 	}
 
 	/**
@@ -718,17 +769,17 @@ class Snappy_Concrete {
 		if ((is_string($arg) or is_integer($arg))) {
 			$this->args[$arg] = $value;
 
-			return true;
+			return TRUE;
 		}
 
-		return false;
+		return FALSE;
 	}
 }
 
 /**
  * Return locale phrase
  *
- * @return mixed|string|void
+ * @return null|string
  */
 function __ ( /*polymorphic*/) {
 	if (!func_num_args()) {
@@ -738,8 +789,8 @@ function __ ( /*polymorphic*/) {
 
 	$phrase = array_shift($args);
 
-	if (class_exists('\Snappy\Lib\Language') && \Snappy\Lib\Language::isDefault() === false) {
-		$phrase = \Snappy\Lib\Language::getPhrase($phrase);
+	if (\Snappy::locale()->isDefault() === false) {
+		$phrase = \Snappy::locale()->getPhrase($phrase);
 	}
 
 	if (count($args)) {

@@ -23,7 +23,7 @@
 
 namespace Snappy\Lib;
 
-use Snappy\Lib\Helper;
+use Snappy\Lib\Random;
 
 class Form extends \Snappy_Concrete {
 	private $element = array();
@@ -33,7 +33,7 @@ class Form extends \Snappy_Concrete {
 		$this->element['@tag'] = 'form';
 		$this->element['@props']['method'] = 'POST';
 		if (is_null($value)) {
-			$this->prop('id', 'sf_' . Helper::getRandomChars(5));
+			$this->prop('id', 'sf_' . Random::getChars(5));
 		}
 		if (is_string($value)) {
 			$this->prop('id', $value);
@@ -41,7 +41,7 @@ class Form extends \Snappy_Concrete {
 			$this->element = $value;
 		}
 
-		parent::__construct(__CLASS__, $this->prop('id'));
+		parent::__construct($this->prop('id'), __CLASS__);
 	}
 
 	/**

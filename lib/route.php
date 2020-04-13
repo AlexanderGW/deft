@@ -50,18 +50,6 @@ class Route {
 			return;
 		}
 
-		// Requested route relative to Snappy URL.
-		define('SNAPPY_ROUTE',
-			Sanitize::forHtml(
-				Sanitize::forText(
-					substr(
-						\Snappy::request()->path(),
-						(strlen(SNAPPY_URL_PATH) + 1)
-					)
-				)
-			)
-		);
-
 		// Process request query string
 //		if ($query = \Snappy::request()->query()) {
 //			if (count($query)) {

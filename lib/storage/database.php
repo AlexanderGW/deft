@@ -21,20 +21,27 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Db extends Snappy_Concrete {
+namespace Snappy\Lib\Storage;
+
+use Snappy\Lib\Helper;
+use Snappy\Lib\Sanitize;
+use Snappy\Lib\Storage;
+use Snappy\Lib\Watchdog;
+
+class Database extends Storage {
 	var $args = array();
 	var $connected = null;
 	var $link = false;
-	var $query = '';
+	var $statement = '';
 	var $database = false;
 	var $resource = false;
 
 	/**
-	 * Db constructor.
+	 * Database constructor.
 	 *
 	 * @param array $args
 	 */
-	function __construct ($args = array()) {
+	function __construct ($args = array(), $class = __CLASS__) {
 		$this->args = self::getArgs($args);
 
 		switch ($this->args['driver']) {
@@ -56,19 +63,15 @@ class Db extends Snappy_Concrete {
 		}
 
 		try {
-			$this->link = new PDO($this->args['dsn'], $this->args['username'], $this->args['password']);
-			$this->link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$this->link = new \PDO($this->args['dsn'], $this->args['username'], $this->args['password']);
+			$this->link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		}
-		catch (PDOException $e) {
+		catch (\PDOException $e) {
 			$this->error = $e;
 		}
 		$this->connected = ($this->link ? true : false);
 
-		if ($this->connected and version_compare(PHP_VERSION, '5.3.6', '<')) {
-			$this->link->exec(Filter::exec('onDbConstructQueryUtf8', 'SET NAMES utf8'));
-		}
-
-		parent::__construct(__CLASS__, $this->args);
+		parent::__construct($this->arg, $class);
 	}
 
 	/**
@@ -79,20 +82,20 @@ class Db extends Snappy_Concrete {
 	public static function getArgs ($args = array()) {
 		$config  =& \Snappy::config();
 		$args = array_merge(array(
-			'driver'       => $config->get('db_driver', 'mysql'),
-			'host'         => $config->get('db_hostname', 'localhost'),
-			'username'     => $config->get('db_username', 'root'),
-			'password'     => $config->get('db_password', ''),
-			'dbname'       => $config->get('db_dbname', 'mysql'),
-			'table_prefix' => $config->get('db_table_prefix'),
-			'port'         => $config->get('db_port', 3306)
+			'driver'       => $config->get('database.driver', 'mysql'),
+			'host'         => $config->get('database.hostname', 'localhost'),
+			'username'     => $config->get('database.username'),
+			'password'     => $config->get('database.password'),
+			'dbname'       => $config->get('database.name'),
+			'table_prefix' => $config->get('database.table.prefix'),
+			'port'         => $config->get('database.port')
 		), $args);
 
 		return $args;
 	}
 
 	/**
-	 * @return Exception|PDOException
+	 * @return Exception|\PDOException
 	 */
 	public function lastError () {
 		return $this->error;
@@ -102,7 +105,7 @@ class Db extends Snappy_Concrete {
 	 * @return bool
 	 */
 	public function isConnected () {
-		return (bool) $this->connected;
+		return $this->connected;
 	}
 
 	/**
@@ -114,16 +117,16 @@ class Db extends Snappy_Concrete {
 		}
 
 		$values = func_get_args();
-		$query  = str_replace('#_', $this->args['table_prefix'], array_shift($values));
+		$statement  = str_replace('#_', $this->args['table_prefix'], array_shift($values));
 		if (!count($values)) {
-			return $query;
+			return $statement;
 		} else {
 			$db     =& $this->link;
 			$result = preg_replace_callback(
 				'#\\?#',
 				function($match) use ($db, &$values) {
 					if (empty($values)) {
-						\Snappy::error('Query has missing parameters.');
+						\Snappy::error('Statement has missing parameters.');
 					}
 					$value = array_shift($values);
 
@@ -142,7 +145,7 @@ class Db extends Snappy_Concrete {
 
 					return $db->quote($value);
 				},
-				$query
+				$statement
 			);
 
 			return $result;
@@ -150,7 +153,7 @@ class Db extends Snappy_Concrete {
 	}
 
 	/**
-	 * @return PDOStatement
+	 * @return \PDOStatement
 	 */
 	public function query ( /*polymorphic*/) {
 		if (!$this->isConnected()) {
@@ -168,10 +171,12 @@ class Db extends Snappy_Concrete {
 
 			// Process conditional query
 			if (count($args) > 1) {
-				$this->query = call_user_func_array(array($this, 'sql'), $args);
-			} // Non-conditional query
+				$this->statement = call_user_func_array(array($this, 'sql'), $args);
+			}
+
+			// Non-conditional query
 			else {
-				$this->query = str_replace('#_', $this->args['table_prefix'], $args[0]);
+				$this->statement = str_replace('#_', $this->args['table_prefix'], $args[0]);
 			}
 
 			// Debug timer
@@ -181,54 +186,55 @@ class Db extends Snappy_Concrete {
 
 			// Execute query
 			try {
-				$this->resource = $this->link->query($this->query);
+				$this->resource = $this->link->query($this->statement);
 			}
-			catch (PDOException $e) {
-				Watchdog::set($e->getMessage(), $e->getCode(), 'db');
+			catch (\PDOException $e) {
+				Watchdog::set($e->getMessage(), $e->getCode(), 'database');
 			}
 
-			if (SNAPPY_DEBUG > 0) {
-				$query = Sanitize::forText($this->query);
-				$entry = array(
-					'time'  => Helper::getMoment($start),
-					'query' => $query
-				);
-
-				\Snappy::log($this->stack . '/queries', $entry);
-
-				switch (SNAPPY_DEBUG) {
-					case 2 :
-						if (strpos($query, 'SELECT') === 0) {
-							$query = 'EXPLAIN ' . $query;
-
-							try {
-								$resource = $this->link->query($this->query);
-							}
-							catch (PDOException $e) {
-								Watchdog::set($e->getMessage(), $e->getCode(), 'db');
-							}
-
-							if ($resource) {
-								$entry = array(
-									'query'   => $query,
-									'explain' => $resource->fetchAll(PDO::FETCH_ASSOC)
-								);
-
-								\Snappy::log($this->stack . '/queries', $entry);
-							}
-						}
-						break;
-				}
-			}
-		} // Exisiting query
-		else {
-			$this->resource = $args[0];
+			// TODO: This is messing up due to the getArgs() != to Snappy::database() args
+//			if (SNAPPY_DEBUG > 0) {
+//				$statement = Sanitize::forText($this->statement);
+//				$entry = array(
+//					'time'  => Helper::getMoment($start),
+//					'statement' => $statement
+//				);
+//
+//				\Snappy::log($this->stack . '/statements', $entry);
+//
+//				switch (SNAPPY_DEBUG) {
+//					case 2 :
+//						if (strpos($statement, 'SELECT') === 0) {
+//							$statement = 'EXPLAIN ' . $this->statement;
+//
+//							try {
+//								$resource = $this->link->query($statement);
+//							}
+//							catch (\PDOException $e) {
+//								Watchdog::set($e->getMessage(), $e->getCode(), 'db');
+//							}
+//
+//							if ($resource) {
+//								$entry = array(
+//									'statement'   => Sanitize::forText($statement),
+//									'explain' => $resource->fetchAll(PDO::FETCH_ASSOC)
+//								);
+//
+//								\Snappy::log($this->stack . '/statements', $entry);
+//							}
+//						}
+//						break;
+//				}
+//			}
 		}
+
+		// Exisiting statement
+		elseif ($this->resource instanceof \PDOStatement)
+			$this->resource = $args[0];
 
 		// Error
-		if (!$this->resource) {
-			return;
-		}
+		if (!$this->resource)
+			return NULL;
 
 		return $this->resource;
 	}
@@ -246,10 +252,10 @@ class Db extends Snappy_Concrete {
 
 		$table = str_replace('#_', $this->args['table_prefix'], $table);
 
-		$query = "INSERT INTO `" . $table . "` ( `" . implode("`,`", array_keys($args)) . "` ) VALUES( " . preg_replace('/, $/', '', str_repeat('?, ', count($args))) . " )";
+		$statement = "INSERT INTO `" . $table . "` ( `" . implode("`,`", array_keys($args)) . "` ) VALUES( " . preg_replace('/, $/', '', str_repeat('?, ', count($args))) . " )";
 
 		$array = array_values($args);
-		array_unshift($array, $query);
+		array_unshift($array, $statement);
 
 		call_user_func_array(array($this, 'query'), $array);
 
@@ -280,10 +286,10 @@ class Db extends Snappy_Concrete {
 			$where[] = "`" . $arg . "` = ?";
 		}
 
-		$query = "UPDATE `" . $table . "` SET " . implode(' AND ', $set) . "  WHERE ( " . implode(' AND ', $where) . " )";
+		$statement = "UPDATE `" . $table . "` SET " . implode(' AND ', $set) . "  WHERE ( " . implode(' AND ', $where) . " )";
 
 		$array = array_merge(array_values($args), array_values($conditonal));
-		array_unshift($array, $query);
+		array_unshift($array, $statement);
 
 		call_user_func_array(array($this, 'query'), $array);
 
@@ -308,10 +314,10 @@ class Db extends Snappy_Concrete {
 			$where[] = "`" . $arg . "` = ?";
 		}
 
-		$query = "DELETE FROM `" . $table . "` WHERE ( " . implode(' AND ', $where) . " )";
+		$statement = "DELETE FROM `" . $table . "` WHERE ( " . implode(' AND ', $where) . " )";
 
 		$array = array_values($args);
-		array_unshift($array, $query);
+		array_unshift($array, $statement);
 
 		call_user_func_array(array($this, 'query'), $array);
 
@@ -324,16 +330,14 @@ class Db extends Snappy_Concrete {
 	 * @return mixed
 	 */
 	public function getField ($index = 0) {
-		if (!$this->isConnected()) {
+		if (!$this->isConnected())
 			return false;
-		}
 
-		if (!$this->resource) {
+		if (!$this->resource)
 			return;
-		}
 
-		if ($this->resource instanceof PDO) {
-			$row = $this->resource->fetch(PDO::FETCH_NUM);
+		if ($this->resource instanceof \PDOStatement) {
+			$row = $this->resource->fetch(\PDO::FETCH_NUM);
 
 			return $row[$index];
 		}
@@ -345,16 +349,10 @@ class Db extends Snappy_Concrete {
 	 * @return array
 	 */
 	public function getRow ( /*polymorphic*/) {
-		if (!$this->isConnected()) {
-			return false;
-		}
-
-		if (func_num_args()) {
+		if (func_num_args())
 			call_user_func_array(array($this, 'query'), func_get_args());
-		}
-		if ($this->resource instanceof PDO) {
-			return $this->resource->fetch(PDO::FETCH_ASSOC);
-		}
+		if ($this->resource instanceof \PDOStatement)
+			return $this->resource->fetch(\PDO::FETCH_ASSOC);
 
 		return;
 	}
@@ -363,16 +361,10 @@ class Db extends Snappy_Concrete {
 	 * @return array
 	 */
 	public function getRows ( /*polymorphic*/) {
-		if (!$this->isConnected()) {
-			return false;
-		}
-
-		if (func_num_args()) {
+		if (func_num_args())
 			call_user_func_array(array($this, 'query'), func_get_args());
-		}
-		if ($this->resource instanceof PDO) {
-			return $this->resource->fetchAll(PDO::FETCH_ASSOC);
-		}
+		if ($this->resource instanceof \PDOStatement)
+			return $this->resource->fetchAll(\PDO::FETCH_ASSOC);
 
 		return;
 	}
@@ -381,16 +373,10 @@ class Db extends Snappy_Concrete {
 	 * @return int
 	 */
 	public function numRows ( /*polymorphic*/) {
-		if (!$this->isConnected()) {
-			return false;
-		}
-
-		if (func_num_args()) {
+		if (func_num_args())
 			call_user_func_array(array($this, 'query'), func_get_args());
-		}
-		if ($this->resource instanceof PDO) {
+		if ($this->resource instanceof \PDOStatement)
 			return $this->resource->rowCount();
-		}
 
 		return;
 	}
@@ -399,16 +385,10 @@ class Db extends Snappy_Concrete {
 	 * @return bool
 	 */
 	public function affectedRows () {
-		if (!$this->isConnected()) {
-			return false;
-		}
-
-		if (func_num_args()) {
+		if (func_num_args())
 			call_user_func_array(array($this, 'query'), func_get_args());
-		}
-		if ($this->resource instanceof PDO) {
+		if ($this->resource instanceof \PDOStatement)
 			return $this->resource->rowCount();
-		}
 
 		return;
 	}
@@ -429,6 +409,6 @@ class Db extends Snappy_Concrete {
 	 */
 
 	public function __toString () {
-		return $this->query;
+		return $this->statement;
 	}
 }

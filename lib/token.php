@@ -70,7 +70,7 @@ class Token {
 		$config =& \Snappy::config();
 		$hash = $config->get( 'token_hash' );
 		if( is_null( $hash ) ) {
-			$hash = Helper::getRandomHash();
+			$hash = Random::getMd5();
 			$config->set( array(
 				'token_hash' => $hash,
 				'token_timeout' => 2592000

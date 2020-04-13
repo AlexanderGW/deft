@@ -21,12 +21,8 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Composer
-if (file_exists('../vendor/autoload.php'))
-	$loader = include_once '../vendor/autoload.php';
+namespace Snappy\Lib;
 
-// Bootstrap Snappy
-require '../bootstrap.php';
+class Plugin {
 
-// Output response
-echo \Snappy::response()->output();
+}

@@ -46,7 +46,7 @@ class Memcached extends \Snappy\Lib\Cache {
 			$this->args['post']
 		);
 
-		parent::__construct(__CLASS__, $this->args);
+		parent::__construct($this->args, __CLASS__);
 	}
 
 	/**

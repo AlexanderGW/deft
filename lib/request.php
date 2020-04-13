@@ -39,7 +39,7 @@ class Request extends \Snappy_Concrete {
 	 * @param null $args
 	 */
 	function __construct () {
-		if (PHP_SAPI  == 'cli') {
+		if (PHP_SAPI  == 'cli' && !defined('SNAPPY_TESTING')) {
 //			$request = $_SERVER['argv'];
 			die('CLI not yet implemented');
 		} else {
