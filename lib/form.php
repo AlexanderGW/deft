@@ -41,7 +41,7 @@ class Form extends \Snappy_Concrete {
 			$this->element = $value;
 		}
 
-		parent::__construct(__CLASS__, $this->prop('id'));
+		parent::__construct($this->prop('id'), __CLASS__);
 	}
 
 	/**

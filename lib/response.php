@@ -30,8 +30,8 @@ class Response extends \Snappy\Lib\Document {
 	 *
 	 * @param null $args
 	 */
-	function __construct () {
-		parent::__construct();
+	function __construct ($args = []) {
+		parent::__construct($args, __CLASS__);
 	}
 
 	/**

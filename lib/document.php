@@ -65,8 +65,15 @@ class Document extends \Snappy_Concrete {
 	 * @param array $args
 	 */
 	function __construct ($args = array()) {
-		$this->args = $this->getArgs($args);
-		parent::__construct(__CLASS__, $this->args);
+		$args = array_merge(array(
+			'base'      => null,
+			'encoding'  => 'utf-8',
+			'locale'    => 'en',
+			'direction' => 'ltr',
+			'mime'      => 'text/html'
+		), $args);
+		$this->args = self::getArgs($args);
+		parent::__construct($this->args, __CLASS__);
 	}
 
 	/**
@@ -733,9 +740,9 @@ class Document extends \Snappy_Concrete {
 
 		// TODO: This should be passed as a param, to be stored in $language, instead of storing a 'copy' on the language instance. Makes more sense!!!
 		if (class_exists('\Snappy\Lib\Language')) {
-			$this->setEncoding(Language::getEncoding());
-			$this->setLocale(Language::getIso(2));
-			$this->setDirection(Language::getDirection());
+			$this->setEncoding(\Snappy::locale()->getEncoding());
+			$this->setLocale(\Snappy::locale()->getIso(2));
+			$this->setDirection(\Snappy::locale()->getDirection());
 		}
 
 //		$this->addMeta('charset', $this->language->getEncoding());
