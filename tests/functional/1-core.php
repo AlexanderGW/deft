@@ -233,7 +233,7 @@ class SnappyCoreIntegrationTest extends \PHPUnit\Framework\TestCase {
 				$instance3,
 				$instance4
 			],
-			"All instances calls are of \\Snappy\\Lib\\Document::class"
+			"All calls are not instances of \\Snappy\\Lib\\Document::class"
 		);
 
 		// Check new instance is equal to the subsequent call
