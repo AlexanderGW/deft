@@ -111,21 +111,28 @@ class Snappy {
 
 		error_reporting((SNAPPY_DEBUG > 0) ? E_ALL & ~E_NOTICE & ~E_STRICT : 0);
 
-		$stack     = debug_backtrace();
-		$first     = $stack[count($stack) - 1];
-		$initiator = $first['file'];
+		$backtrace = debug_backtrace();
+
+		if (!defined('SNAPPY_INITIATOR')) {
+			$first     = $backtrace[count($backtrace) - 1];
+			define('SNAPPY_INITIATOR', $first['file']);
+		}
+
+		// Absolute path
+		if (!defined('SNAPPY_ABS_PATH'))
+			define('SNAPPY_ABS_PATH', __DIR__);
 
 		// App pathes
-		define('SNAPPY_PATH', str_replace("\\", '/', __DIR__) . DS);
+		define('SNAPPY_PATH', str_replace("\\", '/', SNAPPY_ABS_PATH));
 
-		define('SNAPPY_LIB_PATH', SNAPPY_PATH . self::$config['dir_lib'] . DS);
+		define('SNAPPY_LIB_PATH', SNAPPY_PATH . DS . self::$config['dir_lib']);
 		if (!is_dir(SNAPPY_LIB_PATH)) {
 			self::error('App library directory unreadable: %1$s', SNAPPY_LIB_PATH);
 		}
 
-		define('SNAPPY_PLUGIN_PATH', SNAPPY_PATH . self::$config['dir_plugin'] . DS);
-		define('SNAPPY_PUBLIC_PATH', SNAPPY_PATH . self::$config['dir_public'] . DS);
-		define('SNAPPY_PUBLIC_ASSET_PATH', SNAPPY_PUBLIC_PATH . self::$config['dir_public_asset'] . DS);
+		define('SNAPPY_PLUGIN_PATH', SNAPPY_PATH . DS . self::$config['dir_plugin']);
+		define('SNAPPY_PUBLIC_PATH', SNAPPY_PATH . DS . self::$config['dir_public']);
+		define('SNAPPY_PUBLIC_ASSET_PATH', SNAPPY_PUBLIC_PATH . DS . self::$config['dir_public_asset']);
 
 		// Libraries to load
 		$array = self::import(
@@ -146,16 +153,21 @@ class Snappy {
 			self::error('Failed to import core libraries: %1$s', implode(', ', $array));
 		}
 
-		// App URLs
+		// URLs
 		define('SNAPPY_URL_PATH', str_replace(
 			str_replace("\\", '/', $_SERVER['DOCUMENT_ROOT']),
 			'',
-			str_replace("\\", '/', dirname($initiator))
+			str_replace("\\", '/', dirname(SNAPPY_INITIATOR))
 		));
-		define('SNAPPY_URL', self::request()->scheme() . '://' . self::request()->host() . SNAPPY_URL_PATH);
+		define('SNAPPY_URL',
+			self::request()->scheme() . '://' .
+			self::request()->host() .
+			(self::request()->port() <> 80 ? ':' . self::request()->port() : NULL) .
+			SNAPPY_URL_PATH
+		);
 //		define('SNAPPY_URL', SNAPPY_URL_PATH);
 		define('SNAPPY_ASSET_URL', SNAPPY_URL . '/' . self::$config['dir_public_asset'] . '/');
-		define('SNAPPY_PLUGIN_URL', SNAPPY_URL . self::$config['dir_plugin'] . '/');
+		define('SNAPPY_PLUGIN_URL', SNAPPY_URL . '/' . self::$config['dir_plugin'] . '/');
 
 		// Requested route relative to Snappy URL.
 		define('SNAPPY_ROUTE',
@@ -163,7 +175,7 @@ class Snappy {
 				\Snappy\Lib\Sanitize::forText(
 					substr(
 						\Snappy::request()->path(),
-						(strlen(SNAPPY_URL_PATH) + 1)
+						(strlen(SNAPPY_URL_PATH . '/'))
 					)
 				)
 			)
@@ -179,7 +191,7 @@ class Snappy {
 		if (count(self::$config['plugins'])) {
 			foreach (self::$config['plugins'] as $plugin) {
 				$state = 0;
-				$path  = SNAPPY_PLUGIN_PATH . $plugin;
+				$path  = SNAPPY_PLUGIN_PATH . DS . $plugin;
 
 				if (file_exists($path . '.php')) {
 					$state = true;
@@ -240,7 +252,7 @@ class Snappy {
 					continue;
 				}
 
-				$path = SNAPPY_LIB_PATH . str_replace('.', DS, $arg) . '.php';
+				$path = SNAPPY_LIB_PATH . DS . str_replace('.', DS, $arg) . '.php';
 				if (!is_readable($path)) {
 					$result[] = $path;
 				} else {
@@ -261,7 +273,7 @@ class Snappy {
 		if (is_null($name)) {
 			return;
 		}
-		$path   = SNAPPY_PLUGIN_PATH . $name;
+		$path   = SNAPPY_PLUGIN_PATH . DS . $name;
 		$plugin = self::getLog('plugin/' . $name);
 		if (count($plugin) and $plugin[0]['loaded']) {
 			return self::PLUGIN_LOADED;
@@ -555,7 +567,7 @@ class Snappy {
 		}
 
 		${'scope_' . $hash} = \Snappy\Lib\Filter::exec('beforeCapture', $scope);
-		${'path_' . $hash}  = SNAPPY_PATH . str_replace('.', DS, ${'scope_' . $hash}) . '.php';
+		${'path_' . $hash}  = SNAPPY_PATH . DS . str_replace('.', DS, ${'scope_' . $hash}) . '.php';
 
 		if (!file_exists(${'path_' . $hash})) {
 			return;
