@@ -27,6 +27,100 @@ class SnappyIntegrationTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test instance management
 	 */
+	public function test_constants() {
+
+		// Check Snappy path is the same as the working directory
+		$this->assertEquals(
+			SNAPPY_ABS_PATH,
+			SNAPPY_PATH,
+			"The root Snappy path does not match"
+		);
+
+		$path = SNAPPY_ABS_PATH . DS . 'lib';
+
+		$this->assertEquals(
+			$path,
+			SNAPPY_LIB_PATH,
+			"The default Snappy 'lib' path '" . SNAPPY_LIB_PATH . "' does not match '$path'"
+		);
+
+		$path = SNAPPY_ABS_PATH . DS . 'plugin';
+
+		$this->assertEquals(
+			$path,
+			SNAPPY_PLUGIN_PATH,
+			"The default Snappy 'plugin' path '" . SNAPPY_PLUGIN_PATH . "' does not match '$path'"
+		);
+
+		$path = SNAPPY_ABS_PATH . DS . 'public';
+
+		$this->assertEquals(
+			$path,
+			SNAPPY_PUBLIC_PATH,
+			"The default Snappy 'public' path '" . SNAPPY_LIB_PATH . "' does not match '$path'"
+		);
+
+		$path = SNAPPY_ABS_PATH . DS . 'public' . DS . 'asset';
+
+		$this->assertEquals(
+			$path,
+			SNAPPY_PUBLIC_ASSET_PATH,
+			"The default Snappy 'public_asset' path '" . SNAPPY_PUBLIC_ASSET_PATH . "' does not match '$path'"
+		);
+
+		// Check the Snappy path, relative to the document root of the web server
+		$path = str_replace(
+			str_replace("\\", '/', $_SERVER['DOCUMENT_ROOT']),
+			'',
+			str_replace("\\", '/', dirname(SNAPPY_INITIATOR))
+		);
+
+		$this->assertEquals(
+			$path,
+			SNAPPY_URL_PATH,
+			"The SNAPPY_URL_PATH (The URI path of Snappy, relative to the document root of web server) '" . SNAPPY_URL_PATH . "' does not match '$url'"
+		);
+
+		// Check the Snappy URI, with relative document root path
+		$uri = "http://{$_SERVER['HTTP_HOST']}:{$_SERVER['SERVER_PORT']}{$path}";
+
+		$this->assertEquals(
+			$uri,
+			SNAPPY_URL,
+			"The SNAPPY_URL (The full URI of Snappy) '" . SNAPPY_URL_PATH . "' does not match '$uri'"
+		);
+
+		// Check the Snappy URL for assets
+		$url_asset = "{$uri}/asset/";
+
+		$this->assertEquals(
+			$url_asset,
+			SNAPPY_ASSET_URL,
+			"The SNAPPY_ASSET_URL (The URL to Snappy public assets) '" . SNAPPY_ASSET_URL . "' does not match '$url_asset'"
+		);
+
+		// Check the Snappy URL for plugins
+		$url_plugin = "{$uri}/plugin/";
+
+		$this->assertEquals(
+			$url_plugin,
+			SNAPPY_PLUGIN_URL,
+			"The SNAPPY_PLUGIN_URL (The URL to Snappy public assets) '" . SNAPPY_PLUGIN_URL . "' does not match '$url_plugin'"
+		);
+
+		// Check the Snappy route path
+		$path_route = '';
+
+		$this->assertEquals(
+			$path_route,
+			SNAPPY_ROUTE,
+			"The SNAPPY_ROUTE (The path relative to Snappy URL) '" . SNAPPY_ROUTE . "' does not match '$path_route'"
+		);
+	}
+
+	/**
+	 * Test instance management
+	 */
 	public function test_instance_management() {
 		$key = Snappy::getInstanceKey($this->class, $this->args);
 

@@ -2,7 +2,7 @@
 
 // This file is called relative to Snappy root.
 
-// Ensure Snappy handles a web request
+// Ensure Snappy handles a web request, and doesn't create files
 define('SNAPPY_TESTING', true);
 
 define('SNAPPY_ABS_PATH', realpath(__DIR__ . '/../..'));
