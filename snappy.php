@@ -92,7 +92,7 @@ class Snappy {
 			'dir_plugin'       => 'plugin',
 			'dir_lib'          => 'lib',
 //			'init_callback'    => array('Snappy\Callback', 'echoResponseOutput'),
-			'plugin'           => array('debug', 'example'),
+			'plugins'          => array('debug', 'example'),
 			'url_separator'    => '/'
 		), $config);
 
@@ -362,7 +362,7 @@ class Snappy {
 
 		// Create and return
 		$instance = self::newInstance($class, $args);
-//		var_dump($instance);
+
 		return $instance;
 	}
 
@@ -600,7 +600,7 @@ class Snappy {
 
 		\Snappy\Lib\Event::exec('onSnappyError');
 
-		$template = \Snappy\Lib\Filter::exec('onSnappyError.template', [
+		$template = \Snappy\Lib\Filter::exec('SnappyErrorTemplate', [
 			'@tag' => 'html',
 			'@markup' => [
 				'@tag' => 'body',
@@ -701,9 +701,9 @@ class Snappy_Concrete {
 	/**
 	 * @param null $arg
 	 */
-	public function get ($arg = null) {
-		if ((is_string($arg) or is_integer($arg)) and array_key_exists($arg, $this->args)) {
-			return $this->args[$arg];
+	public function get ($key = null) {
+		if ((is_string($key) or is_integer($key)) and array_key_exists($key, $this->args)) {
+			return $this->args[$key];
 		}
 
 		return;
@@ -719,17 +719,17 @@ class Snappy_Concrete {
 		if ((is_string($arg) or is_integer($arg))) {
 			$this->args[$arg] = $value;
 
-			return true;
+			return TRUE;
 		}
 
-		return false;
+		return FALSE;
 	}
 }
 
 /**
  * Return locale phrase
  *
- * @return mixed|string|void
+ * @return null|string
  */
 function __ ( /*polymorphic*/) {
 	if (!func_num_args()) {

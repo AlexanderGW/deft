@@ -1,0 +1,48 @@
+<phpunit
+        bootstrap="tests/includes/bootstrap.php"
+        backupGlobals="false"
+        colors="true"
+        beStrictAboutTestsThatDoNotTestAnything="true">
+    <testsuites>
+        <testsuite name="Snappy unit tests">
+            <directory suffix=".php">tests/unit</directory>
+        </testsuite>
+        <testsuite name="Snappy functional tests">
+            <directory suffix=".php">tests/functional</directory>
+        </testsuite>
+        <!--<testsuite name="Selenium Test Suite">
+            <directory>../tests/selenium</directory>
+        </testsuite>-->
+    </testsuites>
+<!--    <groups>-->
+<!--        <exclude>-->
+<!--            <group>ajax</group>-->
+<!--            <group>ms-files</group>-->
+<!--            <group>ms-required</group>-->
+<!--            <group>external-http</group>-->
+<!--        </exclude>-->
+<!--    </groups>-->
+<!--    <logging>-->
+<!--        <log type="coverage-html" target="./coverage"/>-->
+<!--        <log type="coverage-clover" target="./logs/clover.xml"/>-->
+<!--        <log type="coverage-crap4j" target="./logs/crap4j.xml"/>-->
+<!--        <log type="junit" target="./logs/junit.xml" logIncompleteSkipped="false"/>-->
+<!--    </logging>-->
+    <listeners>
+        <listener class="JohnKary\PHPUnit\Listener\SpeedTrapListener">
+            <arguments>
+                <array>
+                    <element key="slowThreshold">
+                        <integer>500</integer>
+                    </element>
+                </array>
+            </arguments>
+        </listener>
+    </listeners>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">lib</directory>
+            <directory suffix=".php">lib</directory>
+        </whitelist>
+    </filter>
+</phpunit>
