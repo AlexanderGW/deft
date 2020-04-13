@@ -79,7 +79,7 @@ class Response extends \Snappy\Lib\Document {
 				201 => 'Created',
 				204 => 'No Content',
 
-				// Redirection
+				// State
 				300 => 'Multiple Choice',
 				301 => 'Moved Permanently',
 				304 => 'Not Modified',
