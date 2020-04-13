@@ -59,6 +59,7 @@ class Request extends \Snappy_Concrete {
 
 			$this->url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https:" : "http:")
 			       . "//{$_SERVER['HTTP_HOST']}"
+	               . ($_SERVER['SERVER_PORT'] ? ':' . $_SERVER['SERVER_PORT'] : NULL)
 			       . $path
 			       . ($this->query ? '?' . $this->query : NULL);
 
