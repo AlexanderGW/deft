@@ -96,6 +96,7 @@ class Event {
 			return;
 		}
 
+		$state = FALSE;
 		$args = func_get_args();
 		$name = array_shift($args);
 
@@ -104,18 +105,20 @@ class Event {
 			if (count($queue)) {
 				ksort($queue);
 
-				$state = FALSE;
 				$array = array();
 				$start = Helper::getMicroTime();
 
 				foreach ($queue as $priority => $callbacks) {
 					foreach ($callbacks as $callback) {
 						if (is_callable($callback[0])) {
+							$return = call_user_func_array($callback[0], array_slice($args, 0, $callback[1]));
 							$array[$priority][] = array(
 								'callback' => (is_array($callback[0]) ? $callback[0][0] . '::' . $callback[0][1] : $callback[0]),
-								'return'   => call_user_func_array($callback[0], array_slice($args, 0, $callback[1]))
+								'return'   => $return
 							);
-							$state = TRUE;
+
+							if ($return !== FALSE)
+								$state = TRUE;
 						}
 					}
 				}
@@ -124,11 +127,9 @@ class Event {
 					'time'      => Helper::getMoment($start),
 					'callbacks' => $array
 				));
-
-				return $state;
 			}
 		}
 
-		return false;
+		return $state;
 	}
 }
