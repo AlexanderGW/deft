@@ -39,6 +39,7 @@ class SnappyIntegrationEventTest extends \PHPUnit\Framework\TestCase {
 	public function test_event_management() {
 
 		// Set an event action, to change the argument of an instance (the response title)
+		\Snappy::response()->setTitle();
 		$event = Snappy::event()->set('foo', function() {
 			\Snappy::response()->setTitle('EVENT1');
 		}, 999);
