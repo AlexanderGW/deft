@@ -59,23 +59,28 @@ class Event {
 
 	static function clear ($name = null, $function = null) {
 		if (!is_null($name) and array_key_exists($name, self::$actions)) {
+			$state = FALSE;
+
 			if (is_null($function)) {
 				self::$actions[$name] = array();
+				$state = TRUE;
 			} else {
 				foreach (self::$actions[$name] as $priority => $actions) {
 					foreach ($actions as $i => $action) {
 						if ((is_array($function) and $action[0][0] == $function[0] and $action[0][1] == $function[1]) or $action[0] == $function) {
 							unset(self::$actions[$name][$priority][$i]);
+							$state = TRUE;
 
 							if (!count(self::$actions[$name][$priority])) {
 								unset(self::$actions[$name][$priority]);
+								$state = TRUE;
 							}
 						}
 					}
 				}
 			}
 
-			return true;
+			return $state;
 		}
 
 		return false;
@@ -99,6 +104,7 @@ class Event {
 			if (count($queue)) {
 				ksort($queue);
 
+				$state = FALSE;
 				$array = array();
 				$start = Helper::getMicroTime();
 
@@ -109,6 +115,7 @@ class Event {
 								'callback' => (is_array($callback[0]) ? $callback[0][0] . '::' . $callback[0][1] : $callback[0]),
 								'return'   => call_user_func_array($callback[0], array_slice($args, 0, $callback[1]))
 							);
+							$state = TRUE;
 						}
 					}
 				}
@@ -118,7 +125,7 @@ class Event {
 					'callbacks' => $array
 				));
 
-				return true;
+				return $state;
 			}
 		}
 
