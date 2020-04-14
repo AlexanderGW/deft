@@ -58,9 +58,8 @@ class Event {
 	}
 
 	static function clear ($name = null, $function = null) {
+		$state = FALSE;
 		if (!is_null($name) and array_key_exists($name, self::$actions)) {
-			$state = FALSE;
-
 			if (is_null($function)) {
 				self::$actions[$name] = array();
 				$state = TRUE;
@@ -73,17 +72,14 @@ class Event {
 
 							if (!count(self::$actions[$name][$priority])) {
 								unset(self::$actions[$name][$priority]);
-								$state = TRUE;
 							}
 						}
 					}
 				}
 			}
-
-			return $state;
 		}
 
-		return false;
+		return $state;
 	}
 
 	/**
