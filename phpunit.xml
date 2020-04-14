@@ -5,10 +5,12 @@
         beStrictAboutTestsThatDoNotTestAnything="true">
     <testsuites>
         <testsuite name="Snappy unit tests">
-            <directory suffix=".php">tests/unit</directory>
+            <file>tests/unit/snappy.php</file>
+            <file>tests/unit/event.php</file>
         </testsuite>
-        <testsuite name="Snappy functional tests">
-            <directory suffix=".php">tests/functional</directory>
+        <testsuite name="Snappy integration tests">
+            <file>tests/integration/snappy.php</file>
+            <file>tests/integration/event.php</file>
         </testsuite>
         <!--<testsuite name="Selenium Test Suite">
             <directory>../tests/selenium</directory>

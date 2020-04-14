@@ -24,12 +24,12 @@
 /**
  * Here is my attempt to convey my thought process for Snappy core, and how it should work.
  *
- * Class SnappyUnitTest
+ * Class SnappyUnitCoreTest
  *
- * @group core.unit
+ * @group unit.snappy
  */
 
-class SnappyCoreUnitTest extends \PHPUnit\Framework\TestCase {
+class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();

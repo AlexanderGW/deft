@@ -24,12 +24,13 @@
 /**
  * Here is my attempt to convey my thought process for Snappy core, and how it should work.
  *
- * Class SnappyIntegrationTest
+ * Class SnappyIntegrationCoreTest
  *
- * @group core.integration
+ * @group integration.snappy
  */
-class SnappyCoreIntegrationTest extends \PHPUnit\Framework\TestCase {
+class SnappyIntegrationCoreTest extends \PHPUnit\Framework\TestCase {
 	private $response = NULL;
+
 	protected function setUp(): void {
 		parent::setUp();
 
@@ -312,121 +313,6 @@ class SnappyCoreIntegrationTest extends \PHPUnit\Framework\TestCase {
 			'baz bar qux',
 			$value,
 			"Value prepended to 'foo' should be 'qux' for 'baz bar qux', instead '$value'"
-		);
-	}
-
-	/**
-	 * Test event management
-	 */
-	public function test_event_management() {
-
-		// Execute an invalid event
-		$result = \Snappy::event()->exec('foo');
-
-		$this->assertFalse(
-			$result,
-			"Invalid event 'foo' did not return FALSE"
-		);
-
-		// Set an event action, to change the response title
-		$event = Snappy::event()->set('foo', function() {
-			\Snappy::response()->setTitle('EVENT1');
-		}, 999);
-
-		// Check that event set returned TRUE
-		$this->assertTrue(
-			$event,
-			"Seting event 'foo' did not return TRUE"
-		);
-
-		// Check that we can get the event entry
-		$result = \Snappy::event()->get('foo');
-		$count = count($result);
-
-		$this->assertCount(
-			1,
-			$result,
-			"Should return 1 event entry, instead $count"
-		);
-
-		// Check that the event executed something
-		$result = \Snappy::event()->exec('foo');
-
-		$this->assertTrue(
-			$result,
-			"Executing event 'foo' did not return TRUE"
-		);
-
-		// Check 1 stack log entry exists
-		$log = Snappy::getLog("event/foo");
-		$count = count($log);
-
-		$this->assertCount(
-			1,
-			$log,
-			"Stack log event execution count returned $count, instead of 1"
-		);
-
-		// Check event actions list has one entry at priority 999
-		$this->assertCount(
-			1,
-			$log[0]['callbacks'][999],
-			"Event did not return one action entry, and priority 999"
-		);
-
-		// Check event action callback is callable
-		$this->assertIsCallable(
-			$log[0]['callbacks'][999][0]['callback'],
-			"Event action callback is not callable"
-		);
-
-		//TODO: Test 'return' key on log
-
-		// Check that the response title was set
-		$result = \Snappy::response()->getTitle();
-
-		$this->assertEquals(
-			'EVENT1',
-			$result,
-			"Snappy response title was not changed to 'EVENT1', instead '$result'"
-		);
-
-		// Check event clear returns TRUE
-		$result = \Snappy::event()->clear('foo');
-
-		$this->assertTrue(
-			$result,
-			"Clearing event, did not return TRUE"
-		);
-
-		// Clear all actions for an event, returns empty list
-		$result = \Snappy::event()->get('foo');
-		$count = count($result);
-
-		$this->assertCount(
-			0,
-			$result,
-			"Event clear should return 0 entries, instead $count"
-		);
-
-		// Event execution, with no valid callables, returns FALSE
-		\Snappy::event()->set('foo', 'bar');
-		$result = \Snappy::event()->exec('foo');
-
-		$this->assertFalse(
-			$result,
-			"Executing invalid event action 'bar' did not return FALSE"
-		);
-
-		// Clear an event action
-		\Snappy::event()->clear('foo', 'bar');
-		$result = \Snappy::event()->get('foo');
-		$count = count($result);
-
-		$this->assertCount(
-			0,
-			$result,
-			"Event action list after clear should return 0, instead $count"
 		);
 	}
 }
