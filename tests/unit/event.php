@@ -123,9 +123,7 @@ class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
 	public function test_event_exec() {
 
 		// Execute a valid event
-		Snappy::event()->set('foo', function() {
-				\Snappy::response()->setTitle( 'EVENT1' );
-			}, $priority = 999);
+		Snappy::event()->set('foo', function() {}, $priority = 999);
 
 		$result = \Snappy::event()->exec('foo');
 
