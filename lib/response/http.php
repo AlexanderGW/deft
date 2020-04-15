@@ -30,10 +30,13 @@ class Http extends Response {
 	/**
 	 * @param null $uri
 	 */
-	public function header( $key = null, $value ) {
+	public function header( $key = NULL, $value = -1 ) {
 		if( is_string($key)) {
-			if (is_null($value)) {
+			if ($value === -1) {
+				return $this->headers[$key];
+			} elseif (is_null($value)) {
 				unset($this->headers[$key]);
+				return NULL;
 			} else {
 				$this->headers[$key] = $value;
 			}
@@ -50,12 +53,10 @@ class Http extends Response {
 			$uri = null;
 		$this->header('Location', SNAPPY_URL . $path);
 
-		// Empty the response, headers only.
-//		\Snappy::response()->setBody();
+		// Set an event to empty the body
+		\Snappy::event()->set('beforeResponseOutput', '\Snappy\Lib\Response\Http::event__responseOutput', 999);
 
-		die( \Snappy::response()->output() );
-
-//		die( header( sprintf( 'Location: %s', $uri ), true ) );
+		return TRUE;
 	}
 
 	/**
@@ -64,54 +65,55 @@ class Http extends Response {
 	 * @return int
 	 */
 	public function status( $code = null ) {
-		if( !is_null( $code ) ) {
-			$codes = array(
+		if(is_null( $code ))
+			return NULL;
 
-				// Informational
-				200 => 'OK',
-				201 => 'Created',
-				204 => 'No Content',
+		$codes = array(
 
-				// State
-				300 => 'Multiple Choice',
-				301 => 'Moved Permanently',
-				304 => 'Not Modified',
-				307 => 'Temporary Redirect',
-				308 => 'Permanent Redirect',
+			// Informational
+			200 => 'OK',
+			201 => 'Created',
+			204 => 'No Content',
 
-				// Client Error
-				400 => 'Bad Request',
-				401 => 'Unauthorized',
-				403 => 'Forbidden',
-				404 => 'Not Found',
-				405 => 'Method Not Allowed',
-				406 => 'Not Acceptable',
-				418 => 'I\'m a teapot',
-				429 => 'Too Many Requests',
+			// State
+			300 => 'Multiple Choice',
+			301 => 'Moved Permanently',
+			304 => 'Not Modified',
+			307 => 'Temporary Redirect',
+			308 => 'Permanent Redirect',
 
-				// Server Error
-				500 => 'Internal Server Error',
-				501 => 'Not Implemented',
-				502 => 'Bad Gateway',
-				503 => 'Service Unavailable'
-			);
+			// Client Error
+			400 => 'Bad Request',
+			401 => 'Unauthorized',
+			403 => 'Forbidden',
+			404 => 'Not Found',
+			405 => 'Method Not Allowed',
+			406 => 'Not Acceptable',
+			418 => 'I\'m a teapot',
+			429 => 'Too Many Requests',
 
-			if( array_key_exists( $code, $codes ) ) {
-				header( sprintf( 'HTTP/1.1 %d %s', $code, $codes[ $code ] ), true );
+			// Server Error
+			500 => 'Internal Server Error',
+			501 => 'Not Implemented',
+			502 => 'Bad Gateway',
+			503 => 'Service Unavailable'
+		);
 
-				// If empty response, show an error template
-				if( $this->isEmpty() ) {
-					$content = \Snappy::capture( 'template.' . $code );
-					if( is_string( $content ) ) {
-						$this->setBody( $content );
-						return true;
-					}
+		if( array_key_exists( $code, $codes ) ) {
+			header( sprintf( 'HTTP/1.1 %d %s', $code, $codes[ $code ] ), true );
+
+			// If empty response, show an error template
+			if( $this->isEmpty() ) {
+				$content = \Snappy::capture( 'template.' . $code );
+				if( is_string( $content ) ) {
+					$this->setBody( $content );
 				}
-
-				return false;
 			}
+
+			return TRUE;
 		}
-		return;
+
+		return FALSE;
 	}
 
 	public function cookie($key = null, $value = null) {
@@ -124,15 +126,26 @@ class Http extends Response {
 	/**
 	 * @param null $scope
 	 *
-	 * @return mixed|string|void
+	 * @return string
 	 */
-	public function output($scope = null) {
-		\Snappy::response()->header('X-Generator', 'Snappy/' . \Snappy::VERSION);
+	public function output($content = '') {
+		parent::output();
+
+		$this->header('X-Generator', 'Snappy/' . \Snappy::VERSION);
 
 		$this->headers = \Snappy::filter()->exec('responseOutputHeaders', $this->headers);
 		foreach($this->headers as $key => $value) {
 			header($key . ': ' . $value, true);
 		}
-		return parent::output();
+		return $content;
+	}
+
+	/**
+	 * Event that is added to 'beforeResponseOutput' after location() to clear the buffer()
+	 *
+	 * @param null $args
+	 */
+	public function event__responseOutput($args = null) {
+		\Snappy::response($args)->buffer(NULL);
 	}
 }

@@ -26,6 +26,7 @@ namespace Snappy\Lib;
 use Snappy\Lib;
 
 class Response extends Lib {
+	private $buffer = NULL;
 
 	/**
 	 * Config constructor.
@@ -37,6 +38,24 @@ class Response extends Lib {
 //		$this->args = $args;
 //		parent::__construct($this->args, $class);
 //	}
+
+	/**
+	 * @param null $buffer
+	 *
+	 * @return string
+	 */
+	public function buffer($buffer = NULL) {
+		$this->buffer = $buffer;
+	}
+
+	/**
+	 * @param null $scope
+	 *
+	 * @return string
+	 */
+	public function output($content = NULL) {
+		return $content;
+	}
 
 	/**
 	 * Return the output()

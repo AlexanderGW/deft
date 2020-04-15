@@ -63,6 +63,8 @@ class Html extends Http {
 	private $eol = "\r\n";
 	private $body = array();
 
+	private $buffer = NULL;
+
 	/**
 	 * Database constructor.
 	 *
@@ -1180,7 +1182,6 @@ class Html extends Http {
 	 * @return mixed|string|void
 	 */
 	public function output($scope = null) {
-
 		\Snappy::response()->header('Content-type', 'text/html');
 
 		// Default template name
@@ -1188,13 +1189,18 @@ class Html extends Http {
 			$scope = \Snappy::filter()->exec('documentOutput.template', 'template.response.html5');
 		}
 
+		$this->buffer = \Snappy::capture($scope);
+
 		\Snappy::event()->exec('beforeResponseOutput');
 
-		$content = (string)\Snappy::filter()->exec('responseHttpHtmlOutput', \Snappy::filter()->exec('responseOutput', \Snappy::capture($scope)));
+		$content = (string)\Snappy::filter()->exec('responseHttpHtmlOutput', \Snappy::filter()->exec('responseOutput', $this->buffer));
 
 		\Snappy::response()->header('Content-length', strlen($content));
 
 		\Snappy::event()->exec('afterResponseOutput', $content);
+
+		// Set HTTP header()s
+		parent::output();
 
 		return $content;
 	}

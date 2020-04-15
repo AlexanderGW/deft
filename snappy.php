@@ -421,7 +421,7 @@ class Snappy {
 	}
 
 	public static function database ($args = []) {
-		$config  =& \Snappy::config();
+		$config  = \Snappy::config();
 		$args = array_merge(array(
 			'driver'       => $config->get('database.driver'),
 			'host'         => $config->get('database.hostname'),
@@ -488,13 +488,12 @@ class Snappy {
 		return self::lib('route');
 	}
 
-	public static function response () {
+	public static function response ($args = []) {
 		$config = self::lib('config');
 
-		$args = [];
 		if ($config) {
 			$args = array_merge(array(
-				'response' => $config->get('response', 'http.html'),
+				'type' => $config->get('response.type', 'http.html'),
 				'base'      => $config->get('response.base'),
 				'encoding'  => $config->get('response.encoding', 'utf-8'),
 				'locale'    => $config->get('response.locale', 'en'),
@@ -504,8 +503,8 @@ class Snappy {
 		}
 
 		$scope = 'response';
-		if ($args['response'])
-			$scope .= '.' . $args['response'];
+		if ($args['type'])
+			$scope .= '.' . $args['type'];
 
 		return self::lib($scope, $args);
 	}
@@ -521,7 +520,7 @@ class Snappy {
 		if (is_null($args)) {
 			return;
 		}
-		$config =& self::config();
+		$config = self::config();
 
 		$secret = $config->get('secret');
 		if (empty($secret)) {

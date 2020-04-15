@@ -31,9 +31,7 @@ use Snappy\Lib\Response\Http;
  * Class Document
  */
 class Json extends Http {
-	private $errors = array();
-	private $eol = "\r\n";
-	private $body = array();
+	private $buffer = NULL;
 
 	/**
 	 * Database constructor.
@@ -52,18 +50,21 @@ class Json extends Http {
 	 * @return mixed|string|void
 	 */
 	public function output($content = null) {
+		$this->header('Content-type', 'text/json');
+
+		\Snappy::event()->exec('beforeResponseOutput', $this->args);
+
 		if (is_null($content))
-			$content = (string)$this->getArg('content');
-
-		\Snappy::response()->header('Content-type', 'text/json');
-
-		\Snappy::event()->exec('beforeResponseOutput');
+			$content = is_null($this->buffer) ? 'N;' : $this->buffer;
 
 		$content = \Snappy::filter()->exec('responseHttpJsonOutput', \Snappy::filter()->exec('responseOutput', $content));
 
-		\Snappy::response()->header('Content-length', strlen($content));
+		$this->header('Content-length', strlen($content));
 
-		\Snappy::event()->exec('afterResponseOutput', $content);
+		\Snappy::event()->exec('afterResponseOutput', $this->args);
+
+		// Set HTTP header()s
+		parent::output();
 
 		return $content;
 	}
