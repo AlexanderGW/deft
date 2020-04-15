@@ -45,7 +45,7 @@ class Element {
 			return;
 		}
 
-		Event::exec('htmlInit');
+		\Snappy::event()->exec('htmlInit');
 		self::$initialized = true;
 	}
 
@@ -202,4 +202,4 @@ class Element {
 	}
 }
 
-Event::set('init', '\Snappy\Lib\Element::init');
+\Snappy::event()->set('init', '\Snappy\Lib\Element::init');

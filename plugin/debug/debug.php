@@ -23,34 +23,35 @@
 
 namespace Snappy\Plugin;
 
+use Snappy\Lib\Plugin;
 use Snappy\Lib\Route;
 use Snappy\Lib\Event;
 use Snappy\Lib\Filter;
 use Snappy\Lib\Element;
 
-class Debug {
+class Debug extends Plugin {
 	private static $hash;
 
 	public static function init () {
-		Route::add('debug', 'debug', null, '\\Snappy\\Plugin\\Debug::returnSetting');
-		Route::add('debug.request', 'debug/request/[hash]', array(
+		\Snappy::route()->add('debug', 'debug', null, '\\Snappy\\Plugin\\Debug::returnSetting');
+		\Snappy::route()->add('debug.request', 'debug/request/[hash]', array(
 			'hash' => '[0-9a-z]{32}'
 		), '\\Snappy\\Plugin\\Debug::returnRequest');
 
 		$hash = self::getHash();
-		$res =& \Snappy::response();
+		$res = \Snappy::response();
 		$res->addScriptContent("var Snappy = Snappy || {}; Snappy.debugHash = '{$hash}';");
 		$res->addScript('plugin/debug/asset/debug.js');
 		$res->addStyle('plugin/debug/asset/debug.css');
 
-//		Event::set('onConstruct', function($instance){
+//		\Snappy::event()->set('onConstruct', function($instance){
 //			var_dump($instance);
 //		});
 	}
 
 	public static function getHash() {
 		if (!self::$hash) {
-			self::$hash = md5(serialize(Filter::exec('debugRequestHashData', SNAPPY_ROUTE)));
+			self::$hash = md5(serialize(\Snappy::filter()->exec('debugRequestHashData', SNAPPY_ROUTE)));
 		}
 		return self::$hash;
 	}
@@ -62,14 +63,14 @@ class Debug {
 	public static function returnSetting () {
 
 		// Get current debug state
-		$config   =& \Snappy::config();
+		$config   = \Snappy::config();
 		if ($debug = \Snappy::request()->post('debug')) {
 			$config->set('debug', $debug);
 			$config->save();
 		}
 
 		// Create the form
-		$form =& \Snappy::form('debug');
+		$form = \Snappy::form('debug');
 
 		// Set as POST
 		$form->post(true);
@@ -105,11 +106,11 @@ class Debug {
 	}
 
 	public static function returnRequest() {
-		$content = file_get_contents(self::getPath() . DS . Route::getParam('hash') . '.json');
+		$content = file_get_contents(self::getPath() . DS . \Snappy::route()->getParam('hash') . '.json');
 		\Snappy::response()->json($content);
 	}
 
-	public static function end() {
+	public static function writeJson() {
 
 		// Create debugging report for API query
 		if (SNAPPY_DEBUG) {
@@ -122,5 +123,5 @@ class Debug {
 	}
 }
 
-Event::set('init', '\Snappy\Plugin\Debug::init');
-Event::set('exit', '\Snappy\Plugin\Debug::end', 99);
+\Snappy::event()->set('init', '\Snappy\Plugin\Debug::init');
+\Snappy::event()->set('exit', '\Snappy\Plugin\Debug::writeJson', 99);

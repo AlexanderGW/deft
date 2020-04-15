@@ -135,18 +135,18 @@ class Snappy {
 
 		// Libraries to load
 		$array = self::import(
-			'event',
-			'route',
-			'document',
-			'sanitize',
-			'watchdog',
-			'filter',
-			'random',
-			'helper',
-			'http',
-			'element',
-			'token',
-			'plugin'
+			'lib.helper',
+			'lib.watchdog',
+//			'lib.event',
+			'lib.route',
+			'lib.sanitize',
+//			'watchdog',
+//			'filter',
+			'lib.random',
+//			'lib.http',
+			'lib.element',
+			'lib.token',
+			'lib.plugin'
 		);
 		if (count($array)) {
 			self::error('Failed to import core libraries: %1$s', implode(', ', $array));
@@ -220,28 +220,28 @@ class Snappy {
 		// Run this callback after initialization
 		$callback = self::$config['ready_callback'];
 		if (is_callable($callback)) {
-			\Snappy\Lib\Event::set('ready', $callback);
+			\Snappy::event()->set('ready', $callback);
 		}
 
 		// Execute initialization
-		$init = \Snappy\Lib\Event::exec('init');
+		$init = \Snappy::event()->exec('init');
 
 		// Execute ready, after initialization
-		$ready = \Snappy\Lib\Event::exec('ready');
+		$ready = \Snappy::event()->exec('ready');
 
 		// No content
 		if ($init === FALSE && $ready === FALSE) {
 			self::response()->status(204);
 		}
 
-		// Execute xxit event
-		\Snappy\Lib\Event::exec('exit');
+		// Execute exit event
+		\Snappy::event()->exec('exit');
 	}
 
 	/**
-	 * Import libraries relative to SNAPPY_LIB_PATH for use within the App.
+	 * Import libraries relative to SNAPPY_PATH for use within the App.
 	 *
-	 * Dot-scope format "helper.example" for "helper/example.php" class.
+	 * Dot-scope format "lib.response.http.html" for "SNAPPY_PATH/lib/response/http/html.php" class.
 	 *
 	 * @return array
 	 */
@@ -254,8 +254,8 @@ class Snappy {
 					continue;
 				}
 
-				$path = SNAPPY_LIB_PATH . DS . str_replace('.', DS, $arg) . '.php';
-				if (!is_readable($path)) {
+				$path = SNAPPY_PATH . DS . str_replace('.', DS, $arg) . '.php';
+				if (!is_readable($path) || !is_file($path)) {
 					$result[] = $path;
 				} else {
 					include_once $path;
@@ -323,14 +323,13 @@ class Snappy {
 	 */
 	static function newInstance ($class = null, $args = array()) {
 		if (is_null($class) or !class_exists($class)) {
-			return;
+			return NULL;
 		}
 
 		$key = self::getInstanceKey($class, $args);
 		$start = \Snappy\Lib\Helper::getMicroTime();
 
 		self::$instances[ $key ] = new $class( $args );
-
 		self::log("instance/{$class}/{$key}", array(
 			'time' => \Snappy\Lib\Helper::getMoment($start),
 			'args' => $args
@@ -341,9 +340,9 @@ class Snappy {
 	}
 
 	/**
-	 * Returns the instance of class with arguments, will create if does not exist.
+	 * Returns the instance of class with arguments, will create instance if does not exist.
 	 *
-	 * Dot-scope format "helper.example" for "helper/example.php" class.
+	 * Dot-scope format "lib.response.http.html" for "lib/response/http/html.php" class.
 	 *
 	 * @param null $scope
 	 * @param array $args
@@ -353,9 +352,9 @@ class Snappy {
 			return;
 		}
 
-		$class = '\\Snappy\\Lib\\' . str_replace(' ', '\\', ucwords(str_replace('.', ' ', $scope)));
+		$class = '\\Snappy\\' . str_replace(' ', '\\', ucwords(str_replace('.', ' ', $scope)));
 
-		$stack = "lib/{$scope}";
+		$stack = "{$scope}";
 
 		$log = self::getLog($stack);
 
@@ -368,11 +367,15 @@ class Snappy {
 				$array = [];
 				if (strpos($scope, '.')) {
 					while ($offset < strlen($scope) && ($pos = strpos($scope, '.', $offset)) !== false) {
-						$array[] = substr($scope, 0, $pos);
+						$value = substr($scope, 0, $pos);
+						//if ($value !== 'lib')
+							$array[] = $value;
 						$offset += ($pos+1);
 					}
 				}
-				$array[] = $scope;
+
+				//if ($value !== 'lib')
+					$array[] = $scope;
 
 				$errors = call_user_func_array([__CLASS__, 'import'], $array);
 				if (count($errors)) {
@@ -395,15 +398,18 @@ class Snappy {
 
 			return self::$instances[$key];
 		}
-
 		// Create and return
 		$instance = self::newInstance($class, $args);
 
 		return $instance;
 	}
 
+	public static function lib ($scope, $args = array()) {
+		return \Snappy::get('lib.' . $scope, $args);
+	}
+
 	public static function cache ($args = array()) {
-		return \Snappy::get('cache', $args);
+		return self::lib('cache', $args);
 	}
 
 	public static function config ($args = null) {
@@ -411,7 +417,7 @@ class Snappy {
 			$args = self::$config;
 		}
 
-		return \Snappy::get('config', $args);
+		return self::lib('config', $args);
 	}
 
 	public static function database ($args = []) {
@@ -430,65 +436,78 @@ class Snappy {
 		if ($args['driver'])
 			$scope .= '.'.$args['driver'];
 
-		return \Snappy::get($scope, $args);
+		return self::lib($scope, $args);
 	}
 
-	public static function document ($args = array()) {
-		$args = array_merge([
-			'type' => 'html5',
-		], $args);
-
-		if ($args['type'] == 'html5') {
-			$args = array_merge(array(
-				'base'      => null,
-				'encoding'  => 'utf-8',
-				'locale'    => 'en',
-				'direction' => 'ltr',
-				'mime'      => 'text/html'
-			), $args);
-		}
-
-		return \Snappy::get('document', $args);
-	}
+//	public static function document ($args = array()) {
+//		$args = array_merge([
+//			'type' => 'html5',
+//		], $args);
+//
+//		if ($args['type'] == 'html5') {
+//			$args = array_merge(array(
+//				'base'      => null,
+//				'encoding'  => 'utf-8',
+//				'locale'    => 'en',
+//				'direction' => 'ltr',
+//				'mime'      => 'text/html'
+//			), $args);
+//		}
+//
+//		return self::lib('document', $args);
+//	}
 
 	public static function event () {
-		return \Snappy::get('event');
+		return self::lib('event');
 	}
 
 	public static function filter () {
-		return \Snappy::get('filter');
+		return self::lib('filter');
 	}
 
 	public static function form ($id = null) {
-		return \Snappy::get('form', $id);
+		return self::lib('form', $id);
 	}
 
 	public static function locale () {
-		return \Snappy::get('locale');
+		return self::lib('locale');
 	}
+
+	/**
+	 * @return \Snappy\Lib\Request
+	 */
 
 	public static function request () {
-		return \Snappy::get('request');
+		return self::lib('request');
 	}
 
+	/**
+	 * @return \Snappy\Lib\Route
+	 */
 	public static function route () {
-		return \Snappy::get('route');
+		return self::lib('route');
 	}
 
 	public static function response () {
-		$config = self::get('config');
+		$config = self::lib('config');
+
 		$args = [];
 		if ($config) {
-			$args = [
-				'base'      => null,
+			$args = array_merge(array(
+				'response' => $config->get('response', 'http.html'),
+				'base'      => $config->get('response.base'),
 				'encoding'  => $config->get('response.encoding', 'utf-8'),
 				'locale'    => $config->get('response.locale', 'en'),
 				'direction' => $config->get('response.direction', 'ltr'),
 				'mime'      => $config->get('response.mime', 'text/html')
-			];
+			), $args);
 		}
 
-		return \Snappy::get('response', $args);
+		$scope = 'response';
+		if ($args['response'])
+			$scope .= '.' . $args['response'];
+
+		return self::lib($scope, $args);
 	}
 
 	/**
@@ -568,14 +587,14 @@ class Snappy {
 			$config->save();
 		}
 
-		${'scope_' . $hash} = \Snappy\Lib\Filter::exec('beforeCapture', $scope);
+		${'scope_' . $hash} = \Snappy::filter()->exec('beforeCapture', $scope);
 		${'path_' . $hash}  = SNAPPY_PATH . DS . str_replace('.', DS, ${'scope_' . $hash}) . '.php';
 
 		if (!file_exists(${'path_' . $hash})) {
 			return;
 		}
 
-		\Snappy\Lib\Event::exec('beforeCapture', ${'scope_' . $hash});
+		\Snappy::event()->exec('beforeCapture', ${'scope_' . $hash});
 
 		${'start_' . $hash} = \Snappy\Lib\Helper::getMicroTime();
 
@@ -588,7 +607,7 @@ class Snappy {
 			'time' => \Snappy\Lib\Helper::getMoment(${'start_' . $hash})
 		));
 
-		return \Snappy\Lib\Filter::exec('captureContent', ${'content_' . $hash});
+		return \Snappy::filter()->exec('captureContent', ${'content_' . $hash});
 	}
 
 	/**
@@ -599,7 +618,7 @@ class Snappy {
 			$supports = array(
 				'yaml' => function_exists('yaml_emit_file')
 			);
-			$supports = \Snappy\Lib\Filter::exec('beforeSupport', $supports);
+			$supports = \Snappy::filter()->exec('beforeSupport', $supports);
 			return (array_key_exists($string, $supports) and $supports[$string] === true);
 		}
 		return false;
@@ -661,9 +680,9 @@ class Snappy {
 			return;
 		}
 
-		\Snappy\Lib\Event::exec('onSnappyError');
+		\Snappy::event()->exec('onSnappyError');
 
-		$template = \Snappy\Lib\Filter::exec('SnappyErrorTemplate', [
+		$template = \Snappy::filter()->exec('SnappyErrorTemplate', [
 			'@tag' => 'html',
 			'@markup' => [
 				'@tag' => 'body',
@@ -741,9 +760,9 @@ class Snappy_Concrete {
 		$this->stack = 'instance/' . get_class($this) . '/' . \Snappy::getInstanceKey(get_class($this), $args);
 
 		if (is_string($class)) {
-			\Snappy\Lib\Event::exec("on{$class}Construct", $this);
+			\Snappy::event()->exec("on{$class}Construct", $this);
 		}
-		\Snappy\Lib\Event::exec('onSnappyConcrete', $this);
+		\Snappy::event()->exec('onSnappyConcrete', $this);
 	}
 
 	/**
@@ -787,6 +806,97 @@ class Snappy_Concrete {
 		}
 
 		return FALSE;
+	}
+
+	/**
+	 * @param null $arg
+	 * @param null $value
+	 *
+	 * @return bool
+	 */
+	public function setArg ($arg = null, $value = null) {
+		if (is_null($arg)) {
+			return false;
+		}
+		$this->args[$arg] = array($value);
+
+		return true;
+	}
+
+	/**
+	 * @param null $arg
+	 * @param null $value
+	 *
+	 * @return bool
+	 */
+	public function prependArg ($arg = null, $value = null) {
+		if (is_null($arg)) {
+			return false;
+		}
+		if (is_string($this->args[$arg])) {
+			$this->args[$arg] = $value . $this->args[$arg];
+		} else {
+			if (!is_array($this->args[$arg])) {
+				$this->args[$arg] = array($this->args[$arg]);
+			}
+
+			if (is_string($value)) {
+				array_unshift($this->args[$arg], $value);
+			} else {
+				array_merge($value, $this->args[$arg]);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * @param null $arg
+	 * @param null $value
+	 *
+	 * @return bool
+	 */
+	public function appendArg ($arg = null, $value = null) {
+		if (is_null($arg)) {
+			return false;
+		}
+		if (is_string($this->args[$arg])) {
+			$this->args[$arg] .= $value;
+		} else {
+			if (!is_array($this->args[$arg])) {
+				$this->args[$arg] = array();
+			}
+
+			if (is_string($value)) {
+				array_push($this->args[$arg], $value);
+			} else {
+				array_merge($this->args[$arg], $value);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * @param null $arg
+	 * @param null $filter
+	 * @param string $seperator
+	 *
+	 * @return mixed
+	 */
+	public function getArg ($arg = null, $filter = null, $default = NULL, $seperator = ' ') {
+		$return = $default;
+		if (is_string($this->args[$arg])) {
+			$return = $this->args[$arg];
+		} elseif (is_array($this->args[$arg])) {
+			$return = implode($seperator, $this->args[$arg]);
+		}
+
+		if (is_string($filter)) {
+			$return = \Snappy::filter()->exec($filter, $return);
+		}
+
+		return $return;
 	}
 }
 

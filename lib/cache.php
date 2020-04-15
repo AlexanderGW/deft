@@ -41,7 +41,7 @@ class Cache extends \Snappy_Concrete {
 		if ( self::$initialized ) {
 			return;
 		}
-//		var_dump(Snappy::get('cache.memcached')->get(Snappy::request()->url()));exit;
+//		var_dump(Snappy::lib('cache.memcached')->get(Snappy::request()->url()));exit;
 		self::$initialized = true;
 	}
 
@@ -91,4 +91,4 @@ class Cache extends \Snappy_Concrete {
 }
 
 // Process HTTP request against available route rules
-//Event::set( 'init', array( 'Cache', 'init' ), 20 );
+//\Snappy::event()->set( 'init', array( 'Cache', 'init' ), 20 );

@@ -67,7 +67,7 @@ class Token {
 	 * @return string
 	 */
 	public static function getHash() {
-		$config =& \Snappy::config();
+		$config = \Snappy::config();
 		$hash = $config->get( 'token_hash' );
 		if( is_null( $hash ) ) {
 			$hash = Random::getMd5();

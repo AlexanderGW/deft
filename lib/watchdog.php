@@ -52,7 +52,7 @@ class Watchdog {
 			return;
 		}
 
-		Event::exec('documentInit');
+		\Snappy::event()->exec('documentInit');
 		self::$initialized = true;
 	}
 

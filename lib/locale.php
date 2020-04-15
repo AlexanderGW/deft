@@ -47,7 +47,7 @@ class Locale {
 	 		return;
 		}
 
-		$config     =& \Snappy::config();
+		$config     = \Snappy::config();
 		$locales = $config->get('locales', array());
 
 		$string = \Snappy::request()->post('locale');
@@ -58,7 +58,9 @@ class Locale {
 			$string = Token::get('locale');
 		}
 		if (!$string) {
-			$string = Route::getParam('locale');
+			$query = \Snappy::route()->current('data');
+			if (array_key_exists('data', $query))
+				$string['locale'];
 		}
 		if (!$string) {
 			$string = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
@@ -133,7 +135,7 @@ class Locale {
 		}
 
 		setlocale(LC_ALL, $locale . '.utf8');
-		Event::exec('initLanguage');
+		\Snappy::event()->exec('initLanguage');
 		self::$initialized = true;
 	}
 
@@ -142,7 +144,7 @@ class Locale {
 	 */
 	public static function negotiate ($locale = null) {
 		if (is_string($locale) and (strlen($locale) == 2 or strlen($locale) == 5)) {
-			$config     =& \Snappy::config();
+			$config     = \Snappy::config();
 			$locales = $config->get('locales', array());
 
 			if (strlen($locale) == 5) {

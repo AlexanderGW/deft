@@ -76,7 +76,7 @@ class Request extends \Snappy_Concrete {
 
 			// Store POST variables
 			if ($_POST && is_array($_POST)) {
-				$this->post = Filter::exec('requestPostIn', filter_input_array(
+				$this->post = \Snappy::filter()->exec('requestPostIn', filter_input_array(
 					INPUT_POST,
 					FILTER_SANITIZE_STRING
 				));
@@ -90,7 +90,7 @@ class Request extends \Snappy_Concrete {
 					Helper::getBytesFromShno( ini_get( 'memory_limit' ) )
 				);
 
-				$this->files_in = Filter::exec('requestFilesIn', $_FILES);
+				$this->files_in = \Snappy::filter()->exec('requestFilesIn', $_FILES);
 
 				foreach( $this->files_in as $group => $data ) {
 					if( !array_key_exists( 'error', $data ) )
@@ -100,8 +100,8 @@ class Request extends \Snappy_Concrete {
 					$this->files_out[ $group ][] = self::_file( $data, $this->max_size );
 				}
 
-				$this->files_out = Filter::exec('requestFilesOut', $this->files_out);
-				Event::exec( 'requestHasFiles', $this->files_out );
+				$this->files_out = \Snappy::filter()->exec('requestFilesOut', $this->files_out);
+				\Snappy::event()->exec( 'requestHasFiles', $this->files_out );
 			}
 		}
 	}
