@@ -34,8 +34,8 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->scope = 'response';
-		$this->class = '\\Snappy\\Lib\\Response';
+		$this->scope = 'lib.response';
+		$this->class = \Snappy\Lib\Response::class;
 		$this->args = [
 			'foo' => 'bar'
 		];
@@ -48,7 +48,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	 */
 	public function test_import() {
 		$errors = Snappy::import(
-			'random'
+			$this->scope
 		);
 		$this->assertCount(
 			0,
@@ -246,7 +246,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test new instance
 	 *
-	 * @depends test_log
+	 * @depends test_import
 	 *
 	 * @covers Snappy::newInstance
 	 */
@@ -258,7 +258,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf(
 			$this->class,
 			$instance,
-			"An instance of $this->class, was not returned"
+			"An instance of {$this->class}, was not returned"
 		);
 
 		$log = Snappy::getLog("instance/{$this->class}/{$key}/calls");
@@ -304,14 +304,14 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	 */
 	public function test_getInstance() {
 		$args = 'foo';
-		$key = Snappy::getInstanceKey($this->class, $args);
+		$key = Snappy::getInstanceKey($this->class, $this->args);
 
-		$instance = Snappy::get($this->scope, $args);
+		$instance = Snappy::get($this->scope, $this->args);
 
 		$this->assertInstanceOf(
-			\Snappy\Lib\Response::class,
+			$this->class,
 			$instance,
-			"Returned value was not an instance of \\Snappy\\Lib\\Response::class"
+			"Returned value was not an instance of \\Snappy\\Lib::class"
 		);
 
 		$log = Snappy::getLog("instance/{$this->class}/{$key}/calls");
@@ -375,7 +375,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	public function test_capture() {
 		$config = Snappy::config();
 
-		$scope = 'template.html5';
+		$scope = 'template.response.html5';
 
 //		$this->assertNull(
 //			$config->get('capture_hash'),
@@ -383,7 +383,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 //		);
 
 		$capture = Snappy::capture($scope);
-//		var_dump($capture);
+//		var_dump($scope);
 
 		$this->assertRegExp(
 			'%^[a-z0-9]{32}$%',
@@ -414,7 +414,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 		$this->assertCount(
 			1,
 			$log,
-			"Stack log number of instance calls count returned $count, instead of 1"
+			"Stack log number of capture calls count returned $count, instead of 1"
 		);
 
 		$this->assertIsFloat(
@@ -422,7 +422,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 			"Stack log 'time' key is not a float"
 		);
 
-		$time = 0.01;
+		$time = 0.02;
 		$this->assertLessThan(
 			$time,
 			$log[0]['time'],

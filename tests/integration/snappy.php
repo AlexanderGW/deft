@@ -29,13 +29,13 @@
  * @group integration.snappy
  */
 class SnappyIntegrationCoreTest extends \PHPUnit\Framework\TestCase {
-	private $response = NULL;
+	private $output = NULL;
 
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->scope = 'document';
-		$this->class = '\\Snappy\\Lib\\Document';
+		$this->scope = 'response.http.html';
+		$this->class = '\\Snappy\\Lib\\Response\\Http\\Html';
 		$this->args = [
 			'base'      => null,
 			'encoding'  => 'utf-8',
@@ -44,7 +44,7 @@ class SnappyIntegrationCoreTest extends \PHPUnit\Framework\TestCase {
 			'mime'      => 'text/html'
 		];
 
-		$this->response = \Snappy::response()->output();
+		$this->output = \Snappy::response()->output();
 	}
 
 	/**
@@ -221,20 +221,20 @@ class SnappyIntegrationCoreTest extends \PHPUnit\Framework\TestCase {
 		$key = Snappy::getInstanceKey($this->class, $this->args);
 
 		$instance1 = Snappy::newInstance($this->class, $this->args);
-		$instance2 = Snappy::get($this->scope, $this->args);
-		$instance3 = Snappy::get($this->scope, $this->args);
-		$instance4 = Snappy::get($this->scope, 'bar');
+		$instance2 = Snappy::lib($this->scope, $this->args);
+		$instance3 = Snappy::lib($this->scope, $this->args);
+		$instance4 = Snappy::lib($this->scope, 'bar');
 
 		// Check all instance calls are of the same class
 		$this->assertContainsOnlyInstancesOf(
-			\Snappy\Lib\Document::class,
+			\Snappy\Lib\Response\Http\Html::class,
 			[
 				$instance1,
 				$instance2,
 				$instance3,
 				$instance4
 			],
-			"All calls are not instances of \\Snappy\\Lib\\Document::class"
+			"All calls are not instances of \\Snappy\\Lib\\Response\\Http\\Html::class"
 		);
 
 		// Check new instance is equal to the subsequent call
