@@ -21,14 +21,18 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib;
+namespace Snappy\Lib\Response\Http;
+
+use Snappy\Lib\Element;
+use Snappy\Lib\Response\Http;
+use Snappy\Lib\Sanitize;
 
 /**
- * Document class, default HTML5
+ * HTML response class, default v5
  *
  * Class Document
  */
-class Document extends \Snappy_Concrete {
+class Html extends Http {
 	private $errors = array();
 	private $robots = array(
 		'index'  => true,
@@ -64,7 +68,7 @@ class Document extends \Snappy_Concrete {
 	 *
 	 * @param array $args
 	 */
-	function __construct ($args = array()) {
+	function __construct ($args = array(), $class = __CLASS__) {
 		$args = array_merge(array(
 			'base'      => null,
 			'encoding'  => 'utf-8',
@@ -72,99 +76,8 @@ class Document extends \Snappy_Concrete {
 			'direction' => 'ltr',
 			'mime'      => 'text/html'
 		), $args);
-		$this->args = self::getArgs($args);
-		parent::__construct($this->args, __CLASS__);
-	}
-
-	/**
-	 * @param null $arg
-	 * @param null $value
-	 *
-	 * @return bool
-	 */
-	public function setArg ($arg = null, $value = null) {
-		if (is_null($arg)) {
-			return false;
-		}
-		$this->args[$arg] = array($value);
-
-		return true;
-	}
-
-	/**
-	 * @param null $arg
-	 * @param null $value
-	 *
-	 * @return bool
-	 */
-	public function prependArg ($arg = null, $value = null) {
-		if (is_null($arg)) {
-			return false;
-		}
-		if (is_string($this->args[$arg])) {
-			$this->args[$arg] = $value . $this->args[$arg];
-		} else {
-			if (!is_array($this->args[$arg])) {
-				$this->args[$arg] = array($this->args[$arg]);
-			}
-
-			if (is_string($value)) {
-				array_unshift($this->args[$arg], $value);
-			} else {
-				array_merge($value, $this->args[$arg]);
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * @param null $arg
-	 * @param null $value
-	 *
-	 * @return bool
-	 */
-	public function appendArg ($arg = null, $value = null) {
-		if (is_null($arg)) {
-			return false;
-		}
-		if (is_string($this->args[$arg])) {
-			$this->args[$arg] .= $value;
-		} else {
-			if (!is_array($this->args[$arg])) {
-				$this->args[$arg] = array();
-			}
-
-			if (is_string($value)) {
-				array_push($this->args[$arg], $value);
-			} else {
-				array_merge($this->args[$arg], $value);
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * @param null $arg
-	 * @param null $filter
-	 * @param string $seperator
-	 *
-	 * @return mixed
-	 */
-	public function getArg ($arg = null, $filter = null, $seperator = ' ') {
-		$return = null;
-		if (is_string($this->args[$arg])) {
-			$return = $this->args[$arg];
-		} elseif (is_array($this->args[$arg])) {
-			$return = implode($seperator, $this->args[$arg]);
-		}
-
-		if (is_string($filter)) {
-			$return = Filter::exec($filter, $return);
-		}
-
-		return $return;
+		$this->args = $args;
+		parent::__construct($this->args, $class);
 	}
 
 	/**
@@ -198,7 +111,7 @@ class Document extends \Snappy_Concrete {
 	 * @return mixed|string|void
 	 */
 	public function getTitle () {
-		return $this->getArg('title', 'documentTitle', $this->getTitleSeparator());
+		return $this->getArg('title', 'documentTitle', NULL, $this->getTitleSeparator());
 	}
 
 	/**
@@ -240,7 +153,7 @@ class Document extends \Snappy_Concrete {
 	 * @return mixed|void
 	 */
 	public function getDescription () {
-		return Filter::exec('document.description', $this->args['description']);
+		return \Snappy::filter()->exec('document.description', $this->args['description']);
 	}
 
 	/**
@@ -274,7 +187,7 @@ class Document extends \Snappy_Concrete {
 	 * @return mixed|string|void
 	 */
 	public function getKeywords () {
-		return $this->getArg('keywords', 'documentKeywords', ', ');
+		return $this->getArg('keywords', 'documentKeywords', NULL, ', ');
 	}
 
 	/**
@@ -497,7 +410,7 @@ class Document extends \Snappy_Concrete {
 			'content' => $content
 		);
 
-		$this->meta[$hash]            = Filter::exec('documentAddMeta', $this->meta[$hash]);
+		$this->meta[$hash]            = \Snappy::filter()->exec('documentAddMeta', $this->meta[$hash]);
 		$this->meta['_'][$priority][] = $hash;
 
 		return true;
@@ -689,7 +602,7 @@ class Document extends \Snappy_Concrete {
 			), (array) $attributes)
 		);
 
-		$this->scripts[$hash]            = Filter::exec('documentAddScript', $this->scripts[$hash]);
+		$this->scripts[$hash]            = \Snappy::filter()->exec('documentAddScript', $this->scripts[$hash]);
 		$this->scripts['_'][$priority][] = $hash;
 
 		return true;
@@ -715,7 +628,7 @@ class Document extends \Snappy_Concrete {
 	 * @return mixed|void
 	 */
 	public function getHead () {
-		$config =& \Snappy::config('document');
+		$config = \Snappy::config('document');
 
 		if ($config->get('title') and !empty($this->getArg('title'))) {
 			$this->setTitle($config->get('title'));
@@ -770,7 +683,7 @@ class Document extends \Snappy_Concrete {
 
 		$this->addMeta('robots', ($this->getIndex() ? 'index' : 'noindex') . ',' . ($this->getFollow() ? 'follow' : 'nofollow'));
 
-		Event::exec('beforeDocumentGetHead');
+		\Snappy::event()->exec('beforeDocumentGetHead');
 
 		$viewport = array();
 		if (!is_null($this->viewport['width'])) {
@@ -802,7 +715,7 @@ class Document extends \Snappy_Concrete {
 
 		if (count($this->meta['_'])) {
 			ksort($this->meta['_']);
-			$this->meta = Filter::exec('document.meta', $this->meta);
+			$this->meta = \Snappy::filter()->exec('document.meta', $this->meta);
 			foreach ($this->meta['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
 					$html .= Element::html(array(
@@ -823,7 +736,7 @@ class Document extends \Snappy_Concrete {
 
 		if (count($this->links['_'])) {
 			ksort($this->links['_']);
-			$this->links = Filter::exec('documentLinks', $this->links);
+			$this->links = \Snappy::filter()->exec('documentLinks', $this->links);
 
 			$styles = array();
 			foreach ($this->links['_'] as $priority => $hashes) {
@@ -859,7 +772,7 @@ class Document extends \Snappy_Concrete {
 			}
 
 			if (count($styles)) {
-				$styles = Filter::exec('documentAssetCacheStyles', $styles);
+				$styles = \Snappy::filter()->exec('documentAssetCacheStyles', $styles);
 				foreach ($styles as $media => $array) {
 					$html .= $this->setCssAssetCache($array, $media);
 				}
@@ -868,7 +781,7 @@ class Document extends \Snappy_Concrete {
 
 		if (count($this->styles['_'])) {
 			ksort($this->styles['_']);
-			$this->styles = Filter::exec('documentHeadStyles', $this->styles);
+			$this->styles = \Snappy::filter()->exec('documentHeadStyles', $this->styles);
 			foreach ($this->styles['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
 					$html .= Element::html($this->styles[$hash], 'document.style', true) . $this->getEOL();
@@ -878,7 +791,7 @@ class Document extends \Snappy_Concrete {
 
 		if (count($this->custom['_'])) {
 			ksort($this->custom['_']);
-			$this->custom = Filter::exec('documentHeadCustom', $this->custom);
+			$this->custom = \Snappy::filter()->exec('documentHeadCustom', $this->custom);
 			foreach ($this->custom['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
 					$html .= $this->custom[$hash] . $this->getEOL();
@@ -888,7 +801,7 @@ class Document extends \Snappy_Concrete {
 
 		// TODO: Store the head in memory, only clear storage on 'add' functions
 
-		return Filter::exec('documentGetHead', $html);
+		return \Snappy::filter()->exec('documentGetHead', $html);
 	}
 
 	/**
@@ -987,8 +900,8 @@ class Document extends \Snappy_Concrete {
 
 				// Relative to Snappy path
 				elseif (file_exists(SNAPPY_PATH . DS . $file['href'])) {
-					$path      = SNAPPY_PUBLIC_ASSET_PATH . DS;
-					$path_file = $path . basename($file['href']);
+					$path      = SNAPPY_PUBLIC_ASSET_PATH;
+					$path_file = $path . DS . basename($file['href']);
 
 					// Attempt to create
 					if (!is_dir($path)) {
@@ -1117,7 +1030,7 @@ class Document extends \Snappy_Concrete {
 
 				// Relative to Snappy path
 				elseif (file_exists(SNAPPY_PATH . DS . $script['@props']['src'])) {
-					$path      = SNAPPY_PUBLIC_ASSET_PATH;
+					$path      = SNAPPY_PUBLIC_ASSET_PATH . DS;
 					$path_file = $path . basename($script['@props']['src']);
 
 					// Attempt to create
@@ -1192,7 +1105,7 @@ class Document extends \Snappy_Concrete {
 	public function getBody () {
 		if (count($this->scripts['_'])) {
 			ksort($this->scripts['_']);
-			$this->scripts = Filter::exec('document.scripts', $this->scripts);
+			$this->scripts = \Snappy::filter()->exec('document.scripts', $this->scripts);
 
 			$scripts = array();
 			foreach ($this->scripts['_'] as $priority => $hashes) {
@@ -1233,15 +1146,15 @@ class Document extends \Snappy_Concrete {
 			}
 
 			if (count($scripts)) {
-				$scripts = Filter::exec('documentAssetCacheScripts', $scripts);
+				$scripts = \Snappy::filter()->exec('documentAssetCacheScripts', $scripts);
 				$this->appendBody($this->setJsAssetCache($scripts));
 			}
 		}
 
 		// TODO: Store the head in memory, only clear storage on 'add' functions - perhaps an 'init' event?
-		Event::exec('beforeDocumentGetBody');
-		$return = Filter::exec('documentBody', implode($this->getEOL(), $this->body));
-		Event::exec('afterDocumentGetBody');
+		\Snappy::event()->exec('beforeDocumentGetBody');
+		$return = \Snappy::filter()->exec('documentBody', implode($this->getEOL(), $this->body));
+		\Snappy::event()->exec('afterDocumentGetBody');
 		return $return;
 	}
 
@@ -1268,17 +1181,21 @@ class Document extends \Snappy_Concrete {
 	 */
 	public function output($scope = null) {
 
+		\Snappy::response()->header('Content-type', 'text/html');
+
 		// Default template name
 		if (!is_string($scope)) {
-			$scope = Filter::exec('documentOutput.template', 'template.html5');
+			$scope = \Snappy::filter()->exec('documentOutput.template', 'template.response.html5');
 		}
 
-		// Output
-		$value = Filter::exec('documentOutput', \Snappy::capture($scope));
+		\Snappy::event()->exec('beforeResponseOutput');
 
-		// Ultimate document event
-		Event::exec('afterDocumentContent');
+		$content = (string)\Snappy::filter()->exec('responseHttpHtmlOutput', \Snappy::filter()->exec('responseOutput', \Snappy::capture($scope)));
 
-		return $value;
+		\Snappy::response()->header('Content-length', strlen($content));
+
+		\Snappy::event()->exec('afterResponseOutput', $content);
+
+		return $content;
 	}
 }
