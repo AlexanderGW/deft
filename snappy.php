@@ -250,7 +250,7 @@ class Snappy {
 		if (func_num_args()) {
 			$args = func_get_args();
 			foreach ($args as $arg) {
-				if (empty($arg)) {
+				if (empty($arg) || strpos($arg, '.') === FALSE) {
 					continue;
 				}
 

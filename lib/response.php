@@ -25,7 +25,7 @@ namespace Snappy\Lib;
 
 use Snappy\Lib;
 
-class Response extends Lib {
+class Response extends \Snappy_Concrete {
 	private $buffer = NULL;
 
 	/**

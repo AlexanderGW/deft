@@ -57,7 +57,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		$errors = Snappy::import(
-			'foobar'
+			'foo.bar'
 		);
 		$this->assertCount(
 			1,
