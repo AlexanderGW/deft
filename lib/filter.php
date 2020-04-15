@@ -49,24 +49,28 @@ class Filter {
 	}
 
 	static function clear( $name = null, $function = null ) {
+		$state = FALSE;
 		if( !is_null( $name ) and array_key_exists( $name, self::$actions ) ) {
-			if( is_null( $function ) )
+			if( is_null( $function ) ) {
 				self::$actions[ $name ] = array();
-			else {
+				$state = TRUE;
+			} else {
 				foreach( self::$actions[ $name ] as $priority => $actions ) {
 					foreach( $actions as $i => $action ) {
 						if( ( is_array( $function ) and $action[0][0] == $function[0] and $action[0][1] == $function[1] ) or $action[0] == $function ) {
 							unset( self::$actions[ $name ][ $priority ][ $i ] );
+							$state = TRUE;
 
-							if( !count( self::$actions[ $name ][ $priority ] ) )
+							if( !count( self::$actions[ $name ][ $priority ] ) ) {
 								unset( self::$actions[ $name ][ $priority ] );
+							}
 						}
 					}
 				}
 			}
-			return true;
 		}
-		return false;
+
+		return $state;
 	}
 
 	static function exec( /*polymorphic*/ ) {

@@ -80,7 +80,7 @@ class Database extends Storage {
 	 * @return array
 	 */
 	public static function getArgs ($args = array()) {
-		$config  =& \Snappy::config();
+		$config  = \Snappy::config();
 		$args = array_merge(array(
 			'driver'       => $config->get('database.driver', 'mysql'),
 			'host'         => $config->get('database.hostname', 'localhost'),

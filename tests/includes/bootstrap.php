@@ -2,10 +2,17 @@
 
 // This file is called relative to Snappy root.
 
-// Ensure Snappy handles a web request
+// Ensure Snappy handles a web request, and doesn't create files
 define('SNAPPY_TESTING', true);
 
-$_SERVER['REQUEST_URI'] = 'http://localhost:8123/';
+define('SNAPPY_ABS_PATH', realpath(__DIR__ . '/../..'));
+
+define('SNAPPY_INITIATOR', SNAPPY_ABS_PATH . DIRECTORY_SEPARATOR . 'snappy.php');
+
+$_SERVER['DOCUMENT_ROOT'] = SNAPPY_ABS_PATH;
+$_SERVER['HTTP_HOST'] = 'localhost';
+$_SERVER['SERVER_PORT'] = 8000;
+$_SERVER['REQUEST_URI'] = '/';
 
 // Composer
 if (file_exists('vendor/autoload.php'))
@@ -17,7 +24,8 @@ require 'snappy.php';
 // Init Snappy with a test config
 \Snappy::init([
 	'plugins' => [
-		'example'
+		'example',
+		'test'
 	],
 	'token_timeout' => 1
 ]);

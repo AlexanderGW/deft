@@ -23,112 +23,47 @@
 
 namespace Snappy\Lib;
 
-class Response extends \Snappy\Lib\Document {
+use Snappy\Lib;
+
+class Response extends \Snappy_Concrete {
+	private $buffer = NULL;
 
 	/**
 	 * Config constructor.
 	 *
 	 * @param null $args
 	 */
-	function __construct ($args = []) {
-		parent::__construct($args, __CLASS__);
-	}
+//	function __construct ($args = [], $class = __CLASS__) {
+//		$args = array_merge(array(), $args);
+//		$this->args = $args;
+//		parent::__construct($this->args, $class);
+//	}
 
 	/**
-	 * @param null $uri
-	 */
-	public function header( $key = null, $value ) {
-		if( is_string($key)) {
-			if (is_null($value)) {
-				unset($this->headers[$key]);
-			} else {
-				$this->headers[$key] = $value;
-			}
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * @param null $uri
-	 */
-	public function location( $path = null ) {
-		if( !is_string( $path ) )
-			$uri = null;
-		$this->header('Location', SNAPPY_URL . $path);
-
-		// Empty the response, headers only.
-//		\Snappy::response()->setBody();
-
-		die( \Snappy::response()->output() );
-
-//		die( header( sprintf( 'Location: %s', $uri ), true ) );
-	}
-
-	/**
-	 * @param null $code
+	 * @param null $buffer
 	 *
-	 * @return int
+	 * @return string
 	 */
-	public function status( $code = null ) {
-		if( !is_null( $code ) ) {
-			$codes = array(
-
-				// Informational
-				200 => 'OK',
-
-				// Redirection
-				301 => 'Moved Permanently',
-
-				// Client Error
-				401 => 'Unauthorized',
-				403 => 'Forbidden',
-				404 => 'Not Found',
-
-				// Server Error
-				500 => 'Internal Server Error',
-				501 => 'Not Implemented',
-				502 => 'Bad Gateway',
-				503 => 'Service Unavailable'
-			);
-
-			if( array_key_exists( $code, $codes ) ) {
-				header( sprintf( 'HTTP/1.1 %d %s', $code, $codes[ $code ] ), true );
-
-				// If empty response, show an error template
-				if( $this->isEmpty() ) {
-					$content = \Snappy::capture( 'template.' . $code );
-					if( is_string( $content ) ) {
-						$this->setBody( $content );
-						return true;
-					}
-				}
-
-				return false;
-			}
-		}
-		return;
-	}
-
-	public function cookie($key = null, $value = null) {
-		if (is_string($key)) {
-			$this->cookies[$key] = $value;
-		}
-		return false;
+	public function buffer($buffer = NULL) {
+		$this->buffer = $buffer;
 	}
 
 	/**
 	 * @param null $scope
 	 *
-	 * @return mixed|string|void
+	 * @return string
 	 */
-	public function output($scope = null) {
-		\Snappy::response()->header('X-Generator', 'Snappy/' . \Snappy::VERSION);
+	public function output($content = NULL) {
+		return $content;
+	}
 
-		$this->headers = Filter::exec('responseOutputHeaders', $this->headers);
-		foreach($this->headers as $key => $value) {
-			header($key . ': ' . $value, true);
-		}
-		return parent::output();
+	/**
+	 * Return the output()
+	 *
+	 * @return mixed
+	 */
+	public function __toString() {
+		$content = $this->output();
+		return $content;
 	}
 }

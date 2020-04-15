@@ -58,14 +58,17 @@ class Event {
 	}
 
 	static function clear ($name = null, $function = null) {
+		$state = FALSE;
 		if (!is_null($name) and array_key_exists($name, self::$actions)) {
 			if (is_null($function)) {
 				self::$actions[$name] = array();
+				$state = TRUE;
 			} else {
 				foreach (self::$actions[$name] as $priority => $actions) {
 					foreach ($actions as $i => $action) {
 						if ((is_array($function) and $action[0][0] == $function[0] and $action[0][1] == $function[1]) or $action[0] == $function) {
 							unset(self::$actions[$name][$priority][$i]);
+							$state = TRUE;
 
 							if (!count(self::$actions[$name][$priority])) {
 								unset(self::$actions[$name][$priority]);
@@ -74,11 +77,9 @@ class Event {
 					}
 				}
 			}
-
-			return true;
 		}
 
-		return false;
+		return $state;
 	}
 
 	/**
@@ -91,6 +92,7 @@ class Event {
 			return;
 		}
 
+		$state = FALSE;
 		$args = func_get_args();
 		$name = array_shift($args);
 
@@ -105,10 +107,14 @@ class Event {
 				foreach ($queue as $priority => $callbacks) {
 					foreach ($callbacks as $callback) {
 						if (is_callable($callback[0])) {
+							$return = call_user_func_array($callback[0], array_slice($args, 0, $callback[1]));
 							$array[$priority][] = array(
 								'callback' => (is_array($callback[0]) ? $callback[0][0] . '::' . $callback[0][1] : $callback[0]),
-								'return'   => call_user_func_array($callback[0], array_slice($args, 0, $callback[1]))
+								'return'   => $return
 							);
+
+							if ($return !== FALSE)
+								$state = TRUE;
 						}
 					}
 				}
@@ -117,11 +123,9 @@ class Event {
 					'time'      => Helper::getMoment($start),
 					'callbacks' => $array
 				));
-
-				return true;
 			}
 		}
 
-		return false;
+		return $state;
 	}
 }

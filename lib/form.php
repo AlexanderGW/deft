@@ -157,7 +157,7 @@ class Form extends \Snappy_Concrete {
 	}
 
 	public function save () {
-		$config =& \Snappy::config('config.form.' . $this->prop('id'));
+		$config = \Snappy::config('config.form.' . $this->prop('id'));
 
 		$array = array();
 		foreach ($this->fields as $field) {

@@ -23,7 +23,7 @@
 
 namespace Snappy\Lib;
 
-class Route {
+class Route extends \Snappy_Concrete {
 	/**
 	 * Set TRUE once init() executes.
 	 *
@@ -62,7 +62,7 @@ class Route {
 //		}
 
 		// Load config based routes
-		$config =& \Snappy::config( 'config.route' );
+		$config = \Snappy::config( 'config.route' );
 		if ( ! $config->isEmpty() ) {
 			$routes = $config->get( 'routes', array() );
 			if ( count( $routes ) ) {
@@ -86,11 +86,11 @@ class Route {
 		$start = Helper::getMicroTime();
 
 		// Process requested route
-		self::$route = self::get( SNAPPY_ROUTE );
+		self::$route = \Snappy::route()->get( SNAPPY_ROUTE );
 
 		// No match
 		if ( self::$route === null and strlen( SNAPPY_ROUTE ) ) {
-			$routes  = self::getRules();
+			$routes  = \Snappy::route()->getRules();
 			$divider = \Snappy::config()->get( 'url_separator', '/' );
 
 			$request = explode( $divider, SNAPPY_ROUTE );
@@ -182,7 +182,7 @@ class Route {
 	/**
 	 * Returns the currently patched route. Provide a value for a particular route key, or return the whole object.
 	 */
-	public static function current( $arg = null ) {
+	public function current( $arg = null ) {
 		if ( is_null( $arg ) ) {
 			return (object) self::$route;
 		}
@@ -197,7 +197,7 @@ class Route {
 	 * @param null $path
 	 * @param array $args
 	 */
-	public static function add( $name = null, $path = null, $args = array(), $callback = null ) {
+	public function add( $name = null, $path = null, $args = array(), $callback = null ) {
 
 		// TODO: Need to split path by separator
 
@@ -257,7 +257,7 @@ class Route {
 	/**
 	 * @param null $path
 	 */
-	public static function get( $path = null ) {
+	public function get( $path = null ) {
 		if ( is_null( $path ) ) {
 			return null;
 		}
@@ -273,14 +273,14 @@ class Route {
 	/**
 	 * @return array
 	 */
-	public static function getRules() {
+	public function getRules() {
 		return self::$rules;
 	}
 
 	/**
 	 * @param null $path
 	 */
-	public static function remove( $path = null ) {
+	public function remove( $path = null ) {
 		if ( strpos( $path, '/' ) === 0 ) {
 			$path = substr( $path, 1 );
 		}
@@ -292,22 +292,22 @@ class Route {
 	/**
 	 * @param null $name
 	 */
-	public static function addSet( $name = null ) {
+	public function addSet( $name = null ) {
 
 	}
 
 	/**
 	 * @param null $name
 	 */
-	public static function removeSet( $name = null ) {
+	public function removeSet( $name = null ) {
 
 	}
 
 	/**
 	 *
 	 */
-	public static function save() {
-		$config =& \Snappy::config( 'config.route' );
+	public function save() {
+		$config = \Snappy::config( 'config.route' );
 		$config->set( self::getRules() );
 		$config->save();
 	}
@@ -317,23 +317,23 @@ class Route {
 	 *
 	 * @return mixed|object|void
 	 */
-	public static function getName() {
+	public function getName() {
 		return self::current( 'name' );
 	}
 
-	public static function request() {
+	public function request() {
 		return self::current( 'request' );
 	}
 
-	public static function getPath() {
+	public function getPath() {
 		return self::current( 'path' );
 	}
 
-	public static function getPattern() {
+	public function getPattern() {
 		return self::current( 'pattern' );
 	}
 
-	public static function getParam( $key = null ) {
+	public function getParam( $key = null ) {
 		$data = self::current( 'data' );
 		if ( is_array( $data ) ) {
 			if ( array_key_exists( $key, $data ) ) {
@@ -342,13 +342,13 @@ class Route {
 		}
 	}
 
-	public static function getCallback() {
+	public function getCallback() {
 		return self::current( 'callback' );
 	}
 }
 
 // Load route rules
-Event::set( 'init', '\Snappy\Lib\Route::init', 10 );
+\Snappy::event()->set( 'init', '\Snappy\Lib\Route::init', 10 );
 
 // Process HTTP request against available route rules
-Event::set( 'init', '\Snappy\Lib\Route::parse', 500 );
+\Snappy::event()->set( 'init', '\Snappy\Lib\Route::parse', 500 );

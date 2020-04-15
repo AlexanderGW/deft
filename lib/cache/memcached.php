@@ -28,7 +28,7 @@ class Memcached extends \Snappy\Lib\Cache {
 		}
 
 		// TODO: what to do with this
-		$result = \Snappy::get('cache.memcached')->get(\Snappy::request()->url());
+		$result = \Snappy::lib('cache.memcached')->get(\Snappy::request()->url());
 		if ($result) {
 			echo $result; exit;
 		}
@@ -55,7 +55,7 @@ class Memcached extends \Snappy\Lib\Cache {
 	 * @return array
 	 */
 	public static function getArgs ($args = array()) {
-		$config =& \Snappy::config('config.cache.memcached');
+		$config = \Snappy::config('config.cache.memcached');
 		$args = array_merge(array(
 			'host' => $config->get('host', '127.0.0.1'),
 			'port' => $config->get('port', 11211)
@@ -92,7 +92,7 @@ class Memcached extends \Snappy\Lib\Cache {
 			$url = \Snappy::request()->url();
 			if (strpos($url, 'debug') === false) {
 				$key = $url;
-				$state = \Snappy::get('cache.memcached')->set($key, $value);
+				$state = \Snappy::lib('cache.memcached')->set($key, $value);
 			}
 //			var_dump($state);exit;
 //			var_dump(Snappy::cache()->get($key));exit;
@@ -102,6 +102,6 @@ class Memcached extends \Snappy\Lib\Cache {
 }
 
 // Process HTTP request against available route rules
-Event::set( 'init', '\Snappy\Lib\Cache\Memcached::init', 20 );
+\Snappy::event()->set( 'init', '\Snappy\Lib\Cache\Memcached::init', 20 );
 
 Filter::add('documentOutput', '\Snappy\Lib\Cache\Memcached::documentOutput', 999);

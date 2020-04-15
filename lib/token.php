@@ -67,7 +67,7 @@ class Token {
 	 * @return string
 	 */
 	public static function getHash() {
-		$config =& \Snappy::config();
+		$config = \Snappy::config();
 		$hash = $config->get( 'token_hash' );
 		if( is_null( $hash ) ) {
 			$hash = Random::getMd5();
@@ -108,7 +108,7 @@ class Token {
 		} else
 			$encoded = \Snappy::encode( self::$props );
 
-		setcookie( $hash, $encoded, $expire, SNAPPY_URL_PATH, $_SERVER['HTTP_HOST'] );
+		setcookie( $hash, $encoded, $expire, SNAPPY_URL_PATH, \Snappy::request()->host() );
 		return true;
 	}
 

@@ -26,7 +26,7 @@
  */
 Event::set('documentInit', function() {
 	if (Snappy::request()->isPost() === false) {
-		$document = \Snappy::get('cache.memcached')->getLink()->get('snappy.document.' . md5(SNAPPY_ROUTE));
+		$document = \Snappy::lib('cache.memcached')->getLink()->get('snappy.document.' . md5(SNAPPY_ROUTE));
 		if ($document) {
 			die($document);
 		}
@@ -37,7 +37,7 @@ Event::set('documentInit', function() {
  * Cache rendered document for future requests
  */
 Filter::add('documentOutput', function($content) {
-	\Snappy::get('cache.memcached')->getLink()->set(
+	\Snappy::lib('cache.memcached')->getLink()->set(
 		'snappy.document.' . md5(SNAPPY_ROUTE),
 		$content,
 		\Snappy::config('cache.memcached')->get('expire', 900)

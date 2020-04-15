@@ -31,7 +31,7 @@ class Example extends Plugin {
 	private static $path;
 
 	public static function init() {
-		self::$path = SNAPPY_PLUGIN_PATH . 'example' . DS;
+		self::$path = SNAPPY_PLUGIN_PATH . DS . 'example' . DS;
 
 		/**
 		 * Route rules can be automatically loaded at runtime after being stored with \Snappy::route()->save()
@@ -123,15 +123,15 @@ class Example extends Plugin {
 }
 
 // Establish the plugin's routes
-Event::set( 'init', '\Snappy\Plugin\Example::init' );
+\Snappy::event()->set( 'init', '\Snappy\Plugin\Example::init' );
 
 // Document header
-Event::set( 'beforeDocumentGetHead', '\Snappy\Plugin\Example::beforeDocumentGetHead' );
+\Snappy::event()->set( 'beforeDocumentGetHead', '\Snappy\Plugin\Example::beforeDocumentGetHead' );
 
 // Document footer
-Event::set( 'beforeDocumentGetBody', '\Snappy\Plugin\Example::beforeDocumentGetBody' );
+\Snappy::event()->set( 'beforeDocumentGetBody', '\Snappy\Plugin\Example::beforeDocumentGetBody' );
 
 // Example event for files in the request, they have been processed in Http::init() and are ready to handle
-//Event::set( 'requestHasFiles', function ( $files ) {
+//\Snappy::event()->set( 'requestHasFiles', function ( $files ) {
 //	var_dump( $files ); exit;
 //} );
