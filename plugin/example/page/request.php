@@ -61,8 +61,7 @@ $form = Snappy::form('example')
 <div>
 	<div>
 		<h1><?php ___('Snappy &ndash; The cURL request helper') ?></h1>
-		<p><a href="./">Return to previous page.</a><br>A brief example of the URI based request helper and the information
-			provided using the <code>Snappy\Lib\Http::request()</code> function.</p>
+		<p><a href="./">Return to previous page.</a><br>A brief example of the JSON API provided with Snappy. Requested data using <code>Snappy.get()</code> (an HTTP GET wrapper for <code>Snappy.request()</code>), for a response created with <code>Snappy::response()-output()</code></p>
 	</div>
 	<?php echo $form->content() ?>
 </div>
