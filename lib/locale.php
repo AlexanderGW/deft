@@ -58,7 +58,7 @@ class Locale {
 			$string = Token::get('locale');
 		}
 		if (!$string) {
-			$query = \Snappy::route()->current('data');
+			$query = (array)\Snappy::route()->current('data');
 			if (array_key_exists('data', $query))
 				$string['locale'];
 		}
