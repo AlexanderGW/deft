@@ -488,8 +488,13 @@ class Snappy {
 		return self::lib('route');
 	}
 
+	/**
+	 * @param array $args
+	 *
+	 * @return \Snappy\Lib\Response
+	 */
 	public static function response ($args = []) {
-		$config = self::lib('config');
+		$config = self::config();
 
 		if ($config) {
 			$args = array_merge(array(
@@ -578,7 +583,7 @@ class Snappy {
 			return;
 		}
 
-		$config  =& \Snappy::config();
+		$config  = self::config();
 		$hash = $config->get('capture_hash');
 		if (is_null($hash)) {
 			$hash = \Snappy\Lib\Random::getMd5();
