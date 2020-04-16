@@ -26,7 +26,7 @@ namespace Snappy\Lib\Response\Http;
 use Snappy\Lib\Response\Http;
 
 /**
- * JSON response class
+ * Response HTTP JSON class
  *
  * Class Document
  */
@@ -45,6 +45,16 @@ class Json extends Http {
 	}
 
 	/**
+	 * @param null $buffer
+	 *
+	 * @return string
+	 */
+	public function buffer($buffer = NULL) {
+		$this->buffer = $buffer;
+		return TRUE;
+	}
+
+	/**
 	 * @param null $scope
 	 *
 	 * @return mixed|string|void
@@ -54,8 +64,14 @@ class Json extends Http {
 
 		\Snappy::event()->exec('beforeResponseOutput', $this->args);
 
-		if (is_null($content))
+		if (is_null($content)) {
 			$content = is_null($this->buffer) ? 'N;' : $this->buffer;
+
+			// Nothing to output, set status to 404
+			if (is_null($this->buffer)) {
+				\Snappy::response()->status(404);
+			}
+		}
 
 		$content = \Snappy::filter()->exec('responseHttpJsonOutput', \Snappy::filter()->exec('responseOutput', $content));
 
