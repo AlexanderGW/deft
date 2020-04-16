@@ -46,6 +46,7 @@ class Response extends \Snappy_Concrete {
 	 */
 	public function buffer($buffer = NULL) {
 		$this->buffer = $buffer;
+		return TRUE;
 	}
 
 	/**
@@ -54,7 +55,7 @@ class Response extends \Snappy_Concrete {
 	 * @return string
 	 */
 	public function output($content = NULL) {
-		return $content;
+		return is_null($content) ? $this->buffer : $content;
 	}
 
 	/**
