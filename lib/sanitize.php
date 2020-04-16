@@ -30,16 +30,7 @@ class Sanitize {
 	 *
 	 * @return string
 	 */
-	public static function forText( $string ) {
-		return preg_replace( '/[\x00-\x1F\x80-\x9F]/u', '', $string );
-	}
-
-	/**
-	 * @param $string
-	 *
-	 * @return string
-	 */
-	public static function forTextBlock( $string ) {
+	public static function noControlAll( $string = NULL ) {
 		return preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '', $string );
 	}
 
@@ -48,7 +39,34 @@ class Sanitize {
 	 *
 	 * @return string
 	 */
-	public static function forHtml( $string ) {
-		return htmlentities( $string, ENT_QUOTES, 'UTF-8' );
+	public static function noControl( $string = NULL ) {
+		return preg_replace( '/[\x00-\x1F\x80-\x9F]/u', '', $string );
+	}
+
+	/**
+	 * @param $string
+	 *
+	 * @return string
+	 */
+	public static function forText($string = NULL) {
+		return self::noControlAll($string);
+	}
+
+	/**
+	 * @param $string
+	 *
+	 * @return string
+	 */
+	public static function forTextBlock($string = NULL) {
+		return self::noControl($string);
+	}
+
+	/**
+	 * @param $string
+	 *
+	 * @return string
+	 */
+	public static function forHtml( $string = NULL ) {
+		return htmlentities( self::noControl($string), ENT_QUOTES, 'UTF-8' );
 	}
 }
