@@ -28,5 +28,5 @@ if (file_exists('../vendor/autoload.php'))
 // Bootstrap Snappy
 require '../bootstrap.php';
 
-// Output response
-echo \Snappy::response()->output();
+// Echo response
+echo \Snappy::response();
