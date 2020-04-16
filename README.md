@@ -1,7 +1,7 @@
 # Snappy
 An evolving micro framework for JavaScript and PHP.
 
-An attempt to put together code, for common functionality. Such as handling requests, responses, routing, sanitisation, data storage, etc.
+An attempt to put together code, for common functionality. Such as handling requests, responses, routing, events, filters, plugins, sanitation, data storage, etc.
 
 https://gailey-white.com/snappy-php-framework
 
