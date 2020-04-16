@@ -1,7 +1,20 @@
 # Snappy
-A minimal PHP 5.3+ web app framework. Comes with PDO support, URI routing, hooks, filters
+An evolving micro framework for JavaScript and PHP.
 
-Examples and documentation can be found here: https://gailey-white.com/snappy-php-framework
+An attempt to put together code, for common functionality. Such as handling requests, responses, routing, sanitisation, data storage, etc.
 
-##### Webroot
+https://gailey-white.com/snappy-php-framework
+
+##### Default docroot for web servers
 `~/public`
+
+##### Default config
+`~/config/snappy.php`
+
+If left unchanged, Snappy will default to the **example**, and **debug** plugins.
+
+##### NPM
+
+`test` run PHPUnit tests.
+
+`debug` run PHPUnit tests (debugging).
