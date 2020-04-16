@@ -21,8 +21,9 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if(($value = \Snappy::request()->post('foobar')) !== NULL) {
-	\Snappy::response()->json(json_encode([
-		'value' => \Snappy\Lib\Sanitize::forHtml($value)
-	]));
-}
+// TODO: send to a wrapper function for the Snappy payloads stuff
+echo json_encode([
+	'snappy' => Snappy::VERSION,
+	'querySelector' => 'textarea',
+	'data' => "[['time' => \Snappy\Lib\Sanitize::forHtml(time())],[3234324 => 'LOREM IPSUM', 'FOO' => 'BAR'], [[[[[[[[[['baz' => 'qux']]]]]]]]]]]"
+]);

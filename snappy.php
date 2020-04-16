@@ -35,7 +35,7 @@ define('TIME_UTC', (time() - date('Z')));
  * Class Snappy
  */
 class Snappy {
-	const VERSION = '0.4';
+	const VERSION = '0.5';
 
 	const PLUGIN_LOADED = 2;
 	const PLUGIN_EXISTS = 1;
@@ -488,8 +488,13 @@ class Snappy {
 		return self::lib('route');
 	}
 
+	/**
+	 * @param array $args
+	 *
+	 * @return \Snappy\Lib\Response
+	 */
 	public static function response ($args = []) {
-		$config = self::lib('config');
+		$config = self::config();
 
 		if ($config) {
 			$args = array_merge(array(
@@ -578,7 +583,7 @@ class Snappy {
 			return;
 		}
 
-		$config  =& \Snappy::config();
+		$config  = self::config();
 		$hash = $config->get('capture_hash');
 		if (is_null($hash)) {
 			$hash = \Snappy\Lib\Random::getMd5();

@@ -21,23 +21,27 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+\Snappy::import('lib.http');
+
 use Snappy\Lib\Http;
 
 Snappy::response()->prependTitle(__('cURL request'));
 
+Snappy::response()->addScript( 'plugin/example/asset/js/request.js' );
+
 // Send a POST request to "/response" on the example plugin
-$request = Http::request(
-	// URI
-	SNAPPY_URL . '/response',
-
-	// cURL options
-	null,
-
-	// POST data
-	array(
-		'foobar' => 'Testing post'
-	)
-);
+//$request = Http::request(
+//	// URI
+//	'/response',
+//
+//	// cURL options
+//	null,
+//
+//	// POST data
+//	array(
+//		'foobar' => 'Testing post'
+//	)
+//);
 
 // Capture response and build a <textarea> around it.
 ob_start();
@@ -57,8 +61,7 @@ $form = Snappy::form('example')
 <div>
 	<div>
 		<h1><?php ___('Snappy &ndash; The cURL request helper') ?></h1>
-		<p><a href="./">Return to previous page.</a><br>A brief example of the URI based request helper and the information
-			provided using the <code>Snappy\Lib\Http::request()</code> function.</p>
+		<p><a href="./">Return to previous page.</a><br>A brief example of the JSON API provided with Snappy. Requested data using <code>Snappy.get()</code> (an HTTP GET wrapper for <code>Snappy.request()</code>), for a response created with <code>Snappy::response()-output()</code></p>
 	</div>
 	<?php echo $form->content() ?>
 </div>

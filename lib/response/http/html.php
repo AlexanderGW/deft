@@ -28,9 +28,9 @@ use Snappy\Lib\Response\Http;
 use Snappy\Lib\Sanitize;
 
 /**
- * HTML response class, default v5
+ * HTML response class, default HTML5
  *
- * Class Document
+ * Class Html
  */
 class Html extends Http {
 	private $errors = array();
@@ -285,6 +285,25 @@ class Html extends Http {
 	}
 
 	/**
+	 * @param $value
+	 */
+	public function setEOL ($value) {
+		$this->eol = $value;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getEOL () {
+		return $this->eol;
+	}
+
+
+
+
+
+
+	/**
 	 * @param int $value
 	 */
 	public function setVpHeight ($value = 0) {
@@ -318,6 +337,12 @@ class Html extends Http {
 	public function setVpMaximum ($value = null) {
 		$this->viewport['maximum'] = round($value, 2);
 	}
+
+
+
+
+
+
 
 	/**
 	 * @param null $content
@@ -626,6 +651,11 @@ class Html extends Http {
 		return true;
 	}
 
+
+
+
+
+
 	/**
 	 * @return mixed|void
 	 */
@@ -845,19 +875,19 @@ class Html extends Http {
 					} else {
 						file_put_contents($path_file, $content);
 						return Element::html(array(
-							'@tag'   => 'link',
-							'@close' => false,
-							'@props' => array(
-								'media' => $media,
-								'type'  => 'text/css',
-								'rel'   => 'stylesheet',
-								'href'  => str_replace(
-									array(dirname(SNAPPY_PUBLIC_ASSET_PATH), "\\"),
-									array(SNAPPY_URL, '/'),
-									$path_file
+								'@tag'   => 'link',
+								'@close' => false,
+								'@props' => array(
+									'media' => $media,
+									'type'  => 'text/css',
+									'rel'   => 'stylesheet',
+									'href'  => str_replace(
+										array(dirname(SNAPPY_PUBLIC_ASSET_PATH), "\\"),
+										array(SNAPPY_URL, '/'),
+										$path_file
+									)
 								)
-							)
-						), 'document.style') . $this->getEOL();
+							), 'document.style') . $this->getEOL();
 					}
 				}
 			}
@@ -884,18 +914,18 @@ class Html extends Http {
 						$content = file_get_contents($file['href']) . "\n\n";
 						file_put_contents($path_file, $content);
 						$return[] = Element::html(array(
-							'@tag'   => 'link',
-							'@close' => false,
-							'@props' => array(
-								'media' => $media,
-								'type'  => 'text/css',
-								'rel'   => 'stylesheet',
-								'href'  => str_replace(
-									array(dirname(SNAPPY_PATH), "\\"),
-									array(SNAPPY_ASSET_URL, '/'),
-									$file['href']
-								) . '?' . time()
-							), 'document.style')
+								'@tag'   => 'link',
+								'@close' => false,
+								'@props' => array(
+									'media' => $media,
+									'type'  => 'text/css',
+									'rel'   => 'stylesheet',
+									'href'  => str_replace(
+										           array(dirname(SNAPPY_PATH), "\\"),
+										           array(SNAPPY_ASSET_URL, '/'),
+										           $file['href']
+									           ) . '?' . time()
+								), 'document.style')
 						);
 					}
 				}
@@ -981,16 +1011,16 @@ class Html extends Http {
 				}
 
 				return Element::html(array(
-					'@tag'   => 'script',
-					'@props' => array(
-						'type' => 'text/javascript',
-						'src'  => str_replace(
-							array(dirname(SNAPPY_PUBLIC_ASSET_PATH), "\\"),
-							array(SNAPPY_URL, '/'),
-							$path_file
-						)
-					),
-				), 'document.script') . $this->getEOL();
+						'@tag'   => 'script',
+						'@props' => array(
+							'type' => 'text/javascript',
+							'src'  => str_replace(
+								array(dirname(SNAPPY_PUBLIC_ASSET_PATH), "\\"),
+								array(SNAPPY_URL, '/'),
+								$path_file
+							)
+						),
+					), 'document.script') . $this->getEOL();
 			}
 
 			$return = array();
@@ -1066,6 +1096,11 @@ class Html extends Http {
 		return null;
 	}
 
+
+
+
+
+
 	/**
 	 * @param null $content
 	 */
@@ -1085,20 +1120,6 @@ class Html extends Http {
 	 */
 	public function appendBody ($content = null) {
 		array_push($this->body, $content);
-	}
-
-	/**
-	 * @param $value
-	 */
-	public function setEOL ($value) {
-		$this->eol = $value;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getEOL () {
-		return $this->eol;
 	}
 
 	/**
@@ -1168,21 +1189,12 @@ class Html extends Http {
 	}
 
 	/**
-	 *
-	 */
-	static public function json($content) {
-		header('Content-type: text/json');
-		header('Content-length: ' . strlen($content));
-		die($content);
-	}
-
-	/**
 	 * @param null $scope
 	 *
 	 * @return mixed|string|void
 	 */
 	public function output($scope = null) {
-		\Snappy::response()->header('Content-type', 'text/html');
+		$this->header('Content-type', 'text/html');
 
 		// Default template name
 		if (!is_string($scope)) {
@@ -1195,7 +1207,7 @@ class Html extends Http {
 
 		$content = (string)\Snappy::filter()->exec('responseHttpHtmlOutput', \Snappy::filter()->exec('responseOutput', $this->buffer));
 
-		\Snappy::response()->header('Content-length', strlen($content));
+		$this->header('Content-length', strlen($content));
 
 		\Snappy::event()->exec('afterResponseOutput', $content);
 

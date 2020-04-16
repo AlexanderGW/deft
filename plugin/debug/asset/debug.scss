@@ -12,6 +12,10 @@ article.sy-debug-report {
 	font-size: .75rem;
 }
 
+article.sy-debug-report + article.sy-debug-report {
+	margin-top: 0;
+}
+
 article.sy-debug-report > div {
 	background-color: #fff;
 	border: .125rem solid #000;

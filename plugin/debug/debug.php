@@ -38,15 +38,17 @@ class Debug extends Plugin {
 			'hash' => '[0-9a-z]{32}'
 		), '\\Snappy\\Plugin\\Debug::returnRequest');
 
-		$hash = self::getHash();
-		$res = \Snappy::response();
-		$res->addScriptContent("var Snappy = Snappy || {}; Snappy.debugHash = '{$hash}';");
-		$res->addScript('plugin/debug/asset/debug.js');
-		$res->addStyle('plugin/debug/asset/debug.css');
+		\Snappy::event()->set('ready', '\Snappy\Plugin\Debug::setResponseAssets');
+	}
 
-//		\Snappy::event()->set('onConstruct', function($instance){
-//			var_dump($instance);
-//		});
+	public static function setResponseAssets() {
+		$res = \Snappy::response();
+		if ($res->getArg('type') === 'http.html') {
+			$hash = \Snappy\Plugin\Debug::getHash();
+			$res->addScriptContent("var Snappy = Snappy || {}; Snappy.debugHash = '{$hash}';");
+			$res->addScript('plugin/debug/asset/debug.js');
+			$res->addStyle('plugin/debug/asset/debug.css');
+		}
 	}
 
 	public static function getHash() {
@@ -63,7 +65,7 @@ class Debug extends Plugin {
 	public static function returnSetting () {
 
 		// Get current debug state
-		$config   = \Snappy::config();
+		$config = \Snappy::config();
 		if ($debug = \Snappy::request()->post('debug')) {
 			$config->set('debug', $debug);
 			$config->save();
@@ -96,18 +98,22 @@ class Debug extends Plugin {
 		// Add submit control
 		$form->field('input.submit');
 
-		\Snappy::response()->appendBody(Element::html(array(
+		// Add form markup to document
+		$res = \Snappy::response();
+		$res->appendBody(Element::html(array(
 			'@tag' => 'h3',
 			'@markup' => __('Snappy / Debug')
 		)));
-
-		// Add form markup to document
-		\Snappy::response()->appendBody($form);
+		$res->appendBody($form);
 	}
 
 	public static function returnRequest() {
-		$content = file_get_contents(self::getPath() . DS . \Snappy::route()->getParam('hash') . '.json');
-		\Snappy::response()->json($content);
+
+		// Set response output to JSON
+		\Snappy::config()->set('response.type', 'http.json');
+
+		// Buffer the content
+		\Snappy::response()->buffer(file_get_contents(self::getPath() . DS . \Snappy::route()->getParam('hash') . '.json'));
 	}
 
 	public static function writeJson() {

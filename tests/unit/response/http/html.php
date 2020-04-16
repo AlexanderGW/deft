@@ -24,42 +24,55 @@
 /**
  * Here is my attempt to convey my thought process for Snappy core, and how it should work.
  *
- * Class SnappyUnitResponseHttpJsonTest
+ * Class SnappyUnitResponseHttpHtmlTest
  *
- * @group unit.response.http.json
+ * @group unit.response.http.html
  */
 
-class SnappyUnitResponseHttpJsonTest extends \PHPUnit\Framework\TestCase {
+class SnappyUnitResponseHttpHtmlTest extends \PHPUnit\Framework\TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
 		$this->response = Snappy::response([
-			'type' => 'http.json'
+			'type' => 'http.html'
 		]);
 	}
 
 	/**
-	 * Test default JSON output
+	 * Test location
 	 *
-	 * @covers \Snappy\Lib\Response\Http\Json::output
+	 * @covers \Snappy\Lib\Response\Http\Html::output
 	 */
-	public function test_response_http_json_output() {
+	public function test_response_http_html_output() {
 
-		// Check empty output is JSON NULL (N;)
+		// Check empty output has the default html5 template doctype
 		$output = $this->response->output();
-		$this->assertEquals(
-			'N;',
+
+		$this->assertStringStartsWith(
+			'<!DOCTYPE html>',
 			$output,
-			"Empty JSON buffer should be 'N;', instead '$output'"
+			'Default output does not start with the HTML5 doctype'
 		);
 
-		// Check 'Content-type' is text/json
+		$this->assertStringEndsWith(
+			"\r\n",
+			$output,
+			'Default output does not end with carriage return & new line'
+		);
+
+		$this->assertStringContainsString(
+			'Snappy ' . Snappy::VERSION,
+			$output,
+			"Default output contains the Snappy 'Generator' meta tag header"
+		);
+
+		// Check 'Content-type' is text/html
 		$result = $this->response->header('Content-type');
 
 		$this->assertEquals(
-			'text/json',
+			'text/html',
 			$result,
-			"The HTTP 'Content-type' header should be 'text/json', instead '$result'"
+			"The HTTP 'Content-type' header should be 'text/html', instead '$result'"
 		);
 	}
 }
