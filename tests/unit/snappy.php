@@ -403,11 +403,6 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 			'HTML5 template does not end with carriage return & new line'
 		);
 
-		$this->assertStringContainsString(
-			Snappy::VERSION,
-			$capture
-		);
-
 		$log = Snappy::getLog("capture/{$scope}");
 		$count = count($log);
 
