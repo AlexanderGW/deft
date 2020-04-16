@@ -5,10 +5,12 @@
 // Ensure Snappy handles a web request, and doesn't create files
 define('SNAPPY_TESTING', true);
 
-define('SNAPPY_ABS_PATH', realpath(__DIR__ . '/../..'));
+// Replace separators on Windows for test passing
+define('SNAPPY_ABS_PATH', str_replace("\\", '/', realpath(__DIR__ . '/../..')));
 
-define('SNAPPY_INITIATOR', SNAPPY_ABS_PATH . DIRECTORY_SEPARATOR . 'snappy.php');
+define('SNAPPY_INITIATOR', SNAPPY_ABS_PATH . '/snappy.php');
 
+// Spoof web server environment variables for testing
 $_SERVER['DOCUMENT_ROOT'] = SNAPPY_ABS_PATH;
 $_SERVER['HTTP_HOST'] = 'localhost';
 $_SERVER['SERVER_PORT'] = 8000;
@@ -26,6 +28,5 @@ require 'snappy.php';
 	'plugins' => [
 		'example',
 		'test'
-	],
-	'token_timeout' => 1
+	]
 ]);
