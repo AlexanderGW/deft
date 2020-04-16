@@ -21,23 +21,27 @@
  * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+\Snappy::import('lib.http');
+
 use Snappy\Lib\Http;
 
 Snappy::response()->prependTitle(__('cURL request'));
 
+Snappy::response()->addScript( 'plugin/example/asset/js/request.js' );
+
 // Send a POST request to "/response" on the example plugin
-$request = Http::request(
-	// URI
-	SNAPPY_URL . '/response',
-
-	// cURL options
-	null,
-
-	// POST data
-	array(
-		'foobar' => 'Testing post'
-	)
-);
+//$request = Http::request(
+//	// URI
+//	'/response',
+//
+//	// cURL options
+//	null,
+//
+//	// POST data
+//	array(
+//		'foobar' => 'Testing post'
+//	)
+//);
 
 // Capture response and build a <textarea> around it.
 ob_start();

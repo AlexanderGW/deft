@@ -62,19 +62,11 @@ class Example extends Plugin {
 	 * Callback for route matches...
 	 */
 	public static function content() {
-		$res = \Snappy::response();
 
 		// Do we have a 'page' parameter in the route data?
 		if (is_array($query = \Snappy::route()->current('data'))) {
 			$page = $query['page'];
 		}
-
-//		$db = \Snappy::database();
-//		$tmp = $db->query("select * from wp3Jc9_terms");
-//		$tmp2 = $db->query("select * from wp3Jc9_posts");
-//		var_dump($db->getRows($tmp));
-
-
 
 		if( empty( $page ) ) {
 			$page = 'index';
@@ -84,20 +76,39 @@ class Example extends Plugin {
 				'example',
 				Watchdog::INFORMATION
 			);
-		} elseif( $page == 'index' )
-			$res->location();
+		} elseif( $page == 'index' ) {
+			\Snappy::response()->location();
+		}
+
+		// If we're serving the 'response' page, set response to JSON
+		if ($page == 'response') {
+			\Snappy::config()->set('response.type', 'http.json');
+		}
+
+		// Otherwise default http.html response, add event actions to add an HTML header and footer
+		else {
+			\Snappy::event()->set( 'beforeDocumentGetHead', '\Snappy\Plugin\Example::beforeDocumentGetHead' );
+			\Snappy::event()->set( 'beforeDocumentGetBody', '\Snappy\Plugin\Example::beforeDocumentGetBody' );
+		}
+
+		// Get response handle
+		$res = \Snappy::response();
 
 		// Capture the output
 		$content = \Snappy::capture( 'plugin.example.page.' . $page );
 		if( is_string( $content ) ) {
 
-			// Add to the output document
-			$res->appendBody( $content );
-		} else {
-			$res->status(404);
+			// Add to the content to response
+			if ($res->getArg('type') === 'http.json')
+				$res->buffer($content);
+			else
+				$res->appendBody($content);
 		}
 
-
+		// Capture returned FALSE
+		else {
+			$res->status(404);
+		}
 	}
 
 	public static function beforeDocumentGetHead() {
@@ -110,12 +121,11 @@ class Example extends Plugin {
 		$res->setVpWidth( 0 );
 //		$res->addStyle( 'https://fonts.googleapis.com/css?family=Raleway:400,700' );
 		$res->setTitleSeparator( ' &bull; ' );
-		$res->setTitle( 'Snappy, a PHP micro framework for whatever.' );
-		$res->setDescription( 'A PHP micro framework for whatever.' );
+		$res->setTitle( 'Snappy, a PHP & JS framework' );
+		$res->setDescription( 'Another framework, attempting to make your life easier. Its early days yet...' );
 	}
 
 	public static function beforeDocumentGetBody() {
-		//<header><main><div><a href="' . SNAPPY_URL . '" class="logo">SNAPPY</a></div></main></header>
 		$res = \Snappy::response();
 		$res->prependBody( '<main>' );
 		$res->appendBody( '</main>' );
@@ -124,14 +134,3 @@ class Example extends Plugin {
 
 // Establish the plugin's routes
 \Snappy::event()->set( 'init', '\Snappy\Plugin\Example::init' );
-
-// Document header
-\Snappy::event()->set( 'beforeDocumentGetHead', '\Snappy\Plugin\Example::beforeDocumentGetHead' );
-
-// Document footer
-\Snappy::event()->set( 'beforeDocumentGetBody', '\Snappy\Plugin\Example::beforeDocumentGetBody' );
-
-// Example event for files in the request, they have been processed in Http::init() and are ready to handle
-//\Snappy::event()->set( 'requestHasFiles', function ( $files ) {
-//	var_dump( $files ); exit;
-//} );
