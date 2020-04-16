@@ -35,7 +35,7 @@ define('TIME_UTC', (time() - date('Z')));
  * Class Snappy
  */
 class Snappy {
-	const VERSION = '0.4';
+	const VERSION = '0.5';
 
 	const PLUGIN_LOADED = 2;
 	const PLUGIN_EXISTS = 1;
