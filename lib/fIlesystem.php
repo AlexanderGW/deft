@@ -153,7 +153,6 @@ class Filesystem extends \Snappy_Concrete {
 			$failed = FALSE;
 			$items = $this->scan($path, TRUE, 1);
 			if ($items) {
-				var_dump($items);
 				foreach ($items as $key => $value) {
 
 					// Delete file, $value is the full path
