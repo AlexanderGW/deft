@@ -8,6 +8,7 @@
             <file>tests/unit/snappy.php</file>
             <file>tests/unit/event.php</file>
             <file>tests/unit/filter.php</file>
+            <file>tests/unit/filesystem.php</file>
             <file>tests/unit/response/http.php</file>
             <file>tests/unit/response/http/html.php</file>
             <file>tests/unit/response/http/json.php</file>

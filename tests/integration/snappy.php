@@ -67,6 +67,14 @@ class SnappyIntegrationCoreTest extends \PHPUnit\Framework\TestCase {
 			"The default Snappy 'lib' path '" . SNAPPY_LIB_PATH . "' does not match '$path'"
 		);
 
+		$path = SNAPPY_ABS_PATH . DS . 'tmp';
+
+		$this->assertEquals(
+			$path,
+			SNAPPY_TMP_PATH,
+			"The default Snappy 'tmp' path '" . SNAPPY_TMP_PATH . "' does not match '$path'"
+		);
+
 		$path = SNAPPY_ABS_PATH . DS . 'plugin';
 
 		$this->assertEquals(
@@ -80,7 +88,7 @@ class SnappyIntegrationCoreTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(
 			$path,
 			SNAPPY_PUBLIC_PATH,
-			"The default Snappy 'public' path '" . SNAPPY_LIB_PATH . "' does not match '$path'"
+			"The default Snappy 'public' path '" . SNAPPY_PUBLIC_PATH . "' does not match '$path'"
 		);
 
 		$path = SNAPPY_ABS_PATH . DS . 'public' . DS . 'asset';

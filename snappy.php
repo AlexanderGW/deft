@@ -102,6 +102,7 @@ class Snappy {
 			'dir_public_asset' => 'asset',
 			'dir_plugin'       => 'plugin',
 			'dir_lib'          => 'lib',
+			'dir_tmp'          => 'tmp',
 			'plugins'          => array('debug', 'example'),
 			'url_separator'    => '/'
 		), $config);
@@ -123,12 +124,14 @@ class Snappy {
 
 		// App pathes
 		define('SNAPPY_PATH', str_replace("\\", '/', SNAPPY_ABS_PATH));
-
 		define('SNAPPY_LIB_PATH', SNAPPY_PATH . DS . self::$config['dir_lib']);
 		if (!is_dir(SNAPPY_LIB_PATH)) {
-			self::error('App library directory unreadable: %1$s', SNAPPY_LIB_PATH);
+			self::error('Cannot read from library directory: %1$s', SNAPPY_LIB_PATH);
 		}
-
+		define('SNAPPY_TMP_PATH', SNAPPY_PATH . DS . self::$config['dir_tmp']);
+		if (!is_writable(SNAPPY_TMP_PATH)) {
+			self::error('Cannot write to temporary directory: %1$s', SNAPPY_TMP_PATH);
+		}
 		define('SNAPPY_PLUGIN_PATH', SNAPPY_PATH . DS . self::$config['dir_plugin']);
 		define('SNAPPY_PUBLIC_PATH', SNAPPY_PATH . DS . self::$config['dir_public']);
 		define('SNAPPY_PUBLIC_ASSET_PATH', SNAPPY_PUBLIC_PATH . DS . self::$config['dir_public_asset']);
@@ -486,6 +489,21 @@ class Snappy {
 	 */
 	public static function route () {
 		return self::lib('route');
+	}
+
+	/**
+	 * @return \Snappy\Lib\Filesystem
+	 */
+	public static function filesystem ($args = []) {
+		$config = self::config();
+
+		if ($config) {
+			$args = array_merge(array(
+				'type' => $config->get('filesystem.type', 'local')
+			), $args);
+		}
+
+		return self::lib('filesystem', $args);
 	}
 
 	/**
