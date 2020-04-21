@@ -416,15 +416,24 @@ class Snappy {
 	}
 
 	public static function config ($args = null) {
+		$scope = NULL;
 		if (is_null($args)) {
 			$args = self::$config;
-		}
+		} else
+			$args = [];
 
-		return self::lib('config', $args);
+		$args = array_merge(array(
+			'format' => 'php',
+			'filesystem.type' => 'local'
+		), $args);
+
+		$scope = "config.{$args['format']}";
+
+		return self::lib($scope, $args);
 	}
 
 	public static function database ($args = []) {
-		$config  = \Snappy::config();
+		$config  = self::config();
 		$args = array_merge(array(
 			'driver'       => $config->get('database.driver'),
 			'host'         => $config->get('database.hostname'),
