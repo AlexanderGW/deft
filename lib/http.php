@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib;
+namespace Deft\Lib;
 
 class Http {
 
@@ -38,9 +38,9 @@ class Http {
 		$parts = parse_url( $url );
 		extract( $parts );
 		if( !isset( $scheme ) )
-			$scheme = \Snappy::request()->scheme();
+			$scheme = \Deft::request()->scheme();
 		if( empty( $host ) )
-			$host = \Snappy::request()->host();
+			$host = \Deft::request()->host();
 		if( !empty( $query ) )
 			parse_str( $query, $query );
 
@@ -69,7 +69,7 @@ class Http {
 			CURLOPT_SSL_VERIFYPEER => true,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_HTTPHEADER => [
-				'User-Agent: Snappy/' . \Snappy::VERSION
+				'User-Agent: Deft/' . \Deft::VERSION
 			]
 		);
 

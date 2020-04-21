@@ -1,7 +1,7 @@
-Snappy.debug = {};
+Deft.debug = {};
 
 /* Recursivly render object as an HTML table */
-Snappy.debug.recursiveTableObject = function(thing, depth, label){
+Deft.debug.recursiveTableObject = function(thing, depth, label){
 	if (typeof depth == 'undefined') {
 		depth = 0;
 	}
@@ -37,7 +37,7 @@ Snappy.debug.recursiveTableObject = function(thing, depth, label){
 
 					// Item has other things, recurse
 					case 'object':
-						html += Snappy.debug.recursiveTableObject(thing[key], depth+1);
+						html += Deft.debug.recursiveTableObject(thing[key], depth+1);
 						break;
 
 					// Item is a number, string, or bool
@@ -66,7 +66,7 @@ Snappy.debug.recursiveTableObject = function(thing, depth, label){
 };
 
 var xhr = new XMLHttpRequest();
-xhr.open('GET', '/debug/request/' + Snappy.debugHash);
+xhr.open('GET', '/debug/request/' + Deft.debugHash);
 xhr.send(null);
 xhr.onreadystatechange = function () {
 	var DONE = 4; // readyState 4 means the request is done.
@@ -75,7 +75,7 @@ xhr.onreadystatechange = function () {
 		if (xhr.status === OK) {
 			var debug = JSON.parse(xhr.responseText);
 			var html = '<article class="sy-debug-report"><div>' +
-				'<h2>Snappy &ndash; Stack debug</h2>' +
+				'<h2>Deft &ndash; Stack debug</h2>' +
 				'<div>Run time: '+debug.time+' seconds. Memory usage: '+debug.memory + '</div>';
 
 			for (key in debug) {
@@ -83,7 +83,7 @@ xhr.onreadystatechange = function () {
 					case 'object':
 						html += '<section class="expanded">';
 						html += '<h3>'+key+'</h3>';
-						html += Snappy.debug.recursiveTableObject(debug[key], 0, key);
+						html += Deft.debug.recursiveTableObject(debug[key], 0, key);
 						html += '</section>';
 						break;
 				}

@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Snappy_Google_Helper_Plugin {
+class Deft_Google_Helper_Plugin {
 	public static function addFonts() {
 		if( count( Google::$fonts ) ) {
 			$fonts = array();
@@ -38,7 +38,7 @@ class Snappy_Google_Helper_Plugin {
 				$fonts[] = $font;
 			}
 
-			\Snappy::response()->addStyle( 'https://fonts.googleapis.com/css?family=' . implode( '|', $fonts ), 99 );
+			\Deft::response()->addStyle( 'https://fonts.googleapis.com/css?family=' . implode( '|', $fonts ), 99 );
 		}
 	}
 }
@@ -81,4 +81,4 @@ class Google {
 	}
 }
 
-Event::set( 'beforeDocumentGetHead', array( 'Snappy_Google_Helper_Plugin', 'addFonts' ) );
+Event::set( 'beforeDocumentGetHead', array( 'Deft_Google_Helper_Plugin', 'addFonts' ) );

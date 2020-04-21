@@ -1,47 +1,47 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
- * Here is my attempt to convey my thought process for Snappy core, and how it should work.
+ * Here is my attempt to convey my thought process for Deft core, and how it should work.
  *
- * Class SnappyUnitFilesystemTest
+ * Class DeftUnitFilesystemTest
  *
  * @group unit.filesystem
  */
 
-class SnappyUnitFilesystemTest extends \PHPUnit\Framework\TestCase {
+class TestDeftUnitFilesystem extends \PHPUnit\Framework\TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->path = SNAPPY_TMP_PATH . DS . 'foo/bar';
+		$this->path = DEFT_TMP_PATH . DS . 'foo/bar';
 		$this->file = $this->path . '/baz';
 	}
 
 	/**
 	 * Test validating filesystem path
 	 *
-	 * @covers \Snappy\Lib\Filesystem::isValid
+	 * @covers \Deft\Lib\Filesystem::isValid
 	 */
 //	public function test_filesystem_isValid() {
 //
@@ -51,12 +51,12 @@ class SnappyUnitFilesystemTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test getting filesystem action
 	 *
-	 * @covers \Snappy\Lib\Filesystem::exists
+	 * @covers \Deft\Lib\Filesystem::exists
 	 */
 	public function test_filesystem_exists() {
 
 		// Check that invalid path returns FALSE
-		$result = \Snappy::filesystem()->exists($this->file);
+		$result = \Deft::filesystem()->exists($this->file);
 
 		$this->assertFalse(
 			$result,
@@ -67,12 +67,12 @@ class SnappyUnitFilesystemTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test filesystem install
 	 *
-	 * @covers \Snappy\Lib\Filesystem::install
+	 * @covers \Deft\Lib\Filesystem::install
 	 */
 	public function test_filesystem_install() {
 
 		// Installing valid path returns TRUE
-		$result = \Snappy::filesystem()->install($this->path);
+		$result = \Deft::filesystem()->install($this->path);
 
 		$this->assertTrue(
 			$result,
@@ -83,13 +83,13 @@ class SnappyUnitFilesystemTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test getting filesystem action
 	 *
-	 * @covers \Snappy\Lib\Filesystem::touch
+	 * @covers \Deft\Lib\Filesystem::touch
 	 */
 	public function test_filesystem_touch() {
 
 		// Check that invalid file returns FALSE
-		\Snappy::filesystem()->install($this->path);
-		$result = \Snappy::filesystem()->touch($this->file);
+		\Deft::filesystem()->install($this->path);
+		$result = \Deft::filesystem()->touch($this->file);
 
 		$this->assertEquals(
 			0,
@@ -101,12 +101,12 @@ class SnappyUnitFilesystemTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test filesystem writing
 	 *
-	 * @covers \Snappy\Lib\Filesystem::write
+	 * @covers \Deft\Lib\Filesystem::write
 	 */
 	public function test_filesystem_write() {
 
-		// Write 'qux' to a temporary file to SNAPPY_TMP_PATH
-		$result =  Snappy::filesystem()->write($this->file, 'qux');
+		// Write 'qux' to a temporary file to DEFT_TMP_PATH
+		$result =  Deft::filesystem()->write($this->file, 'qux');
 		$this->assertGreaterThan(
 			0,
 			$result,
@@ -119,12 +119,12 @@ class SnappyUnitFilesystemTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_filesystem_write
 	 *
-	 * @covers \Snappy\Lib\Filesystem::read
+	 * @covers \Deft\Lib\Filesystem::read
 	 */
 	public function test_filesystem_read() {
 
 		// Reading a valid file, return something other than FALSE
-		$result = \Snappy::filesystem()->read($this->file);
+		$result = \Deft::filesystem()->read($this->file);
 
 		$this->assertEquals(
 			'qux',
@@ -133,7 +133,7 @@ class SnappyUnitFilesystemTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Reading a valid directory, returns TRUE
-		$result = \Snappy::filesystem()->read($this->path);
+		$result = \Deft::filesystem()->read($this->path);
 
 		$this->assertTrue(
 			$result,
@@ -146,14 +146,14 @@ class SnappyUnitFilesystemTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_filesystem_write
 	 *
-	 * @covers \Snappy\Lib\Filesystem::delete
+	 * @covers \Deft\Lib\Filesystem::delete
 	 */
 	public function test_filesystem_delete() {
 
 		$parent_path = realpath($this->path.'/..');
 
 		// Check file delete returns TRUE
-		$result = \Snappy::filesystem()->delete($this->file);
+		$result = \Deft::filesystem()->delete($this->file);
 
 		$this->assertTrue(
 			$result,
@@ -161,7 +161,7 @@ class SnappyUnitFilesystemTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Check non-recursive directory delete (wth content) returns FALSE
-		$result = \Snappy::filesystem()->delete($parent_path, FALSE);
+		$result = \Deft::filesystem()->delete($parent_path, FALSE);
 
 		$this->assertFalse(
 			$result,
@@ -169,7 +169,7 @@ class SnappyUnitFilesystemTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Check not empty directory non-recursive delete, returns FALSE
-		$result = \Snappy::filesystem()->delete($parent_path, TRUE);
+		$result = \Deft::filesystem()->delete($parent_path, TRUE);
 
 		$this->assertTrue(
 			$result,

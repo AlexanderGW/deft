@@ -1,31 +1,31 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib\Response\Http;
+namespace Deft\Lib\Response\Http;
 
-use Snappy\Lib\Element;
-use Snappy\Lib\Response\Http;
-use Snappy\Lib\Sanitize;
+use Deft\Lib\Element;
+use Deft\Lib\Response\Http;
+use Deft\Lib\Sanitize;
 
 /**
  * HTML response class, default HTML5
@@ -155,7 +155,7 @@ class Html extends Http {
 	 * @return mixed|void
 	 */
 	public function getDescription () {
-		return \Snappy::filter()->exec('document.description', $this->args['description']);
+		return \Deft::filter()->exec('document.description', $this->args['description']);
 	}
 
 	/**
@@ -437,7 +437,7 @@ class Html extends Http {
 			'content' => $content
 		);
 
-		$this->meta[$hash]            = \Snappy::filter()->exec('documentAddMeta', $this->meta[$hash]);
+		$this->meta[$hash]            = \Deft::filter()->exec('documentAddMeta', $this->meta[$hash]);
 		$this->meta['_'][$priority][] = $hash;
 
 		return true;
@@ -502,8 +502,8 @@ class Html extends Http {
 			return;
 		}
 
-		if (strpos($path, SNAPPY_PATH) !== 0) {
-			$path = SNAPPY_PATH . DS . $path;
+		if (strpos($path, DEFT_PATH) !== 0) {
+			$path = DEFT_PATH . DS . $path;
 		}
 
 		if (!file_exists($path)) {
@@ -591,8 +591,8 @@ class Html extends Http {
 			return;
 		}
 
-		if (strpos($path, SNAPPY_PATH) !== 0) {
-			$path = SNAPPY_PATH . DS . $path;
+		if (strpos($path, DEFT_PATH) !== 0) {
+			$path = DEFT_PATH . DS . $path;
 		}
 
 		if (!file_exists($path)) {
@@ -629,7 +629,7 @@ class Html extends Http {
 			), (array) $attributes)
 		);
 
-		$this->scripts[$hash]            = \Snappy::filter()->exec('documentAddScript', $this->scripts[$hash]);
+		$this->scripts[$hash]            = \Deft::filter()->exec('documentAddScript', $this->scripts[$hash]);
 		$this->scripts['_'][$priority][] = $hash;
 
 		return true;
@@ -660,7 +660,7 @@ class Html extends Http {
 	 * @return mixed|void
 	 */
 	public function getHead () {
-		$config = \Snappy::config('document');
+		$config = \Deft::config('document');
 
 		if ($config->get('title') and !empty($this->getArg('title'))) {
 			$this->setTitle($config->get('title'));
@@ -684,10 +684,10 @@ class Html extends Http {
 
 
 		// TODO: This should be passed as a param, to be stored in $language, instead of storing a 'copy' on the language instance. Makes more sense!!!
-		if (class_exists('\Snappy\Lib\Language')) {
-			$this->setEncoding(\Snappy::locale()->getEncoding());
-			$this->setLocale(\Snappy::locale()->getIso(2));
-			$this->setDirection(\Snappy::locale()->getDirection());
+		if (class_exists('\Deft\Lib\Language')) {
+			$this->setEncoding(\Deft::locale()->getEncoding());
+			$this->setLocale(\Deft::locale()->getIso(2));
+			$this->setDirection(\Deft::locale()->getDirection());
 		}
 
 //		$this->addMeta('charset', $this->language->getEncoding());
@@ -703,7 +703,7 @@ class Html extends Http {
 				), 'documentBase', true) . $this->getEOL();
 		}
 
-		$this->addMeta('generator', 'Snappy ' . \Snappy::VERSION);
+		$this->addMeta('generator', 'Deft ' . \Deft::VERSION);
 
 		if ($this->getDescription()) {
 			$this->addMeta('description', $this->getDescription());
@@ -715,7 +715,7 @@ class Html extends Http {
 
 		$this->addMeta('robots', ($this->getIndex() ? 'index' : 'noindex') . ',' . ($this->getFollow() ? 'follow' : 'nofollow'));
 
-		\Snappy::event()->exec('beforeDocumentGetHead');
+		\Deft::event()->exec('beforeDocumentGetHead');
 
 		$viewport = array();
 		if (!is_null($this->viewport['width'])) {
@@ -747,7 +747,7 @@ class Html extends Http {
 
 		if (count($this->meta['_'])) {
 			ksort($this->meta['_']);
-			$this->meta = \Snappy::filter()->exec('document.meta', $this->meta);
+			$this->meta = \Deft::filter()->exec('document.meta', $this->meta);
 			foreach ($this->meta['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
 					$html .= Element::html(array(
@@ -768,7 +768,7 @@ class Html extends Http {
 
 		if (count($this->links['_'])) {
 			ksort($this->links['_']);
-			$this->links = \Snappy::filter()->exec('documentLinks', $this->links);
+			$this->links = \Deft::filter()->exec('documentLinks', $this->links);
 
 			$styles = array();
 			foreach ($this->links['_'] as $priority => $hashes) {
@@ -782,11 +782,11 @@ class Html extends Http {
 						(!array_key_exists('rel', $this->links[$hash]) or $this->links[$hash]['rel'] != 'stylesheet')
 						or (
 
-							// or isn't in the Snappy url environment...
-							strpos($this->links[$hash]['href'], SNAPPY_PATH) !== 0
+							// or isn't in the Deft url environment...
+							strpos($this->links[$hash]['href'], DEFT_PATH) !== 0
 
-							// nor the Snappy sys environment...
-							and !file_exists(SNAPPY_PATH . DS . $this->links[$hash]['href'])
+							// nor the Deft sys environment...
+							and !file_exists(DEFT_PATH . DS . $this->links[$hash]['href'])
 						)
 					) {
 						$html .= Element::html(array(
@@ -804,7 +804,7 @@ class Html extends Http {
 			}
 
 			if (count($styles)) {
-				$styles = \Snappy::filter()->exec('documentAssetCacheStyles', $styles);
+				$styles = \Deft::filter()->exec('documentAssetCacheStyles', $styles);
 				foreach ($styles as $media => $array) {
 					$html .= $this->setCssAssetCache($array, $media);
 				}
@@ -813,7 +813,7 @@ class Html extends Http {
 
 		if (count($this->styles['_'])) {
 			ksort($this->styles['_']);
-			$this->styles = \Snappy::filter()->exec('documentHeadStyles', $this->styles);
+			$this->styles = \Deft::filter()->exec('documentHeadStyles', $this->styles);
 			foreach ($this->styles['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
 					$html .= Element::html($this->styles[$hash], 'document.style', true) . $this->getEOL();
@@ -823,7 +823,7 @@ class Html extends Http {
 
 		if (count($this->custom['_'])) {
 			ksort($this->custom['_']);
-			$this->custom = \Snappy::filter()->exec('documentHeadCustom', $this->custom);
+			$this->custom = \Deft::filter()->exec('documentHeadCustom', $this->custom);
 			foreach ($this->custom['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
 					$html .= $this->custom[$hash] . $this->getEOL();
@@ -833,7 +833,7 @@ class Html extends Http {
 
 		// TODO: Store the head in memory, only clear storage on 'add' functions
 
-		return \Snappy::filter()->exec('documentGetHead', $html);
+		return \Deft::filter()->exec('documentGetHead', $html);
 	}
 
 	/**
@@ -842,22 +842,22 @@ class Html extends Http {
 	public function setCssAssetCache ($files = array(), $media = 'all') {
 		if (($total = count($files)) !== 0) {
 			$hash      = md5(serialize($files));
-			$path      = SNAPPY_PUBLIC_ASSET_PATH . DS . 'cache';
+			$path      = DEFT_PUBLIC_ASSET_PATH . DS . 'cache';
 			$path_file = $path . '/' . $hash . '.css';
 
 			$content = '';
 
-			if (SNAPPY_DEBUG === 0) {
+			if (DEFT_DEBUG === 0) {
 				if (!file_exists($path_file)) {
 					foreach ($files as $i => $file) {
 						$content .= '/* (' . ($i + 1) . '/' . $total . ') ' . $file['href'] . " */\n";
 
 						// Absolute path
-						if (strpos($file['href'], SNAPPY_PATH) === 0) {
+						if (strpos($file['href'], DEFT_PATH) === 0) {
 							$content .= file_get_contents($file['href']) . "\n\n";
-						} // Relative to Snappy path
-						elseif (file_exists(SNAPPY_PATH . DS . $file['href'])) {
-							$content .= file_get_contents(SNAPPY_PATH . DS . $file['href']) . "\n\n";
+						} // Relative to Deft path
+						elseif (file_exists(DEFT_PATH . DS . $file['href'])) {
+							$content .= file_get_contents(DEFT_PATH . DS . $file['href']) . "\n\n";
 						}
 					}
 
@@ -869,9 +869,9 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Snappy::error('Failed to write style cache directory: %1$s', $path);
+						\Deft::error('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
+						\Deft::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						file_put_contents($path_file, $content);
 						return Element::html(array(
@@ -882,8 +882,8 @@ class Html extends Http {
 									'type'  => 'text/css',
 									'rel'   => 'stylesheet',
 									'href'  => str_replace(
-										array(dirname(SNAPPY_PUBLIC_ASSET_PATH), "\\"),
-										array(SNAPPY_URL, '/'),
+										array(dirname(DEFT_PUBLIC_ASSET_PATH), "\\"),
+										array(DEFT_URL, '/'),
 										$path_file
 									)
 								)
@@ -896,7 +896,7 @@ class Html extends Http {
 			foreach ($files as $i => $file) {
 
 				// Absolute path
-				if (strpos($file['href'], SNAPPY_PATH) === 0) {
+				if (strpos($file['href'], DEFT_PATH) === 0) {
 					$path_file = $path . '/' . basename($file['href']);
 
 					// Attempt to create
@@ -907,9 +907,9 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Snappy::error('Failed to write style cache directory: %1$s', $path);
+						\Deft::error('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
+						\Deft::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						$content = file_get_contents($file['href']) . "\n\n";
 						file_put_contents($path_file, $content);
@@ -921,8 +921,8 @@ class Html extends Http {
 									'type'  => 'text/css',
 									'rel'   => 'stylesheet',
 									'href'  => str_replace(
-										           array(dirname(SNAPPY_PATH), "\\"),
-										           array(SNAPPY_ASSET_URL, '/'),
+										           array(dirname(DEFT_PATH), "\\"),
+										           array(DEFT_ASSET_URL, '/'),
 										           $file['href']
 									           ) . '?' . time()
 								), 'document.style')
@@ -930,9 +930,9 @@ class Html extends Http {
 					}
 				}
 
-				// Relative to Snappy path
-				elseif (file_exists(SNAPPY_PATH . DS . $file['href'])) {
-					$path      = SNAPPY_PUBLIC_ASSET_PATH;
+				// Relative to Deft path
+				elseif (file_exists(DEFT_PATH . DS . $file['href'])) {
+					$path      = DEFT_PUBLIC_ASSET_PATH;
 					$path_file = $path . DS . basename($file['href']);
 
 					// Attempt to create
@@ -943,11 +943,11 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Snappy::error('Failed to write style cache directory: %1$s', $path);
+						\Deft::error('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
+						\Deft::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
-						$content = file_get_contents(SNAPPY_PATH . DS . $file['href']) . "\n\n";
+						$content = file_get_contents(DEFT_PATH . DS . $file['href']) . "\n\n";
 						file_put_contents($path_file, $content);
 						$return[] = Element::html(array(
 							'@tag'   => 'link',
@@ -956,7 +956,7 @@ class Html extends Http {
 								'media' => $media,
 								'type'  => 'text/css',
 								'rel'   => 'stylesheet',
-								'href'  => SNAPPY_ASSET_URL . basename($file['href']) . '?' . time()
+								'href'  => DEFT_ASSET_URL . basename($file['href']) . '?' . time()
 							)
 						), 'document.style');
 					}
@@ -975,22 +975,22 @@ class Html extends Http {
 	public function setJsAssetCache ($scripts = array()) {
 		if (($total = count($scripts)) !== 0) {
 			$hash      = md5(serialize($scripts));
-			$path      = SNAPPY_PUBLIC_ASSET_PATH . DS . 'cache';
+			$path      = DEFT_PUBLIC_ASSET_PATH . DS . 'cache';
 			$path_file = $path . '/' . $hash . '.js';
 
 			$content = '';
 
-			if (SNAPPY_DEBUG === 0) {
+			if (DEFT_DEBUG === 0) {
 				if (!file_exists($path_file)) {
 					foreach ($scripts as $i => $script) {
 						$content .= '/* (' . ($i + 1) . '/' . $total . ') ' . $script['@props']['src'] . " */\n";
 
 						// Absolute path
-						if (strpos($script['@props']['src'], SNAPPY_PATH) === 0) {
+						if (strpos($script['@props']['src'], DEFT_PATH) === 0) {
 							$content .= file_get_contents($script['@props']['src']) . "\n\n";
-						} // Relative to Snappy path
-						elseif (file_exists(SNAPPY_PATH . DS . $script['@props']['src'])) {
-							$content .= file_get_contents(SNAPPY_PATH . DS . $script['@props']['src']) . "\n\n";
+						} // Relative to Deft path
+						elseif (file_exists(DEFT_PATH . DS . $script['@props']['src'])) {
+							$content .= file_get_contents(DEFT_PATH . DS . $script['@props']['src']) . "\n\n";
 						}
 					}
 
@@ -1002,9 +1002,9 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Snappy::error('Failed to write directory: %1$s', $path);
+						\Deft::error('Failed to write directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Snappy::error('Failed to write file: %1$s', $path_file);
+						\Deft::error('Failed to write file: %1$s', $path_file);
 					} else {
 						file_put_contents($path_file, $content);
 					}
@@ -1015,8 +1015,8 @@ class Html extends Http {
 						'@props' => array(
 							'type' => 'text/javascript',
 							'src'  => str_replace(
-								array(dirname(SNAPPY_PUBLIC_ASSET_PATH), "\\"),
-								array(SNAPPY_URL, '/'),
+								array(dirname(DEFT_PUBLIC_ASSET_PATH), "\\"),
+								array(DEFT_URL, '/'),
 								$path_file
 							)
 						),
@@ -1028,7 +1028,7 @@ class Html extends Http {
 				$content .= '/* (' . ($i + 1) . '/' . $total . ') ' . $script['@props']['src'] . " */\n";
 
 				// Absolute path
-				if (strpos($script['@props']['src'], SNAPPY_PATH) === 0) {
+				if (strpos($script['@props']['src'], DEFT_PATH) === 0) {
 					$path_file = $path . '/' . basename($script['@props']['src']);
 
 					// Attempt to create
@@ -1039,9 +1039,9 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Snappy::error('Failed to write style cache directory: %1$s', $path);
+						\Deft::error('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
+						\Deft::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						$content = file_get_contents($script['@props']['src']) . "\n\n";
 						file_put_contents($path_file, $content);
@@ -1050,8 +1050,8 @@ class Html extends Http {
 							'@props' => array(
 								'type' => 'text/javascript',
 								'src'  => str_replace(
-									array(dirname(SNAPPY_PUBLIC_ASSET_PATH), "\\"),
-									array(SNAPPY_URL, '/'),
+									array(dirname(DEFT_PUBLIC_ASSET_PATH), "\\"),
+									array(DEFT_URL, '/'),
 									$script['@props']['src'] . '?' . time()
 								)
 							),
@@ -1060,9 +1060,9 @@ class Html extends Http {
 				}
 
 
-				// Relative to Snappy path
-				elseif (file_exists(SNAPPY_PATH . DS . $script['@props']['src'])) {
-					$path      = SNAPPY_PUBLIC_ASSET_PATH . DS;
+				// Relative to Deft path
+				elseif (file_exists(DEFT_PATH . DS . $script['@props']['src'])) {
+					$path      = DEFT_PUBLIC_ASSET_PATH . DS;
 					$path_file = $path . basename($script['@props']['src']);
 
 					// Attempt to create
@@ -1073,17 +1073,17 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Snappy::error('Failed to write style cache directory: %1$s', $path);
+						\Deft::error('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Snappy::error('Failed to write style cache file: %1$s', $path_file);
+						\Deft::error('Failed to write style cache file: %1$s', $path_file);
 					} else {
-						$content = file_get_contents(SNAPPY_PATH . DS . $script['@props']['src']) . "\n\n";
+						$content = file_get_contents(DEFT_PATH . DS . $script['@props']['src']) . "\n\n";
 						file_put_contents($path_file, $content);
 						$return[] = Element::html(array(
 							'@tag'   => 'script',
 							'@props' => array(
 								'type' => 'text/javascript',
-								'src'  => SNAPPY_ASSET_URL . basename($script['@props']['src']) . '?' . time()
+								'src'  => DEFT_ASSET_URL . basename($script['@props']['src']) . '?' . time()
 							),
 						), 'document.script');
 					}
@@ -1128,7 +1128,7 @@ class Html extends Http {
 	public function getBody () {
 		if (count($this->scripts['_'])) {
 			ksort($this->scripts['_']);
-			$this->scripts = \Snappy::filter()->exec('document.scripts', $this->scripts);
+			$this->scripts = \Deft::filter()->exec('document.scripts', $this->scripts);
 
 			$scripts = array();
 			foreach ($this->scripts['_'] as $priority => $hashes) {
@@ -1147,11 +1147,11 @@ class Html extends Http {
 
 						or (
 
-							// or isn't in the Snappy url environment...
-							strpos($this->scripts[$hash]['@props']['src'], SNAPPY_PATH) !== 0
+							// or isn't in the Deft url environment...
+							strpos($this->scripts[$hash]['@props']['src'], DEFT_PATH) !== 0
 
-							// nor the Snappy sys environment...
-							and !file_exists(SNAPPY_PATH . DS . $this->scripts[$hash]['@props']['src'])
+							// nor the Deft sys environment...
+							and !file_exists(DEFT_PATH . DS . $this->scripts[$hash]['@props']['src'])
 						)
 					) {
 						$this->appendBody(Element::html(
@@ -1169,15 +1169,15 @@ class Html extends Http {
 			}
 
 			if (count($scripts)) {
-				$scripts = \Snappy::filter()->exec('documentAssetCacheScripts', $scripts);
+				$scripts = \Deft::filter()->exec('documentAssetCacheScripts', $scripts);
 				$this->appendBody($this->setJsAssetCache($scripts));
 			}
 		}
 
 		// TODO: Store the head in memory, only clear storage on 'add' functions - perhaps an 'init' event?
-		\Snappy::event()->exec('beforeDocumentGetBody');
-		$return = \Snappy::filter()->exec('documentBody', implode($this->getEOL(), $this->body));
-		\Snappy::event()->exec('afterDocumentGetBody');
+		\Deft::event()->exec('beforeDocumentGetBody');
+		$return = \Deft::filter()->exec('documentBody', implode($this->getEOL(), $this->body));
+		\Deft::event()->exec('afterDocumentGetBody');
 		return $return;
 	}
 
@@ -1198,18 +1198,18 @@ class Html extends Http {
 
 		// Default template name
 		if (!is_string($scope)) {
-			$scope = \Snappy::filter()->exec('documentOutput.template', 'template.response.html5');
+			$scope = \Deft::filter()->exec('documentOutput.template', 'template.response.html5');
 		}
 
-		$this->buffer = \Snappy::capture($scope);
+		$this->buffer = \Deft::capture($scope);
 
-		\Snappy::event()->exec('beforeResponseOutput');
+		\Deft::event()->exec('beforeResponseOutput');
 
-		$content = (string)\Snappy::filter()->exec('responseHttpHtmlOutput', \Snappy::filter()->exec('responseOutput', $this->buffer));
+		$content = (string)\Deft::filter()->exec('responseHttpHtmlOutput', \Deft::filter()->exec('responseOutput', $this->buffer));
 
 		$this->header('Content-length', strlen($content));
 
-		\Snappy::event()->exec('afterResponseOutput', $content);
+		\Deft::event()->exec('afterResponseOutput', $content);
 
 		// Set HTTP header()s
 		parent::output();

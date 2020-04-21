@@ -1,39 +1,39 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
- * Here is my attempt to convey my thought process for Snappy core, and how it should work.
+ * Here is my attempt to convey my thought process for Deft core, and how it should work.
  *
- * Class SnappyUnitResponseHttpHtmlTest
+ * Class DeftUnitResponseHttpHtmlTest
  *
  * @group unit.response.http.html
  */
 
-class SnappyUnitResponseHttpHtmlTest extends \PHPUnit\Framework\TestCase {
+class TestDeftUnitResponseHttpHtml extends \PHPUnit\Framework\TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->response = Snappy::response([
+		$this->response = Deft::response([
 			'type' => 'http.html'
 		]);
 	}
@@ -41,7 +41,7 @@ class SnappyUnitResponseHttpHtmlTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test location
 	 *
-	 * @covers \Snappy\Lib\Response\Http\Html::output
+	 * @covers \Deft\Lib\Response\Http\Html::output
 	 */
 	public function test_response_http_html_output() {
 
@@ -61,9 +61,9 @@ class SnappyUnitResponseHttpHtmlTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		$this->assertStringContainsString(
-			'Snappy ' . Snappy::VERSION,
+			'Deft ' . Deft::VERSION,
 			$output,
-			"Default output contains the Snappy 'Generator' meta tag header"
+			"Default output contains the Deft 'Generator' meta tag header"
 		);
 
 		// Check 'Content-type' is text/html

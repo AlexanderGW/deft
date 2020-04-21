@@ -1,57 +1,57 @@
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 'use strict';
 
-var Snappy = Snappy || {
+var Deft = Deft || {
 	DEBUG: 1
 };
 
-Snappy.request = function (method, url, data) {
+Deft.request = function (method, url, data) {
 	var xhr = new XMLHttpRequest();
 	xhr.open(method, url);
 	xhr.send(data);
 	xhr.onreadystatechange = function () {
 		if (xhr.readyState === 4) {
-			Snappy.response(xhr);
+			Deft.response(xhr);
 		}
 	};
 };
 
-Snappy.response = function (xhr /*XMLHttpRequest*/ ) {
+Deft.response = function (xhr /*XMLHttpRequest*/ ) {
 	console.log(xhr);
 };
 
-Snappy.delete = function (url) {
-	Snappy.request('DELETE', url);
+Deft.delete = function (url) {
+	Deft.request('DELETE', url);
 };
 
-Snappy.get = function (url) {
-	Snappy.request('GET', url);
+Deft.get = function (url) {
+	Deft.request('GET', url);
 };
 
-Snappy.post = function (url, data) {
-	Snappy.request('POST', url, data);
+Deft.post = function (url, data) {
+	Deft.request('POST', url, data);
 };
 
-Snappy.put = function (url) {
-	Snappy.request('PUT', url, data);
+Deft.put = function (url) {
+	Deft.request('PUT', url, data);
 };

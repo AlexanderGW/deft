@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib;
+namespace Deft\Lib;
 
 class Token {
 	/**
@@ -54,7 +54,7 @@ class Token {
 		}
 
 		if( is_string( $data ) )
-			self::$props = (array)\Snappy::decode( $data );
+			self::$props = (array)\Deft::decode( $data );
 
 		if(array_key_exists('consent', self::$props) and self::$props['consent'] != false) {
 			self::$consent = true;
@@ -67,7 +67,7 @@ class Token {
 	 * @return string
 	 */
 	public static function getHash() {
-		$config = \Snappy::config();
+		$config = \Deft::config();
 		$hash = $config->get( 'token_hash' );
 		if( is_null( $hash ) ) {
 			$hash = Random::getMd5();
@@ -89,7 +89,7 @@ class Token {
 
 		$hash = self::getHash();
 		self::$props = Filter::exec( 'tokenSave', self::$props );
-		$_SESSION[ $hash ] = \Snappy::encode( self::$props );
+		$_SESSION[ $hash ] = \Deft::encode( self::$props );
 		return true;
 	}
 
@@ -99,16 +99,16 @@ class Token {
 	public static function saveCookie() {
 		self::save();
 		$hash = self::getHash();
-		$timeout = (int)\Snappy::config()->get( 'token_timeout', 2592000 );
+		$timeout = (int)\Deft::config()->get( 'token_timeout', 2592000 );
 		$expire = ( ( TIME_UTC + ( 3600 * (float)self::get( 'timezone' ) ) ) + $timeout );
 
 		if( !count( self::$props ) ) {
 			$encoded = -1;
 			$expire = time() - 86400;
 		} else
-			$encoded = \Snappy::encode( self::$props );
+			$encoded = \Deft::encode( self::$props );
 
-		setcookie( $hash, $encoded, $expire, SNAPPY_URL_PATH, \Snappy::request()->host() );
+		setcookie( $hash, $encoded, $expire, DEFT_URL_PATH, \Deft::request()->host() );
 		return true;
 	}
 

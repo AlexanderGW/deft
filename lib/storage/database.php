@@ -1,32 +1,32 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib\Storage;
+namespace Deft\Lib\Storage;
 
-use Snappy\Lib\Helper;
-use Snappy\Lib\Sanitize;
-use Snappy\Lib\Storage;
-use Snappy\Lib\Watchdog;
+use Deft\Lib\Helper;
+use Deft\Lib\Sanitize;
+use Deft\Lib\Storage;
+use Deft\Lib\Watchdog;
 
 class Database extends Storage {
 	var $args = array();
@@ -80,7 +80,7 @@ class Database extends Storage {
 	 * @return array
 	 */
 	public static function getArgs ($args = array()) {
-		$config  = \Snappy::config();
+		$config  = \Deft::config();
 		$args = array_merge(array(
 			'driver'       => $config->get('database.driver', 'mysql'),
 			'host'         => $config->get('database.hostname', 'localhost'),
@@ -126,7 +126,7 @@ class Database extends Storage {
 				'#\\?#',
 				function($match) use ($db, &$values) {
 					if (empty($values)) {
-						\Snappy::error('Statement has missing parameters.');
+						\Deft::error('Statement has missing parameters.');
 					}
 					$value = array_shift($values);
 
@@ -180,7 +180,7 @@ class Database extends Storage {
 			}
 
 			// Debug timer
-			if (SNAPPY_DEBUG > 0) {
+			if (DEFT_DEBUG > 0) {
 				$start = Helper::getMicroTime();
 			}
 
@@ -192,17 +192,17 @@ class Database extends Storage {
 				Watchdog::set($e->getMessage(), $e->getCode(), 'database');
 			}
 
-			// TODO: This is messing up due to the getArgs() != to Snappy::database() args
-//			if (SNAPPY_DEBUG > 0) {
+			// TODO: This is messing up due to the getArgs() != to Deft::database() args
+//			if (DEFT_DEBUG > 0) {
 //				$statement = Sanitize::forText($this->statement);
 //				$entry = array(
 //					'time'  => Helper::getMoment($start),
 //					'statement' => $statement
 //				);
 //
-//				\Snappy::log($this->stack . '/statements', $entry);
+//				\Deft::log($this->stack . '/statements', $entry);
 //
-//				switch (SNAPPY_DEBUG) {
+//				switch (DEFT_DEBUG) {
 //					case 2 :
 //						if (strpos($statement, 'SELECT') === 0) {
 //							$statement = 'EXPLAIN ' . $this->statement;
@@ -220,7 +220,7 @@ class Database extends Storage {
 //									'explain' => $resource->fetchAll(PDO::FETCH_ASSOC)
 //								);
 //
-//								\Snappy::log($this->stack . '/statements', $entry);
+//								\Deft::log($this->stack . '/statements', $entry);
 //							}
 //						}
 //						break;

@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib\Config;
+namespace Deft\Lib\Config;
 
-use Snappy\Lib\Config;
+use Deft\Lib\Config;
 
 class Php extends Config {
 
@@ -35,8 +35,8 @@ class Php extends Config {
 	function __construct ($scope = null, $class = __CLASS__) {
 		$this->scope =
 
-			// The initial Snappy config is always passed as an array, so default to 'config.snappy'
-			is_array($scope) ? 'config.snappy'
+			// The initial Deft config is always passed as an array, so default to 'config.deft'
+			is_array($scope) ? 'config.deft'
 
 				// Otherwise it should be a scope string
 				: self::getArgs($scope);
@@ -44,9 +44,9 @@ class Php extends Config {
 		if (is_array($scope)) {
 			$this->fields = $scope;
 			$this->empty  = FALSE;
-			$this->path = SNAPPY_PATH . DS . 'config' . DS . 'snappy.php';
+			$this->path = DEFT_PATH . DS . 'config' . DS . 'deft.php';
 		} else {
-			$this->path = SNAPPY_PATH . DS . str_replace('.', DS, $this->scope) . '.' . $this->type;
+			$this->path = DEFT_PATH . DS . str_replace('.', DS, $this->scope) . '.' . $this->type;
 
 			if (file_exists($this->path)) {
 				$this->exists = TRUE;
@@ -128,9 +128,9 @@ class Php extends Config {
 			if (!$content) {
 				$content = "<" . "?php" . PHP_EOL . PHP_EOL
 				           . "/" . "**" . PHP_EOL
-				           . " * File: " . str_replace(SNAPPY_PATH . DS, '', $this->path) . PHP_EOL
+				           . " * File: " . str_replace(DEFT_PATH . DS, '', $this->path) . PHP_EOL
 				           . " * Date: " . gmdate('Y-m-d H:i:s') . PHP_EOL
-				           . " * Auto-generated configuration by the Snappy Framework" . PHP_EOL
+				           . " * Auto-generated configuration by the Deft Framework" . PHP_EOL
 				           . " */" . PHP_EOL . PHP_EOL
 				           . "return array(" . PHP_EOL;
 
@@ -157,7 +157,7 @@ class Php extends Config {
 		];
 
 		// Get the filesystem
-		$this->filesystem = \Snappy::filesystem($args);
+		$this->filesystem = \Deft::filesystem($args);
 		if ($this->filesystem) {
 //			$this->filesystem->touch($this->path);
 
@@ -170,9 +170,9 @@ class Php extends Config {
 			else {
 				var_dump('write failure: ' . $this->path);
 			}
-//			\Snappy::watchdog()->add();
+//			\Deft::watchdog()->add();
 		} else {
-//			\Snappy::watchdog()->add();
+//			\Deft::watchdog()->add();
 		}
 
 		return FALSE;

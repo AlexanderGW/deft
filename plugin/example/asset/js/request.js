@@ -1,7 +1,7 @@
-Snappy.example = {};
+Deft.example = {};
 
 /* Recursivly render object as an HTML table */
-Snappy.example.recursiveTableObject = function(thing, depth, label){
+Deft.example.recursiveTableObject = function(thing, depth, label){
 	if (typeof depth == 'undefined') {
 		depth = 0;
 	}
@@ -37,7 +37,7 @@ Snappy.example.recursiveTableObject = function(thing, depth, label){
 
 					// Item has other things, recurse
 					case 'object':
-						html += Snappy.example.recursiveTableObject(thing[key], depth+1);
+						html += Deft.example.recursiveTableObject(thing[key], depth+1);
 						break;
 
 					// Item is a number, string, or bool
@@ -85,15 +85,15 @@ xhr2.onreadystatechange = function () {
 
 
 			var html = '<article class="sy-debug-report"><div>' +
-				'<h2>Snappy &ndash; Response for "'+debug.querySelector+'"</h2>' +
-				'<div>Version: '+debug.snappy + '</div>';
+				'<h2>Deft &ndash; Response for "'+debug.querySelector+'"</h2>' +
+				'<div>Version: '+debug.deft + '</div>';
 
 			for (key in debug) {
 				switch (typeof debug[key]) {
 					case 'object':
 						html += '<section class="expanded">';
 						html += '<h3>'+key+'</h3>';
-						html += Snappy.example.recursiveTableObject(debug[key], 0, key);
+						html += Deft.example.recursiveTableObject(debug[key], 0, key);
 						html += '</section>';
 						break;
 					case 'string':

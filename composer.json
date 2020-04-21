@@ -1,5 +1,5 @@
 {
-    "name": "alexandergw/snappy",
+    "name": "alexandergw/deft",
     "type": "project",
     "require": {
       "ext-json": "*"

@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Snappy\Lib;
+namespace Deft\Lib;
 
 
-class Filesystem extends \Snappy_Concrete {
+class Filesystem extends \Deft_Concrete {
 
 	/**
 	 *
@@ -17,14 +17,14 @@ class Filesystem extends \Snappy_Concrete {
 	 *
 	 */
 	public function isRelative($path = NULL) {
-		return (strpos(SNAPPY_PATH, realpath($path)) === 0);
+		return (strpos(DEFT_PATH, realpath($path)) === 0);
 	}
 
 	/**
 	 *
 	 */
 	public function makeRelative($path) {
-		$path = substr($path, strlen(SNAPPY_PATH)+1);
+		$path = substr($path, strlen(DEFT_PATH)+1);
 		$path = str_replace('\\', '/', $path);
 		return $path;
 	}
@@ -33,7 +33,7 @@ class Filesystem extends \Snappy_Concrete {
 	 *
 	 */
 	public function install($path = NULL, $mode = NULL) {
-		if (strpos($path, SNAPPY_PATH) !== 0)
+		if (strpos($path, DEFT_PATH) !== 0)
 			return NULL;
 
 		if (is_null($mode))
@@ -42,7 +42,7 @@ class Filesystem extends \Snappy_Concrete {
 		$path = $this->makeRelative($path);
 
 		$directories = explode('/', $path);
-		$path = SNAPPY_PATH;
+		$path = DEFT_PATH;
 		foreach ($directories as $directory) {
 			$path .= "/{$directory}";
 			if (!is_dir($path)) {
@@ -68,7 +68,7 @@ class Filesystem extends \Snappy_Concrete {
 			if( !is_array($ignore) || !count($ignore))
 				$ignore = ['.', '..'];
 
-			$ignore = \Snappy::filter()->exec('filesystemIgnore', $ignore);
+			$ignore = \Deft::filter()->exec('filesystemIgnore', $ignore);
 
 			// TODO: Recursion limit not honoured
 
@@ -164,7 +164,7 @@ class Filesystem extends \Snappy_Concrete {
 
 					// Delete the content of the directory
 					elseif($value === TRUE) {
-						$path_directory = SNAPPY_PATH . DS . $path . '/' . $key;
+						$path_directory = DEFT_PATH . DS . $path . '/' . $key;
 						if ($this->delete($path_directory, TRUE) === FALSE) {
 							$failed = TRUE;
 							break;
@@ -178,7 +178,7 @@ class Filesystem extends \Snappy_Concrete {
 		}
 
 		// Delete directory
-		$result = rmdir(SNAPPY_PATH . DS . $path);
+		$result = rmdir(DEFT_PATH . DS . $path);
 		return $result;
 	}
 }

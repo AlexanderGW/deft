@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib;
+namespace Deft\Lib;
 
-class Request extends \Snappy_Concrete {
+class Request extends \Deft_Concrete {
 	protected $url = false;
 	protected $parsed = false;
 	protected $post = false;
@@ -39,7 +39,7 @@ class Request extends \Snappy_Concrete {
 	 * @param null $args
 	 */
 	function __construct () {
-		if (PHP_SAPI  == 'cli' && !defined('SNAPPY_TESTING')) {
+		if (PHP_SAPI  == 'cli' && !defined('DEFT_TESTING')) {
 //			$request = $_SERVER['argv'];
 			die('CLI not yet implemented');
 		} else {
@@ -76,7 +76,7 @@ class Request extends \Snappy_Concrete {
 
 			// Store POST variables
 			if ($_POST && is_array($_POST)) {
-				$this->post = \Snappy::filter()->exec('requestPostIn', filter_input_array(
+				$this->post = \Deft::filter()->exec('requestPostIn', filter_input_array(
 					INPUT_POST,
 					FILTER_SANITIZE_STRING
 				));
@@ -90,7 +90,7 @@ class Request extends \Snappy_Concrete {
 					Helper::getBytesFromShno( ini_get( 'memory_limit' ) )
 				);
 
-				$this->files_in = \Snappy::filter()->exec('requestFilesIn', $_FILES);
+				$this->files_in = \Deft::filter()->exec('requestFilesIn', $_FILES);
 
 				foreach( $this->files_in as $group => $data ) {
 					if( !array_key_exists( 'error', $data ) )
@@ -100,8 +100,8 @@ class Request extends \Snappy_Concrete {
 					$this->files_out[ $group ][] = self::_file( $data, $this->max_size );
 				}
 
-				$this->files_out = \Snappy::filter()->exec('requestFilesOut', $this->files_out);
-				\Snappy::event()->exec( 'requestHasFiles', $this->files_out );
+				$this->files_out = \Deft::filter()->exec('requestFilesOut', $this->files_out);
+				\Deft::event()->exec( 'requestHasFiles', $this->files_out );
 			}
 		}
 	}

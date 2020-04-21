@@ -1,24 +1,24 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
@@ -32,9 +32,9 @@ define('DS', '/');
 define('TIME_UTC', (time() - date('Z')));
 
 /**
- * Class Snappy
+ * Class Deft
  */
-class Snappy {
+class Deft {
 	const VERSION = '0.6';
 
 	const PLUGIN_LOADED = 2;
@@ -84,7 +84,7 @@ class Snappy {
 	private static $calls = [];
 
 	/**
-	 * Initialise Snappy
+	 * Initialise Deft
 	 *
 	 * @param array $args
 	 */
@@ -93,7 +93,7 @@ class Snappy {
 			return;
 		}
 
-//		set_error_handler(['Snappy', 'errorHandler']);
+//		set_error_handler(['Deft', 'errorHandler']);
 
 		self::$config = array_merge(array(
 			'config_format'    => 'php',
@@ -107,34 +107,34 @@ class Snappy {
 			'url_separator'    => '/'
 		), $config);
 
-		define('SNAPPY_DEBUG', (int) self::$config['debug']);
+		define('DEFT_DEBUG', (int) self::$config['debug']);
 
-		error_reporting((SNAPPY_DEBUG > 0) ? E_ALL & ~E_NOTICE & ~E_STRICT : 0);
+		error_reporting((DEFT_DEBUG > 0) ? E_ALL & ~E_NOTICE & ~E_STRICT : 0);
 
 		$backtrace = debug_backtrace();
 
-		if (!defined('SNAPPY_INITIATOR')) {
+		if (!defined('DEFT_INITIATOR')) {
 			$first     = $backtrace[count($backtrace) - 1];
-			define('SNAPPY_INITIATOR', $first['file']);
+			define('DEFT_INITIATOR', $first['file']);
 		}
 
 		// Absolute path
-		if (!defined('SNAPPY_ABS_PATH'))
-			define('SNAPPY_ABS_PATH', __DIR__);
+		if (!defined('DEFT_ABS_PATH'))
+			define('DEFT_ABS_PATH', __DIR__);
 
 		// App pathes
-		define('SNAPPY_PATH', str_replace("\\", '/', SNAPPY_ABS_PATH));
-		define('SNAPPY_LIB_PATH', SNAPPY_PATH . DS . self::$config['dir_lib']);
-		if (!is_dir(SNAPPY_LIB_PATH)) {
-			self::error('Cannot read from library directory: %1$s', SNAPPY_LIB_PATH);
+		define('DEFT_PATH', str_replace("\\", '/', DEFT_ABS_PATH));
+		define('DEFT_LIB_PATH', DEFT_PATH . DS . self::$config['dir_lib']);
+		if (!is_dir(DEFT_LIB_PATH)) {
+			self::error('Cannot read from library directory: %1$s', DEFT_LIB_PATH);
 		}
-		define('SNAPPY_TMP_PATH', SNAPPY_PATH . DS . self::$config['dir_tmp']);
-		if (!is_writable(SNAPPY_TMP_PATH)) {
-			self::error('Cannot write to temporary directory: %1$s', SNAPPY_TMP_PATH);
+		define('DEFT_TMP_PATH', DEFT_PATH . DS . self::$config['dir_tmp']);
+		if (!is_writable(DEFT_TMP_PATH)) {
+			self::error('Cannot write to temporary directory: %1$s', DEFT_TMP_PATH);
 		}
-		define('SNAPPY_PLUGIN_PATH', SNAPPY_PATH . DS . self::$config['dir_plugin']);
-		define('SNAPPY_PUBLIC_PATH', SNAPPY_PATH . DS . self::$config['dir_public']);
-		define('SNAPPY_PUBLIC_ASSET_PATH', SNAPPY_PUBLIC_PATH . DS . self::$config['dir_public_asset']);
+		define('DEFT_PLUGIN_PATH', DEFT_PATH . DS . self::$config['dir_plugin']);
+		define('DEFT_PUBLIC_PATH', DEFT_PATH . DS . self::$config['dir_public']);
+		define('DEFT_PUBLIC_ASSET_PATH', DEFT_PUBLIC_PATH . DS . self::$config['dir_public_asset']);
 
 		// Libraries to load
 		$array = self::import(
@@ -156,35 +156,35 @@ class Snappy {
 		}
 
 		// URLs
-		define('SNAPPY_URL_PATH', str_replace(
+		define('DEFT_URL_PATH', str_replace(
 			str_replace("\\", '/', $_SERVER['DOCUMENT_ROOT']),
 			'',
-			str_replace("\\", '/', dirname(SNAPPY_INITIATOR))
+			str_replace("\\", '/', dirname(DEFT_INITIATOR))
 		));
-		define('SNAPPY_URL',
+		define('DEFT_URL',
 			self::request()->scheme() . '://' .
 			self::request()->host() .
 			(self::request()->port() <> 80 ? ':' . self::request()->port() : NULL) .
-			SNAPPY_URL_PATH
+			DEFT_URL_PATH
 		);
-//		define('SNAPPY_URL', SNAPPY_URL_PATH);
-		define('SNAPPY_ASSET_URL', SNAPPY_URL . '/' . self::$config['dir_public_asset'] . '/');
-		define('SNAPPY_PLUGIN_URL', SNAPPY_URL . '/' . self::$config['dir_plugin'] . '/');
+//		define('DEFT_URL', DEFT_URL_PATH);
+		define('DEFT_ASSET_URL', DEFT_URL . '/' . self::$config['dir_public_asset'] . '/');
+		define('DEFT_PLUGIN_URL', DEFT_URL . '/' . self::$config['dir_plugin'] . '/');
 
-		// Requested route relative to Snappy URL.
-		define('SNAPPY_ROUTE',
-			\Snappy\Lib\Sanitize::forHtml(
-				\Snappy\Lib\Sanitize::forText(
+		// Requested route relative to Deft URL.
+		define('DEFT_ROUTE',
+			\Deft\Lib\Sanitize::forHtml(
+				\Deft\Lib\Sanitize::forText(
 					substr(
-						\Snappy::request()->path(),
-						(strlen(SNAPPY_URL_PATH . '/'))
+						\Deft::request()->path(),
+						(strlen(DEFT_URL_PATH . '/'))
 					)
 				)
 			)
 		);
 
-		// Snappy init time
-		self::$start = \Snappy\Lib\Helper::getMicroTime();
+		// Deft init time
+		self::$start = \Deft\Lib\Helper::getMicroTime();
 
 		// URL separator
 		define('US', self::$config['url_separator']);
@@ -192,45 +192,45 @@ class Snappy {
 		// Runtime plugins
 		if (count(self::$config['plugins'])) {
 			foreach (self::$config['plugins'] as $plugin) {
-				$state = Snappy::PLUGIN_MISSING;
-				$path  = SNAPPY_PLUGIN_PATH . DS . $plugin;
+				$state = Deft::PLUGIN_MISSING;
+				$path  = DEFT_PLUGIN_PATH . DS . $plugin;
 				$ext = '.php';
 
 				if (file_exists($path . $ext)) {
-					$state = Snappy::PLUGIN_EXISTS;
+					$state = Deft::PLUGIN_EXISTS;
 				} elseif (is_dir($path) && file_exists($path . DS . $plugin . $ext)) {
-					$state = Snappy::PLUGIN_EXISTS;
+					$state = Deft::PLUGIN_EXISTS;
 					$path  .= DS . $plugin;
 				}
 
 				$start = 0;
-				if ($state === Snappy::PLUGIN_EXISTS) {
-					$start = \Snappy\Lib\Helper::getMicroTime();
+				if ($state === Deft::PLUGIN_EXISTS) {
+					$start = \Deft\Lib\Helper::getMicroTime();
 					include $path . $ext;
-					$state = Snappy::PLUGIN_LOADED;
+					$state = Deft::PLUGIN_LOADED;
 				}
 
 				self::log('plugin/' . $plugin, array(
-					'time'   => ($state ? \Snappy\Lib\Helper::getMoment($start) : 0),
+					'time'   => ($state ? \Deft\Lib\Helper::getMoment($start) : 0),
 					'loaded' => $state
 				));
 			}
 		}
 
-		// Prevent 'Snappy::init()' from being called again
+		// Prevent 'Deft::init()' from being called again
 		self::$initialized = true;
 
 		// Run this callback after initialization
 		$callback = self::$config['ready_callback'];
 		if (is_callable($callback)) {
-			\Snappy::event()->set('ready', $callback);
+			\Deft::event()->set('ready', $callback);
 		}
 
 		// Execute initialization
-		$init = \Snappy::event()->exec('init');
+		$init = \Deft::event()->exec('init');
 
 		// Execute ready, after initialization
-		$ready = \Snappy::event()->exec('ready');
+		$ready = \Deft::event()->exec('ready');
 
 		// No content
 		if ($init === FALSE && $ready === FALSE) {
@@ -238,13 +238,13 @@ class Snappy {
 		}
 
 		// Execute exit event
-		\Snappy::event()->exec('exit');
+		\Deft::event()->exec('exit');
 	}
 
 	/**
-	 * Import libraries relative to SNAPPY_PATH for use within the App.
+	 * Import libraries relative to DEFT_PATH for use within the App.
 	 *
-	 * Dot-scope format "lib.response.http.html" for "SNAPPY_PATH/lib/response/http/html.php" class.
+	 * Dot-scope format "lib.response.http.html" for "DEFT_PATH/lib/response/http/html.php" class.
 	 *
 	 * @return array
 	 */
@@ -257,7 +257,7 @@ class Snappy {
 					continue;
 				}
 
-				$path = SNAPPY_PATH . DS . str_replace('.', DS, $arg) . '.php';
+				$path = DEFT_PATH . DS . str_replace('.', DS, $arg) . '.php';
 				if (!is_readable($path) || !is_file($path)) {
 					$result[] = $path;
 				} else {
@@ -278,7 +278,7 @@ class Snappy {
 		if (is_null($name)) {
 			return;
 		}
-		$path   = SNAPPY_PLUGIN_PATH . DS . $name;
+		$path   = DEFT_PLUGIN_PATH . DS . $name;
 		$plugin = self::getLog('plugin/' . $name);
 		if (count($plugin) and $plugin[0]['loaded']) {
 			return self::PLUGIN_LOADED;
@@ -330,11 +330,11 @@ class Snappy {
 		}
 
 		$key = self::getInstanceKey($class, $args);
-		$start = \Snappy\Lib\Helper::getMicroTime();
+		$start = \Deft\Lib\Helper::getMicroTime();
 
 		self::$instances[ $key ] = new $class( $args );
 		self::log("instance/{$class}/{$key}", array(
-			'time' => \Snappy\Lib\Helper::getMoment($start),
+			'time' => \Deft\Lib\Helper::getMoment($start),
 			'args' => $args
 		));
 		self::log("instance/{$class}/{$key}/calls");
@@ -355,7 +355,7 @@ class Snappy {
 			return;
 		}
 
-		$class = '\\Snappy\\' . str_replace(' ', '\\', ucwords(str_replace('.', ' ', $scope)));
+		$class = '\\Deft\\' . str_replace(' ', '\\', ucwords(str_replace('.', ' ', $scope)));
 
 		$stack = "{$scope}";
 
@@ -382,7 +382,7 @@ class Snappy {
 
 				$errors = call_user_func_array([__CLASS__, 'import'], $array);
 				if (count($errors)) {
-					\Snappy::error('Failed to import and instantiate: %1$s', implode(', ', $errors));
+					\Deft::error('Failed to import and instantiate: %1$s', implode(', ', $errors));
 				}
 			}
 
@@ -408,7 +408,7 @@ class Snappy {
 	}
 
 	public static function lib ($scope, $args = array()) {
-		return \Snappy::get('lib.' . $scope, $args);
+		return \Deft::get('lib.' . $scope, $args);
 	}
 
 	public static function cache ($args = array()) {
@@ -486,7 +486,7 @@ class Snappy {
 	}
 
 	/**
-	 * @return \Snappy\Lib\Request
+	 * @return \Deft\Lib\Request
 	 */
 
 	public static function request () {
@@ -494,14 +494,14 @@ class Snappy {
 	}
 
 	/**
-	 * @return \Snappy\Lib\Route
+	 * @return \Deft\Lib\Route
 	 */
 	public static function route () {
 		return self::lib('route');
 	}
 
 	/**
-	 * @return \Snappy\Lib\Filesystem
+	 * @return \Deft\Lib\Filesystem
 	 */
 	public static function filesystem ($args = []) {
 		$config = self::config();
@@ -518,7 +518,7 @@ class Snappy {
 	/**
 	 * @param array $args
 	 *
-	 * @return \Snappy\Lib\Response
+	 * @return \Deft\Lib\Response
 	 */
 	public static function response ($args = []) {
 		$config = self::config();
@@ -556,13 +556,13 @@ class Snappy {
 
 		$secret = $config->get('secret');
 		if (empty($secret)) {
-			$config->set('secret', str_shuffle(\Snappy\Lib\Helper::ALPHANUMERIC_CHARS . \Snappy\Lib\Helper::EXTENDED_CHARS));
+			$config->set('secret', str_shuffle(\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS));
 			$config->save();
 		}
 
 		return strtr(
 			serialize($args),
-			\Snappy\Lib\Helper::ALPHANUMERIC_CHARS . \Snappy\Lib\Helper::EXTENDED_CHARS,
+			\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS,
 			$secret
 		);
 	}
@@ -587,7 +587,7 @@ class Snappy {
 		$decoded = strtr(
 			$string,
 			$secret,
-			\Snappy\Lib\Helper::ALPHANUMERIC_CHARS . \Snappy\Lib\Helper::EXTENDED_CHARS
+			\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS
 		);
 
 		$result = @unserialize($decoded);
@@ -613,21 +613,21 @@ class Snappy {
 		$config  = self::config();
 		$hash = $config->get('capture_hash');
 		if (is_null($hash)) {
-			$hash = \Snappy\Lib\Random::getMd5();
+			$hash = \Deft\Lib\Random::getMd5();
 			$config->set('capture_hash', $hash);
 			$config->save();
 		}
 
-		${'scope_' . $hash} = \Snappy::filter()->exec('beforeCapture', $scope);
-		${'path_' . $hash}  = SNAPPY_PATH . DS . str_replace('.', DS, ${'scope_' . $hash}) . '.php';
+		${'scope_' . $hash} = \Deft::filter()->exec('beforeCapture', $scope);
+		${'path_' . $hash}  = DEFT_PATH . DS . str_replace('.', DS, ${'scope_' . $hash}) . '.php';
 
 		if (!file_exists(${'path_' . $hash})) {
 			return;
 		}
 
-		\Snappy::event()->exec('beforeCapture', ${'scope_' . $hash});
+		\Deft::event()->exec('beforeCapture', ${'scope_' . $hash});
 
-		${'start_' . $hash} = \Snappy\Lib\Helper::getMicroTime();
+		${'start_' . $hash} = \Deft\Lib\Helper::getMicroTime();
 
 		ob_start();
 		include ${'path_' . $hash};
@@ -635,10 +635,10 @@ class Snappy {
 		ob_end_clean();
 
 		self::log('capture/' . ${'scope_' . $hash}, array(
-			'time' => \Snappy\Lib\Helper::getMoment(${'start_' . $hash})
+			'time' => \Deft\Lib\Helper::getMoment(${'start_' . $hash})
 		));
 
-		return \Snappy::filter()->exec('captureContent', ${'content_' . $hash});
+		return \Deft::filter()->exec('captureContent', ${'content_' . $hash});
 	}
 
 	/**
@@ -649,7 +649,7 @@ class Snappy {
 			$supports = array(
 				'yaml' => function_exists('yaml_emit_file')
 			);
-			$supports = \Snappy::filter()->exec('beforeSupport', $supports);
+			$supports = \Deft::filter()->exec('beforeSupport', $supports);
 			return (array_key_exists($string, $supports) and $supports[$string] === true);
 		}
 		return false;
@@ -672,7 +672,7 @@ class Snappy {
 			self::$logs[$stack] = array();
 		}
 
-		$entry = array('moment' => \Snappy\Lib\Helper::getMoment()) + (array) $args;
+		$entry = array('moment' => \Deft\Lib\Helper::getMoment()) + (array) $args;
 
 		if ($replace) {
 			self::$logs[$stack] = array($entry);
@@ -711,9 +711,9 @@ class Snappy {
 			return;
 		}
 
-		\Snappy::event()->exec('onSnappyError');
+		\Deft::event()->exec('onDeftError');
 
-		$template = \Snappy::filter()->exec('SnappyErrorTemplate', [
+		$template = \Deft::filter()->exec('DeftErrorTemplate', [
 			'@tag' => 'html',
 			'@markup' => [
 				'@tag' => 'body',
@@ -723,9 +723,9 @@ class Snappy {
 			]
 		]);
 
-		//if (\Snappy::response()->status(500) !== true) {
+		//if (\Deft::response()->status(500) !== true) {
 			echo '<h1>' . __('App error') . '</h1>';
-			if (SNAPPY_DEBUG > 0) {
+			if (DEFT_DEBUG > 0) {
 
 			}
 			var_dump(func_get_args());
@@ -767,9 +767,9 @@ class Snappy {
 }
 
 /**
- * Class Snappy_Concrete for instantiation based classes
+ * Class Deft_Concrete for instantiation based classes
  */
-class Snappy_Concrete {
+class Deft_Concrete {
 
 	/**
 	 * @var array
@@ -788,12 +788,12 @@ class Snappy_Concrete {
 	 */
 	public function __construct ($args = array(), $class = __CLASS__) {
 		$this->args = self::getArgs($args);
-		$this->stack = 'instance/' . get_class($this) . '/' . \Snappy::getInstanceKey(get_class($this), $args);
+		$this->stack = 'instance/' . get_class($this) . '/' . \Deft::getInstanceKey(get_class($this), $args);
 
 		if (is_string($class)) {
-			\Snappy::event()->exec("on{$class}Construct", $this);
+			\Deft::event()->exec("on{$class}Construct", $this);
 		}
-		\Snappy::event()->exec('onSnappyConcrete', $this);
+		\Deft::event()->exec('onDeftConcrete', $this);
 	}
 
 	/**
@@ -924,7 +924,7 @@ class Snappy_Concrete {
 		}
 
 		if (is_string($filter)) {
-			$return = \Snappy::filter()->exec($filter, $return);
+			$return = \Deft::filter()->exec($filter, $return);
 		}
 
 		return $return;
@@ -944,8 +944,8 @@ function __ ( /*polymorphic*/) {
 
 	$phrase = array_shift($args);
 
-	if (\Snappy::locale()->isDefault() === false) {
-		$phrase = \Snappy::locale()->getPhrase($phrase);
+	if (\Deft::locale()->isDefault() === false) {
+		$phrase = \Deft::locale()->getPhrase($phrase);
 	}
 
 	if (count($args)) {

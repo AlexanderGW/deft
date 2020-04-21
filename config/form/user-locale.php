@@ -3,7 +3,7 @@
 /**
  * File: config/form/user-locale.php
  * Date: 2018-05-29 14:33:09
- * Auto-generated configuration by the Snappy Framework
+ * Auto-generated configuration by the Deft Framework
  */
 
 return array(

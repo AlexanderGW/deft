@@ -1,39 +1,39 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
- * Here is my attempt to convey my thought process for Snappy core, and how it should work.
+ * Here is my attempt to convey my thought process for Deft core, and how it should work.
  *
- * Class SnappyUnitResponseHttpJsonTest
+ * Class DeftUnitResponseHttpJsonTest
  *
  * @group unit.response.http.json
  */
 
-class SnappyUnitResponseHttpJsonTest extends \PHPUnit\Framework\TestCase {
+class TestDeftUnitResponseHttpJson extends \PHPUnit\Framework\TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->response = Snappy::response([
+		$this->response = Deft::response([
 			'type' => 'http.json'
 		]);
 	}
@@ -41,7 +41,7 @@ class SnappyUnitResponseHttpJsonTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test default JSON output
 	 *
-	 * @covers \Snappy\Lib\Response\Http\Json::output
+	 * @covers \Deft\Lib\Response\Http\Json::output
 	 */
 	public function test_response_http_json_output() {
 

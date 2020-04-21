@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib;
+namespace Deft\Lib;
 
 class Watchdog {
 	const INFORMATION = 0;
@@ -52,7 +52,7 @@ class Watchdog {
 			return;
 		}
 
-		\Snappy::event()->exec('documentInit');
+		\Deft::event()->exec('documentInit');
 		self::$initialized = true;
 	}
 
@@ -67,9 +67,9 @@ class Watchdog {
 		}
 
 		// Too many watchdog errors
-		$limit = \Snappy::config()->get('max_errors', 30);
+		$limit = \Deft::config()->get('max_errors', 30);
 		if ($limit && self::$errors >= $limit) {
-			\Snappy::error('Document error limit reached (%1%d)', $limit);
+			\Deft::error('Document error limit reached (%1%d)', $limit);
 		}
 
 		if (!is_string($message)) {
@@ -98,13 +98,13 @@ class Watchdog {
 		}
 		$phrase .= ': %1$s (%2$d)';
 
-		\Snappy::response()->prependBody(sprintf(
+		\Deft::response()->prependBody(sprintf(
 			Element::html(array(
 				'@tag' => 'div',
 				'@props' => array(
 					'tabindex' => 0,
 					'class' => array(
-						'snappy',
+						'deft',
 						'watchdog',
 						($level === self::ERROR ? 'err' : (($level === self::WARNING ? 'warn' : 'info')))
 					),
