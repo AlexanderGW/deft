@@ -103,7 +103,7 @@ class Filesystem extends \Snappy_Concrete {
 	 */
 	public function touch($path = NULL) {
 		if (!is_null($path)) {
-			if (!is_dir($path))
+			if (!is_dir(dirname($path)))
 				mkdir(dirname($path));
 			if (is_writable($path)) {
 				if (file_put_contents($path, NULL) === 0)
