@@ -33,10 +33,10 @@ class Debug extends Plugin {
 	private static $hash;
 
 	public static function init () {
-		\Deft::route()->add('debug', 'debug', null, '\\Deft\\Plugin\\Debug::returnSetting');
+		\Deft::route()->add('debug', 'debug', null, '\Deft\Plugin\Debug::returnSetting');
 		\Deft::route()->add('debug.request', 'debug/request/[hash]', array(
 			'hash' => '[0-9a-z]{32}'
-		), '\\Deft\\Plugin\\Debug::returnRequest');
+		), '\Deft\Plugin\Debug::returnRequest');
 
 		\Deft::event()->set('ready', '\Deft\Plugin\Debug::setResponseAssets');
 	}
@@ -59,7 +59,7 @@ class Debug extends Plugin {
 	}
 
 	public static function getPath() {
-		return DEFT_PLUGIN_PATH . DS . 'debug' . DS . 'cache';
+		return DEFT_STORAGE_PATH . DS . 'debug';
 	}
 
 	public static function returnSetting () {
@@ -112,19 +112,22 @@ class Debug extends Plugin {
 		// Set response output to JSON
 		\Deft::config()->set('response.type', 'http.json');
 
+		$content = file_get_contents(self::getPath() . DS . \Deft::route()->getParam('hash') . '.json');
+//		var_dump($content);
+
 		// Buffer the content
-		\Deft::response()->buffer(file_get_contents(self::getPath() . DS . \Deft::route()->getParam('hash') . '.json'));
+		\Deft::response()->buffer($content);
 	}
 
 	public static function writeJson() {
 
 		// Create debugging report for API query
+//		var_dump(DEFT_DEBUG);
 		if (DEFT_DEBUG) {
-			$path = self::getPath();
-			if (!is_dir($path)) {
-				mkdir($path);
+			if (!is_dir(self::getPath())) {
+				mkdir(self::getPath());
 			}
-			file_put_contents($path . DS . self::getHash() . '.json', \Deft::capture('plugin.debug.template.debug'));
+			file_put_contents(self::getPath() . DS . self::getHash() . '.json', \Deft::capture('plugin.debug.template.debug'));
 		}
 	}
 }

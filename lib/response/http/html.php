@@ -120,42 +120,42 @@ class Html extends Http {
 	 * @param null $value
 	 */
 	public function setTitleSeparator ($value = null) {
-		$this->args['title_separator'] = $value;
+		$this->setArg('title_separator', $value);
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getTitleSeparator () {
-		return $this->args['title_separator'];
+		return $this->getArg('title_separator');
 	}
 
 	/**
 	 * @param null $value
 	 */
 	public function setDescription ($value = null) {
-		$this->args['description'] = $value;
+		$this->setArg('description', $value);
 	}
 
 	/**
 	 * @param null $value
 	 */
 	public function prependDescription ($value = null) {
-		$this->args['description'] = $value . $this->args['description'];
+		$this->prependArg('description', $value);
 	}
 
 	/**
 	 * @param null $value
 	 */
 	public function appendDescription ($value = null) {
-		$this->args['description'] .= $value;
+		$this->appendArg('description', $value);
 	}
 
 	/**
 	 * @return mixed|void
 	 */
 	public function getDescription () {
-		return \Deft::filter()->exec('document.description', $this->args['description']);
+		return \Deft::filter()->exec('document.description', $this->getArg('description'));
 	}
 
 	/**
@@ -666,15 +666,15 @@ class Html extends Http {
 			$this->setTitle($config->get('title'));
 		}
 
-		if (!$this->args['title_separator']) {
+		if (!$this->getTitleSeparator()) {
 			$this->setTitleSeparator($config->get('title_separator', ', '));
 		}
 
-		if ($config->get('keywords') and !empty($this->getArg('keywords'))) {
+		if ($config->get('keywords') and !empty($this->getKeywords())) {
 			$this->setKeywords($config->get('keywords'));
 		}
 
-		if ($config->get('description') and !empty($this->getArg('description'))) {
+		if ($config->get('description') and !empty($this->getDescription())) {
 			$this->setDescription($config->get('description'));
 		}
 
@@ -1133,7 +1133,7 @@ class Html extends Http {
 			$scripts = array();
 			foreach ($this->scripts['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
-					$this->links[$hash]['@props']['src'] = Sanitize::forText($this->scripts[$hash]['@props']['src']);
+					$this->links[$hash]['@props']['src'] = array_key_exists('src', $this->scripts[$hash]['@props']) ? Sanitize::forText($this->scripts[$hash]['@props']['src']) : NULL;
 
 					// Add script..
 					if (
@@ -1157,8 +1157,8 @@ class Html extends Http {
 						$this->appendBody(Element::html(
 							[
 								'@tag'    => 'script',
-								'@markup' => $this->scripts[$hash]['@markup'],
-								'@props'  => $this->scripts[$hash]['@props']
+								'@markup' => array_key_exists('@markup', $this->scripts[$hash]) ? $this->scripts[$hash]['@markup'] : NULL,
+								'@props'  => array_key_exists('@props', $this->scripts[$hash]) ? $this->scripts[$hash]['@props'] : NULL
 							],
 							'document.script'
 						) . $this->getEOL());
@@ -1217,3 +1217,40 @@ class Html extends Http {
 		return $content;
 	}
 }
+
+//		\Deft::response()->prependBody(sprintf(
+//			Element::html(array(
+//				'@tag' => 'div',
+//				'@props' => array(
+//					'tabindex' => 0,
+//					'class' => array(
+//						'deft',
+//						'watchdog',
+//						($level === self::ERROR ? 'err' : (($level === self::WARNING ? 'warn' : 'info')))
+//					),
+//					'role' => 'alert'
+//				),
+//				'@markup' => array(
+//					array(
+//						'@tag' => 'div',
+//						'@markup' => array(
+//							array(
+//								'@tag' => 'strong',
+//								'@markup' => '%1$s'
+//							)
+//						)
+//					),
+//					array(
+//						'@tag' => 'div',
+//						'@markup' => array(
+//							array(
+//								'@tag' => 'span',
+//								'@markup' => '%2$s'
+//							)
+//						)
+//					)
+//				)
+//			), 'response.error.template'),
+//			__($phrase, $stack, $code),
+//			$message
+//		));

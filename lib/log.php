@@ -23,19 +23,16 @@
 
 namespace Deft\Lib;
 
-class Log {
+class Log extends \Deft_Concrete {
 	const INFORMATION = 0;
 	const WARNING = 1;
 	const ERROR = 2;
 
-	private $entries = [];
-
-	private static $args = array(
-		'base'      => null,
-		'encoding'  => 'utf-8',
-		'locale'    => 'en',
-		'direction' => 'ltr'
-	);
+	private $entries = [
+		self::ERROR => [],
+		self::WARNING => [],
+		self::INFORMATION => []
+	];
 
 	/**
 	 * Log constructor.
@@ -52,7 +49,12 @@ class Log {
 	 * @return array
 	 */
 	public static function getArgs ($args = array()) {
-		return $args;
+		return array_merge(array(
+			'base'      => null,
+			'encoding'  => 'utf-8',
+			'locale'    => 'en',
+			'direction' => 'ltr'
+		), $args);
 	}
 
 	/**
@@ -64,7 +66,7 @@ class Log {
 		
 		// Too many watchdog errors
 		$limit = \Deft::config()->get('log.error.max', 30);
-		if ($limit && $this->entries['error'] >= $limit)
+		if ($limit && count($this->entries[self::ERROR]) >= $limit)
 			\Deft::error('Error limit reached (%1%d)', $limit);
 
 		if (!is_string($message))
@@ -99,42 +101,5 @@ class Log {
 			$this->entries[$stack][$level] = $entry;
 			\Deft::event()->exec('newLogEntry', $entry);
 		}
-
-//		\Deft::response()->prependBody(sprintf(
-//			Element::html(array(
-//				'@tag' => 'div',
-//				'@props' => array(
-//					'tabindex' => 0,
-//					'class' => array(
-//						'deft',
-//						'watchdog',
-//						($level === self::ERROR ? 'err' : (($level === self::WARNING ? 'warn' : 'info')))
-//					),
-//					'role' => 'alert'
-//				),
-//				'@markup' => array(
-//					array(
-//						'@tag' => 'div',
-//						'@markup' => array(
-//							array(
-//								'@tag' => 'strong',
-//								'@markup' => '%1$s'
-//							)
-//						)
-//					),
-//					array(
-//						'@tag' => 'div',
-//						'@markup' => array(
-//							array(
-//								'@tag' => 'span',
-//								'@markup' => '%2$s'
-//							)
-//						)
-//					)
-//				)
-//			), 'response.error.template'),
-//			__($phrase, $stack, $code),
-//			$message
-//		));
 	}
 }

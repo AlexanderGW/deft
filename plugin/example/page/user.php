@@ -45,19 +45,19 @@ if ($locale) {
  * Get a list of locales from config, if empty add Spanish "es-ES" (see /locale/es-es.php) to test with,
  * and add the default EN for form options
  */
-$config =& \Deft::config();
+$config = \Deft::config();
 $locales = $config->get('locales');
 if (!$locales) {
 	$locales = array('es-ES');
 	$config->set('locales', $locales);
-	$config->save();
+//	$config->save();
 }
 array_unshift($locales, 'en-GB');
 
 /**
  * Build form to set locale environment
  */
-$form =& \Deft::form('user_locale');
+$form = \Deft::form('user_locale');
 
 $form->validate(['', '']);
 

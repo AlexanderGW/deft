@@ -213,9 +213,11 @@ class Deft {
 		self::$initialized = true;
 
 		// Run this callback after initialization
-		$callback = self::$config['ready_callback'];
-		if (is_callable($callback)) {
-			\Deft::event()->set('ready', $callback);
+		if (array_key_exists('ready_callback', self::$config)) {
+			$callback = self::$config['ready_callback'];
+			if (is_callable($callback)) {
+				\Deft::event()->set('ready', $callback);
+			}
 		}
 
 		// Execute initialization
@@ -846,9 +848,12 @@ class Deft_Concrete {
 	 * @return bool
 	 */
 	public function prependArg ($arg = null, $value = null) {
-		if (is_null($arg)) {
-			return false;
-		}
+		if (is_null($arg))
+			return FALSE;
+
+		if (!array_key_exists($arg, $this->args))
+			$this->args[$arg] = [];
+
 		if (is_string($this->args[$arg])) {
 			$this->args[$arg] = $value . $this->args[$arg];
 		} else {
@@ -873,9 +878,12 @@ class Deft_Concrete {
 	 * @return bool
 	 */
 	public function appendArg ($arg = null, $value = null) {
-		if (is_null($arg)) {
+		if (is_null($arg))
 			return false;
-		}
+
+		if (!array_key_exists($arg, $this->args))
+			$this->args[$arg] = [];
+
 		if (is_string($this->args[$arg])) {
 			$this->args[$arg] .= $value;
 		} else {
@@ -902,10 +910,11 @@ class Deft_Concrete {
 	 */
 	public function getArg ($arg = null, $filter = null, $default = NULL, $seperator = ' ') {
 		$return = $default;
-		if (is_string($this->args[$arg])) {
-			$return = $this->args[$arg];
-		} elseif (is_array($this->args[$arg])) {
-			$return = implode($seperator, $this->args[$arg]);
+		if (array_key_exists($arg, $this->args)) {
+			if (is_array($this->args[$arg]))
+				$return = implode($seperator, $this->args[$arg]);
+			else
+				$return = $this->args[$arg];
 		}
 
 		if (is_string($filter)) {

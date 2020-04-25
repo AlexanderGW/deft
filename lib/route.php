@@ -89,7 +89,7 @@ class Route extends \Deft_Concrete {
 		self::$route = \Deft::route()->get( DEFT_ROUTE );
 
 		// No match
-		if ( self::$route === null and strlen( DEFT_ROUTE ) ) {
+		if ( self::$route === FALSE and strlen( DEFT_ROUTE ) ) {
 			$routes  = \Deft::route()->getRules();
 			$divider = \Deft::config()->get( 'url_separator', '/' );
 
@@ -166,7 +166,7 @@ class Route extends \Deft_Concrete {
 			'time'     => Helper::getMoment( $start ),
 			'name'     => self::$route[ 'name' ],
 			'request'  => DEFT_ROUTE,
-			'path'     => self::$route[ 'path' ],
+			'path'     => array_key_exists('path', self::$route) ? self::$route[ 'path' ] : '',
 			'pattern'  => self::$route[ 'pattern' ],
 			'data'     => self::$route[ 'data' ],
 			'callback' => self::$route[ 'callback' ]
@@ -219,8 +219,9 @@ class Route extends \Deft_Concrete {
 		}
 
 		// Process route arguments
+		$patterns = array();
 		if ( is_array( $args ) and count( $args ) ) {
-			$patterns = $errors = array();
+			$errors = array();
 
 			// Test for route placeholders
 			preg_match_all( '#\[([a-z0-9]+)\]#', $path, $matches );
@@ -258,16 +259,18 @@ class Route extends \Deft_Concrete {
 	 * @param null $path
 	 */
 	public function get( $path = null ) {
-		if ( is_null( $path ) ) {
-			return null;
-		}
+		if ( is_null( $path ) )
+			return NULL;
 
 		$sep = \Deft::config()->get( 'url_separator', '/' );
 		if ( strpos( $path, $sep ) === 0 ) {
 			$path = substr( $path, strlen( $sep ) );
 		}
 
-		return self::$rules[ $path ];
+		if (array_key_exists($path, self::$rules) )
+			return self::$rules[ $path ];
+
+		return FALSE;
 	}
 
 	/**

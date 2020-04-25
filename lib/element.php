@@ -108,7 +108,7 @@ class Element {
 		}
 
 		// A nested array of elements in markup...
-		elseif( is_array( $value['@markup'] ) ) {
+		elseif( array_key_exists( '@markup', $value ) && is_array( $value['@markup'] ) ) {
 			$markup = array();
 			foreach( $value['@markup'] as $key => $val ) {
 				$element = self::html( $val );
@@ -182,12 +182,12 @@ class Element {
 
 		// Close markup
 		else
-			$element .= '<' . $value['@tag'] . $props . '>' . $value['@markup'] . '</' . $value['@tag'] . '>' . "\r\n";
+			$element .= '<' . $value['@tag'] . $props . '>' . (array_key_exists('@markup', $value) ? $value['@markup'] : NULL) . '</' . $value['@tag'] . '>' . "\r\n";
 
 		if (DEFT_DEBUG) {
 			$element .= "<!-- /Element({$value['@tag']}) -->";
 
-			if (DEFT_DEBUG > 1)
+			if (DEFT_DEBUG > 1 && array_key_exists( '@markup', $value ))
 				$value['@markup'] = htmlspecialchars($value['@markup']);
 			else
 				$value['@markup'] = null;
