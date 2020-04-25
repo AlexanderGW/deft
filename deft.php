@@ -96,20 +96,21 @@ class Deft {
 //		set_error_handler(['Deft', 'errorHandler']);
 
 		self::$config = array_merge(array(
-			'config_format'    => 'php',
-			'debug'            => 0,
-			'dir_public'       => 'public',
-			'dir_public_asset' => 'asset',
-			'dir_plugin'       => 'plugin',
-			'dir_lib'          => 'lib',
-			'dir_tmp'          => 'tmp',
-			'plugins'          => array('debug', 'example'),
-			'url_separator'    => '/'
+			'config_format'          => 'php',
+			'debug'                  => 0,
+			'directory.lib'          => 'lib',
+			'directory.plugin'       => 'plugin',
+			'directory.storage'      => 'storage',
+			'directory.storage.tmp'  => 'tmp',
+			'directory.public'       => 'public',
+			'directory.public.asset' => 'asset',
+			'plugins'                => array('debug', 'example'),
+			'url_separator'          => '/'
 		), $config);
 
 		define('DEFT_DEBUG', (int) self::$config['debug']);
 
-		error_reporting((DEFT_DEBUG > 0) ? E_ALL & ~E_NOTICE & ~E_STRICT : 0);
+		error_reporting((DEFT_DEBUG > 0) ? 9 : 0);
 
 		$backtrace = debug_backtrace();
 
@@ -124,28 +125,21 @@ class Deft {
 
 		// App pathes
 		define('DEFT_PATH', str_replace("\\", '/', DEFT_ABS_PATH));
-		define('DEFT_LIB_PATH', DEFT_PATH . DS . self::$config['dir_lib']);
-		if (!is_dir(DEFT_LIB_PATH)) {
+		define('DEFT_LIB_PATH', DEFT_PATH . DS . self::$config['directory.lib']);
+		if (!is_dir(DEFT_LIB_PATH) || !is_readable(DEFT_LIB_PATH))
 			self::error('Cannot read from library directory: %1$s', DEFT_LIB_PATH);
-		}
-		define('DEFT_TMP_PATH', DEFT_PATH . DS . self::$config['dir_tmp']);
-		if (!is_writable(DEFT_TMP_PATH)) {
-			self::error('Cannot write to temporary directory: %1$s', DEFT_TMP_PATH);
-		}
-		define('DEFT_PLUGIN_PATH', DEFT_PATH . DS . self::$config['dir_plugin']);
-		define('DEFT_PUBLIC_PATH', DEFT_PATH . DS . self::$config['dir_public']);
-		define('DEFT_PUBLIC_ASSET_PATH', DEFT_PUBLIC_PATH . DS . self::$config['dir_public_asset']);
+		define('DEFT_STORAGE_PATH', DEFT_PATH . DS . self::$config['directory.storage']);
+		define('DEFT_TMP_PATH', DEFT_PATH . DS . self::$config['directory.storage.tmp']);
+		define('DEFT_PLUGIN_PATH', DEFT_PATH . DS . self::$config['directory.plugin']);
+		define('DEFT_PUBLIC_PATH', DEFT_PATH . DS . self::$config['directory.public']);
+		define('DEFT_PUBLIC_ASSET_PATH', DEFT_PUBLIC_PATH . DS . self::$config['directory.public.asset']);
 
 		// Libraries to load
 		$array = self::import(
 			'lib.helper',
-//			'lib.event',
 			'lib.route',
 			'lib.sanitize',
-//			'watchdog',
-//			'filter',
 			'lib.random',
-//			'lib.http',
 			'lib.element',
 			'lib.token',
 			'lib.plugin'
@@ -166,9 +160,8 @@ class Deft {
 			(self::request()->port() <> 80 ? ':' . self::request()->port() : NULL) .
 			DEFT_URL_PATH
 		);
-//		define('DEFT_URL', DEFT_URL_PATH);
-		define('DEFT_ASSET_URL', DEFT_URL . '/' . self::$config['dir_public_asset'] . '/');
-		define('DEFT_PLUGIN_URL', DEFT_URL . '/' . self::$config['dir_plugin'] . '/');
+		define('DEFT_ASSET_URL', DEFT_URL . '/' . self::$config['directory.public.asset'] . '/');
+		define('DEFT_PLUGIN_URL', DEFT_URL . '/' . self::$config['directory.plugin'] . '/');
 
 		// Requested route relative to Deft URL.
 		define('DEFT_ROUTE',
