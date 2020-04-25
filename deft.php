@@ -645,20 +645,6 @@ class Deft {
 	}
 
 	/**
-	 * Get support state for something
-	 */
-	static public function support($string = null) {
-		if (is_string($string)) {
-			$supports = array(
-				'yaml' => function_exists('yaml_emit_file')
-			);
-			$supports = \Deft::filter()->exec('beforeSupport', $supports);
-			return (array_key_exists($string, $supports) and $supports[$string] === true);
-		}
-		return false;
-	}
-
-	/**
 	 * Append log stack entry
 	 *
 	 * Slash-scope format "app/state"
@@ -668,12 +654,16 @@ class Deft {
 	 * @param bool|false $replace
 	 */
 	static function stack ($stack = null, $args = -1, $replace = false) {
+
+		// Nothing provided, return the entire stack
 		if (is_null($stack))
 			return self::$logs;
 
+		// Default the stack
 		if (!is_string($stack))
 			$stack = 'app';
 
+		// Args not provided, return the stack
 		if ($args === -1) {
 			if (array_key_exists($stack, self::$logs)) {
 				return self::$logs[$stack];
@@ -681,45 +671,29 @@ class Deft {
 			return [];
 		}
 
+		// Explicitly passed NULL, clear the stack
 		if (is_null($args)) {
 			self::$logs[$stack] = [];
 			return TRUE;
 		}
 
+		// Stack entry data
 		$entry = array('moment' => \Deft\Lib\Helper::getMoment()) + (array) $args;
 
+		// Replace all stack entries
 		if ($replace) {
 			self::$logs[$stack] = [
 				$entry
 			];
-		} else {
+		}
+
+		// Append to the stack
+		else {
 			if (!array_key_exists($stack, self::$logs))
 				self::$logs[$stack] = [];
 			self::$logs[$stack][] = $entry;
 		}
 	}
-
-	/**
-	 * Get log entries
-	 *
-	 * Slash-scope format "app/state"
-	 *
-	 * @param null $stack
-	 *
-	 * @return array
-	 */
-//	static function stack2 ($stack = null) {
-//		$return = array();
-//		if (!is_null($stack)) {
-//			if (array_key_exists($stack, self::$logs)) {
-//				$return = self::$logs[$stack];
-//			}
-//		} else {
-//			$return = self::$logs;
-//		}
-//
-//		return $return;
-//	}
 
 	/**
 	 * Raises App critical error
