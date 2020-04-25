@@ -189,7 +189,7 @@ class Database extends Storage {
 				$this->resource = $this->link->query($this->statement);
 			}
 			catch (\PDOException $e) {
-				Watchdog::set($e->getMessage(), $e->getCode(), 'database');
+				\Deft::log()->set($e->getMessage(), $e->getCode(), $this->getStack());
 			}
 
 			// TODO: This is messing up due to the getArgs() != to Deft::database() args
@@ -200,7 +200,7 @@ class Database extends Storage {
 //					'statement' => $statement
 //				);
 //
-//				\Deft::log($this->stack . '/statements', $entry);
+//				\Deft::stack($this->stack . '/statements', $entry);
 //
 //				switch (DEFT_DEBUG) {
 //					case 2 :
@@ -211,7 +211,7 @@ class Database extends Storage {
 //								$resource = $this->link->query($statement);
 //							}
 //							catch (\PDOException $e) {
-//								Watchdog::set($e->getMessage(), $e->getCode(), 'db');
+//								\Deft::log()->set($e->getMessage(), $e->getCode(), 'db');
 //							}
 //
 //							if ($resource) {
@@ -220,7 +220,7 @@ class Database extends Storage {
 //									'explain' => $resource->fetchAll(PDO::FETCH_ASSOC)
 //								);
 //
-//								\Deft::log($this->stack . '/statements', $entry);
+//								\Deft::stack($this->stack . '/statements', $entry);
 //							}
 //						}
 //						break;

@@ -35,7 +35,7 @@ $array = array(
 	'filter' => array()
 );
 
-foreach( \Deft::getLog() as $stack => $events ) {
+foreach( \Deft::stack() as $stack => $events ) {
 	$scope = explode( '/', $stack );
 
 	if( $scope[0] == 'instance') {

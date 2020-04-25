@@ -119,7 +119,7 @@ class Event {
 					}
 				}
 
-				\Deft::log('event/' . $name, array(
+				\Deft::stack('event/' . $name, array(
 					'time'      => Helper::getMoment($start),
 					'callbacks' => $array
 				));

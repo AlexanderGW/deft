@@ -139,7 +139,6 @@ class Deft {
 		// Libraries to load
 		$array = self::import(
 			'lib.helper',
-			'lib.watchdog',
 //			'lib.event',
 			'lib.route',
 			'lib.sanitize',
@@ -210,7 +209,7 @@ class Deft {
 					$state = Deft::PLUGIN_LOADED;
 				}
 
-				self::log('plugin/' . $plugin, array(
+				self::stack('plugin/' . $plugin, array(
 					'time'   => ($state ? \Deft\Lib\Helper::getMoment($start) : 0),
 					'loaded' => $state
 				));
@@ -279,7 +278,7 @@ class Deft {
 			return;
 		}
 		$path   = DEFT_PLUGIN_PATH . DS . $name;
-		$plugin = self::getLog('plugin/' . $name);
+		$plugin = self::stack('plugin/' . $name);
 		if (count($plugin) and $plugin[0]['loaded']) {
 			return self::PLUGIN_LOADED;
 		} elseif (file_exists($path . '.php') or is_dir($path)) {
@@ -333,11 +332,11 @@ class Deft {
 		$start = \Deft\Lib\Helper::getMicroTime();
 
 		self::$instances[ $key ] = new $class( $args );
-		self::log("instance/{$class}/{$key}", array(
+		self::stack("instance/{$class}/{$key}", array(
 			'time' => \Deft\Lib\Helper::getMoment($start),
 			'args' => $args
 		));
-		self::log("instance/{$class}/{$key}/calls");
+		self::stack("instance/{$class}/{$key}/calls", TRUE);
 
 		return self::$instances[$key];
 	}
@@ -359,7 +358,7 @@ class Deft {
 
 		$stack = "{$scope}";
 
-		$log = self::getLog($stack);
+		$log = self::stack($stack);
 
 		// First time calls may need to import library
 		if (!count($log)) {
@@ -386,7 +385,7 @@ class Deft {
 				}
 			}
 
-			self::log($stack);
+			self::stack($stack);
 		}
 
 		// Generate instance key
@@ -397,7 +396,7 @@ class Deft {
 
 		// Return existing
 		if ($result) {
-			self::log("instance/{$class}/{$key}/calls");
+			self::stack("instance/{$class}/{$key}/calls", TRUE);
 
 			return self::$instances[$key];
 		}
@@ -409,6 +408,10 @@ class Deft {
 
 	public static function lib ($scope, $args = array()) {
 		return \Deft::get('lib.' . $scope, $args);
+	}
+
+	public static function log ($args = array()) {
+		return self::lib('log', $args);
 	}
 
 	public static function cache ($args = array()) {
@@ -634,7 +637,7 @@ class Deft {
 		${'content_' . $hash} = ob_get_contents();
 		ob_end_clean();
 
-		self::log('capture/' . ${'scope_' . $hash}, array(
+		self::stack('capture/' . ${'scope_' . $hash}, array(
 			'time' => \Deft\Lib\Helper::getMoment(${'start_' . $hash})
 		));
 
@@ -664,19 +667,34 @@ class Deft {
 	 * @param $args
 	 * @param bool|false $replace
 	 */
-	static function log ($stack = null, $args = array(), $replace = false) {
-		if (!is_string($stack)) {
+	static function stack ($stack = null, $args = -1, $replace = false) {
+		if (is_null($stack))
+			return self::$logs;
+
+		if (!is_string($stack))
 			$stack = 'app';
+
+		if ($args === -1) {
+			if (array_key_exists($stack, self::$logs)) {
+				return self::$logs[$stack];
+			}
+			return [];
 		}
-		if (!array_key_exists($stack, self::$logs) and !$replace) {
-			self::$logs[$stack] = array();
+
+		if (is_null($args)) {
+			self::$logs[$stack] = [];
+			return TRUE;
 		}
 
 		$entry = array('moment' => \Deft\Lib\Helper::getMoment()) + (array) $args;
 
 		if ($replace) {
-			self::$logs[$stack] = array($entry);
+			self::$logs[$stack] = [
+				$entry
+			];
 		} else {
+			if (!array_key_exists($stack, self::$logs))
+				self::$logs[$stack] = [];
 			self::$logs[$stack][] = $entry;
 		}
 	}
@@ -690,18 +708,18 @@ class Deft {
 	 *
 	 * @return array
 	 */
-	static function getLog ($stack = null) {
-		$return = array();
-		if (!is_null($stack)) {
-			if (array_key_exists($stack, self::$logs)) {
-				$return = self::$logs[$stack];
-			}
-		} else {
-			$return = self::$logs;
-		}
-
-		return $return;
-	}
+//	static function stack2 ($stack = null) {
+//		$return = array();
+//		if (!is_null($stack)) {
+//			if (array_key_exists($stack, self::$logs)) {
+//				$return = self::$logs[$stack];
+//			}
+//		} else {
+//			$return = self::$logs;
+//		}
+//
+//		return $return;
+//	}
 
 	/**
 	 * Raises App critical error

@@ -165,7 +165,7 @@ class TestDeftIntegrationCore extends \PHPUnit\Framework\TestCase {
 			"The 'example' and 'test' plugins was not present in the 'plugins' config"
 		);
 
-		$log = Deft::getLog("plugin/example");
+		$log = Deft::stack("plugin/example");
 		$count = count($log);
 
 		// Check that 1 stack log exists for the directory-based 'example' plugin
@@ -193,7 +193,7 @@ class TestDeftIntegrationCore extends \PHPUnit\Framework\TestCase {
 			"The 'example' plugin time returned 0"
 		);
 
-		$log = Deft::getLog("plugin/test");
+		$log = Deft::stack("plugin/test");
 		$count = count($log);
 
 		// Check that 1 stack log exists for the file-based 'test' plugin
@@ -267,7 +267,7 @@ class TestDeftIntegrationCore extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Check stack log shows 3 calls for the original instance with $args
-		$log = Deft::getLog("instance/{$this->class}/{$key}/calls");
+		$log = Deft::stack("instance/{$this->class}/{$key}/calls");
 		$count = count($log);
 
 		$this->assertCount(

@@ -133,7 +133,7 @@ class TestDeftUnitEvent extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Check 1 stack log entry exists
-		$log = Deft::getLog("event/foo");
+		$log = Deft::stack("event/foo");
 		$count = count($log);
 
 		$this->assertCount(

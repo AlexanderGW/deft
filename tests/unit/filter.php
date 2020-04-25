@@ -136,7 +136,7 @@ class TestDeftUnitFilter extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Check 1 stack log entry exists
-		$log = Deft::getLog("filter/foo");
+		$log = Deft::stack("filter/foo");
 		$count = count($log);
 
 		$this->assertCount(

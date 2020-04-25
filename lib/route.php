@@ -162,7 +162,7 @@ class Route extends \Deft_Concrete {
 		}
 
 		// Logging
-		\Deft::log( 'route/' . self::$route[ 'name' ], array(
+		\Deft::stack( 'route/' . self::$route[ 'name' ], array(
 			'time'     => Helper::getMoment( $start ),
 			'name'     => self::$route[ 'name' ],
 			'request'  => DEFT_ROUTE,

@@ -193,7 +193,7 @@ class Element {
 				$value['@markup'] = null;
 		}
 
-		\Deft::log('element/' . $filter, array(
+		\Deft::stack('element/' . $filter, array(
 			'time'     => Helper::getMoment( $start ),
 			'element' => $value
 		));

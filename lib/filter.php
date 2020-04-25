@@ -99,7 +99,7 @@ class Filter {
 					}
 				}
 
-				\Deft::log( 'filter/' . $name, array(
+				\Deft::stack( 'filter/' . $name, array(
 					'time' => Helper::getMoment( $start ),
 					'callbacks' => $array
 				) );

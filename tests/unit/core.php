@@ -109,16 +109,16 @@ class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 	 * @depends test_getInstanceKey
 	 *
 	 * @covers Deft::log
-	 * @covers Deft::getLog
+	 * @covers Deft::stack
 	 */
-	public function test_log() {
+	public function test_stack() {
 		$key = Deft::getInstanceKey($this->class, $this->args);
 
 		$stack = "instance/{$this->class}/{$key}";
 
 		// Create stack log entry
-		Deft::log($stack, $this->args, $replace = FALSE);
-		$log = Deft::getLog($stack);
+		Deft::stack($stack, $this->args, $replace = FALSE);
+		$log = Deft::stack($stack);
 		$count = count($log);
 
 		$this->assertCount(
@@ -145,8 +145,8 @@ class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 				'foo' => 'baz'
 			]
 		);
-		Deft::log($stack, $args, $replace = FALSE);
-		$log = Deft::getLog($stack);
+		Deft::stack($stack, $args, $replace = FALSE);
+		$log = Deft::stack($stack);
 		$count = count($log);
 
 		$this->assertCount(
@@ -175,8 +175,8 @@ class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 				'foo' => 'qux'
 			]
 		);
-		Deft::log($stack, $args, $replace = TRUE);
-		$log = Deft::getLog($stack);
+		Deft::stack($stack, $args, $replace = TRUE);
+		$log = Deft::stack($stack);
 		$count = count($log);
 
 		$this->assertCount(
@@ -261,7 +261,7 @@ class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 			"An instance of {$this->class}, was not returned"
 		);
 
-		$log = Deft::getLog("instance/{$this->class}/{$key}/calls");
+		$log = Deft::stack("instance/{$this->class}/{$key}/calls");
 		$count = count($log);
 
 		$this->assertCount(
@@ -314,7 +314,7 @@ class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 			"Returned value was not an instance of \\Deft\\Lib::class"
 		);
 
-		$log = Deft::getLog("instance/{$this->class}/{$key}/calls");
+		$log = Deft::stack("instance/{$this->class}/{$key}/calls");
 		$count = count($log);
 
 		$this->assertCount(
@@ -403,7 +403,7 @@ class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 			'HTML5 template does not end with carriage return & new line'
 		);
 
-		$log = Deft::getLog("capture/{$scope}");
+		$log = Deft::stack("capture/{$scope}");
 		$count = count($log);
 
 		$this->assertCount(
