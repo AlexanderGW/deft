@@ -89,7 +89,7 @@ class Deft {
 	 * @param array $args
 	 */
 	static function init ($config) {
-		if (self::$initialized) {
+		if (self::$initialized || !is_array($config)) {
 			return;
 		}
 
@@ -148,6 +148,9 @@ class Deft {
 			self::error('Failed to import core libraries: %1$s', implode(', ', $array));
 		}
 
+		// Deft init time
+		self::$start = \Deft\Lib\Helper::getMicroTime();
+
 		// URLs
 		define('DEFT_URL_PATH', str_replace(
 			str_replace("\\", '/', $_SERVER['DOCUMENT_ROOT']),
@@ -174,9 +177,6 @@ class Deft {
 				)
 			)
 		);
-
-		// Deft init time
-		self::$start = \Deft\Lib\Helper::getMicroTime();
 
 		// URL separator
 		define('US', self::$config['url_separator']);
@@ -292,7 +292,7 @@ class Deft {
 	 * @return string
 	 */
 	static function getInstanceKey ($class = null, $seed = null) {
-		return ($class . '_' . md5(serialize($seed)));
+		return ($class . '#' . md5(serialize($seed)));
 	}
 
 	/**
@@ -413,19 +413,29 @@ class Deft {
 		return self::lib('cache', $args);
 	}
 
-	public static function config ($args = null) {
-		$scope = NULL;
-		if (is_null($args)) {
-			$args = self::$config;
-		} else
-			$args = [];
+	public static function config ($args = array()) {
+		if (is_string($args))
+			$args = [
+				'scope' => $args
+			];
 
-		$args = array_merge(array(
-			'format' => 'php',
-			'filesystem.type' => 'local'
-		), $args);
+		$scope = 'config';
+		if (is_array($args)) {
+			if (!count($args))
+				$args = self::$config;
+			else {
+				$args = array_merge(array(
+					'scope' => 'config.deft',
+					'format' => 'php',
+					'filesystem.type' => 'local'
+				), $args);
 
-		$scope = "config.{$args['format']}";
+				if (empty($args['format']))
+					$args['format'] = 'php';
+
+				$scope = "config.{$args['format']}";
+			}
+		}
 
 		return self::lib($scope, $args);
 	}
