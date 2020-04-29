@@ -77,7 +77,7 @@ class Http {
 
 		// Get response
 		if( ( $response = curl_exec( $ch ) ) === false )
-			\Deft::log()->set( curl_error( $ch ), curl_errno( $ch ), 'curl' );
+			\Deft::log()->add( curl_error( $ch ), curl_errno( $ch ), 'curl' );
 
 		$return = curl_getinfo( $ch );
 		$return['response'] = $response;
