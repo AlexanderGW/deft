@@ -24,15 +24,16 @@
 use Deft\Lib\Helper;
 
 $array = array(
-	'time' => sprintf('%4.4f', Helper::getMoment()),
+	'time' => Helper::getMoment(),
 	'memory' => Helper::getShnoFromBytes( memory_get_usage() ),
-	'element' => array(),
-	'route' => array(),
-	'instance' => array(),
-	'plugin' => array(),
+
 	'capture' => array(),
 	'event' => array(),
-	'filter' => array()
+	'route' => array(),
+	'plugin' => array(),
+	'instance' => array(),
+	'filter' => array(),
+	'element' => array()
 );
 
 foreach( \Deft::stack() as $stack => $events ) {
