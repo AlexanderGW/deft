@@ -32,43 +32,33 @@ class Php extends Config {
 	 *
 	 * @param null $args
 	 */
-	function __construct ($scope = null, $class = __CLASS__) {
-		$this->scope =
+	function __construct ($args = null, $class = __CLASS__) {
+		$this->path = DEFT_PATH . DS . str_replace('.', DS, $args['scope']) . '.' . $args['format'];
 
-			// The initial Deft config is always passed as an array, so default to 'config.deft'
-			is_array($scope) ? 'config.deft'
+//		var_dump($args['path']);
 
-				// Otherwise it should be a scope string
-				: self::getArgs($scope);
+		if (file_exists($this->path)) {
+			$this->exists = TRUE;
+			if (is_readable($this->path)) {
+				$this->readable = TRUE;
 
-		if (is_array($scope)) {
-			$this->fields = $scope;
-			$this->empty  = FALSE;
-			$this->path = DEFT_PATH . DS . 'config' . DS . 'deft.php';
-		} else {
-			$this->path = DEFT_PATH . DS . str_replace('.', DS, $this->scope) . '.' . $this->type;
+				try {
+					$array = include $this->path;
+				}
+				catch (\Exception $e) {
+					$this->exception = $e;
+				}
 
-			if (file_exists($this->path)) {
-				$this->exists = TRUE;
-				if (is_readable($this->path)) {
-					$this->readable = TRUE;
-
-					try {
-						$array = include $this->path;
-					}
-					catch (Exception $e) {
-						$this->exception = $e;
-					}
-
-					if (isset($array) and is_array($array)) {
-						$this->fields = $array;
-						$this->empty  = FALSE;
-					}
+				if (isset($array) and is_array($array)) {
+					$this->fields = $array;
+					$this->empty  = FALSE;
 				}
 			}
 		}
 
-		parent::__construct($this->scope, $class);
+		$this->args = $args;
+
+		parent::__construct($this->args, $class);
 	}
 
 	/**
@@ -170,9 +160,9 @@ class Php extends Config {
 			else {
 				var_dump('write failure: ' . $this->path);
 			}
-//			\Deft::watchdog()->add();
+			\Deft::log()->add('failed to write');
 		} else {
-//			\Deft::watchdog()->add();
+			\Deft::log()->add('no filesystem.');
 		}
 
 		return FALSE;
