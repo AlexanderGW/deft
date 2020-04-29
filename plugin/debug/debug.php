@@ -113,24 +113,23 @@ class Debug extends Plugin {
 		\Deft::config()->set('response.type', 'http.json');
 
 		$content = file_get_contents(self::getPath() . DS . \Deft::route()->getParam('hash') . '.json');
-//		var_dump($content);
 
 		// Buffer the content
 		\Deft::response()->buffer($content);
 	}
 
-	public static function writeJson() {
-
-		// Create debugging report for API query
-//		var_dump(DEFT_DEBUG);
+	public static function shutdown() {
 		if (DEFT_DEBUG) {
-			if (!is_dir(self::getPath())) {
-				mkdir(self::getPath());
-			}
-			file_put_contents(self::getPath() . DS . self::getHash() . '.json', \Deft::capture('plugin.debug.template.debug'));
+			register_shutdown_function( 'Deft\Plugin\Debug::captureWriteJson' );
 		}
+	}
+
+	public static function captureWriteJson() {
+		if (!is_dir(self::getPath()))
+			mkdir(self::getPath());
+		file_put_contents(self::getPath() . DS . self::getHash() . '.json', \Deft::capture('plugin.debug.template.debug'));
 	}
 }
 
 \Deft::event()->set('init', '\Deft\Plugin\Debug::init');
-\Deft::event()->set('exit', '\Deft\Plugin\Debug::writeJson', 99);
+\Deft::event()->set('exit', '\Deft\Plugin\Debug::shutdown', 999);
