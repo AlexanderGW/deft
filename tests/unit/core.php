@@ -95,7 +95,7 @@ class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 	 */
 	public function test_getInstanceKey() {
 		$key = Deft::getInstanceKey($this->class, $this->args);
-		$expected = $this->class . '_' . md5(serialize($this->args));
+		$expected = $this->class . '#' . md5(serialize($this->args));
 		$this->assertEquals(
 			$expected,
 			$key,
