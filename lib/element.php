@@ -202,4 +202,4 @@ class Element {
 	}
 }
 
-\Deft::event()->set('init', '\Deft\Lib\Element::init');
+//\Deft::event()->set('init', '\Deft\Lib\Element::init');
