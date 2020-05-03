@@ -127,7 +127,7 @@ class Debug extends Plugin {
 	public static function captureWriteJson() {
 		if (!is_dir(self::getPath()))
 			mkdir(self::getPath());
-		file_put_contents(self::getPath() . DS . self::getHash() . '.json', \Deft::capture('plugin.debug.template.debug'));
+		file_put_contents(self::getPath() . DS . self::getHash() . '.json', \Deft::capture('plugin.debug.template.json'));
 	}
 }
 

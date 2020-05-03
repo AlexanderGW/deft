@@ -26,9 +26,8 @@ use Deft\Lib\Helper;
 $array = array(
 	'time' => Helper::getMoment(),
 	'memory' => Helper::getShnoFromBytes( memory_get_usage() ),
-
-	'capture' => array(),
 	'event' => array(),
+	'capture' => array(),
 	'route' => array(),
 	'plugin' => array(),
 	'instance' => array(),
