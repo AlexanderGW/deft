@@ -56,9 +56,9 @@ class Php extends Config {
 			}
 		}
 
-		$this->args = $args;
+//		$this->args = $args;
 
-		parent::__construct($this->args, $class);
+		parent::__construct($args, $class);
 	}
 
 	/**
@@ -157,12 +157,10 @@ class Php extends Config {
 			$result = $this->filesystem->write($this->path, $content);
 			if ($result)
 				return TRUE;
-			else {
-				var_dump('write failure: ' . $this->path);
-			}
-			\Deft::log()->add('failed to write');
+
+			\Deft::log()->add(__('Failed to write "%1$s" over filesystem "%2$s"', $this->path, $args['scope']), 2, 'config.php');
 		} else {
-			\Deft::log()->add('no filesystem.');
+			\Deft::log()->add(__('Failed to instantiate filesystem "%1$s"', $args['scope']), 1, 'config.php');
 		}
 
 		return FALSE;
