@@ -869,9 +869,9 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Deft::error('Failed to write style cache directory: %1$s', $path);
+						\Deft::log()->add('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Deft::error('Failed to write style cache file: %1$s', $path_file);
+						\Deft::log()->add('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						file_put_contents($path_file, $content);
 						return Element::html(array(
@@ -907,9 +907,9 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Deft::error('Failed to write style cache directory: %1$s', $path);
+						\Deft::log()->add('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Deft::error('Failed to write style cache file: %1$s', $path_file);
+						\Deft::log()->add('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						$content = file_get_contents($file['href']) . "\n\n";
 						file_put_contents($path_file, $content);
@@ -943,9 +943,9 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Deft::error('Failed to write style cache directory: %1$s', $path);
+						\Deft::log()->add('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Deft::error('Failed to write style cache file: %1$s', $path_file);
+						\Deft::log()->add('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						$content = file_get_contents(DEFT_PATH . DS . $file['href']) . "\n\n";
 						file_put_contents($path_file, $content);
@@ -1002,9 +1002,9 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Deft::error('Failed to write directory: %1$s', $path);
+						\Deft::log()->add('Failed to write directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Deft::error('Failed to write file: %1$s', $path_file);
+						\Deft::log()->add('Failed to write file: %1$s', $path_file);
 					} else {
 						file_put_contents($path_file, $content);
 					}
@@ -1039,9 +1039,9 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Deft::error('Failed to write style cache directory: %1$s', $path);
+						\Deft::log()->add('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Deft::error('Failed to write style cache file: %1$s', $path_file);
+						\Deft::log()->add('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						$content = file_get_contents($script['@props']['src']) . "\n\n";
 						file_put_contents($path_file, $content);
@@ -1073,9 +1073,9 @@ class Html extends Http {
 					touch($path_file);
 
 					if (!is_writable($path)) {
-						\Deft::error('Failed to write style cache directory: %1$s', $path);
+						\Deft::log()->add('Failed to write style cache directory: %1$s', $path);
 					} elseif (!is_writable($path_file)) {
-						\Deft::error('Failed to write style cache file: %1$s', $path_file);
+						\Deft::log()->add('Failed to write style cache file: %1$s', $path_file);
 					} else {
 						$content = file_get_contents(DEFT_PATH . DS . $script['@props']['src']) . "\n\n";
 						file_put_contents($path_file, $content);
