@@ -344,7 +344,6 @@ class Request extends \Deft_Concrete {
 				$results[$i]['validated'] = $validated;
 			}
 
-			var_dump($results);
 			return $results;
 		}
 
