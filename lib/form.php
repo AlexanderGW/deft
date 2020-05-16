@@ -33,7 +33,7 @@ class Form extends \Deft_Concrete {
 		$this->element['@tag'] = 'form';
 		$this->element['@props']['method'] = 'POST';
 		if (is_null($value)) {
-			$this->prop('id', 'sf_' . Random::getChars(5));
+			$this->prop('id', 'df_' . Random::getChars(5));
 		}
 		if (is_string($value)) {
 			$this->prop('id', $value);
@@ -127,14 +127,28 @@ class Form extends \Deft_Concrete {
 		}
 
 		if (!array_key_exists($scope, $this->fields)) {
-			if (strpos($scope, 'select') === 0 or strpos($scope, 'textarea') === 0) {
-				list($tag, $name, $id) = explode('.', $scope);
-				$type = null;
+			$tag = $type = $name = $id = null;
+			if ((strpos($scope, 'select') === 0 or strpos($scope, 'textarea') === 0) or substr_count('.', $scope)) {
+				$items = explode('.', $scope);
+				if (array_key_exists(0, $items))
+					$tag = $items[0];
+				if (array_key_exists(1, $items))
+					$name = $items[2];
+				if (array_key_exists(2, $items))
+					$id = $items[3];
 			} else {
-				list($tag, $type, $name, $id) = explode('.', $scope);
+				$items = explode('.', $scope);
+				if (array_key_exists(0, $items))
+					$tag = $items[0];
+				if (array_key_exists(1, $items))
+					$type = $items[1];
+				if (array_key_exists(2, $items))
+					$name = $items[2];
+				if (array_key_exists(3, $items))
+					$id = $items[3];
 			}
 			if (empty($id)) {
-				$id = 'syf__' . ($name ? $name : ($type ? $tag . '_' . $type : $tag));
+				$id = 'df__' . ($name ? $name : ($type ? $tag . '_' . $type : $tag));
 			}
 			$this->fields[$scope] = new formField($tag, $type, $name, $id);
 		}
@@ -150,7 +164,10 @@ class Form extends \Deft_Concrete {
 			if ($field->prop('type') == 'file' and !$this->prop('enctype')) {
 				$this->prop('enctype', 'multipart/form-data');
 			}
-			$this->element['@markup'] .= $field->content();
+			if (array_key_exists('@markup', $this->element))
+				$this->element['@markup'] .= $field->content();
+			else
+				$this->element['@markup'] = $field->content();
 		}
 
 		return Element::html($this->element, $this->prop('id') ? 'element.form.' . $this->prop('id') : 'element.form');
