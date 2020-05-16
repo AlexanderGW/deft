@@ -40,11 +40,11 @@ class Config extends \Deft_Concrete {
 	function __construct ($args = [], $class = __CLASS__) {
 		if (!array_key_exists('scope', $args)) {
 			$this->scope = 'config';
-			$this->path = SNAPPY_PATH . DS . str_replace('.', DS, $this->scope) . '.php';
+			$this->path = DEFT_PATH . DS . str_replace('.', DS, $this->scope) . '.php';
 			$this->fields = $args;
 		} else {
 			$this->scope = $args['scope'];
-			$this->path = SNAPPY_PATH . DS . str_replace('.', DS, $this->scope) . '.' . $args['format'];
+			$this->path = DEFT_PATH . DS . str_replace('.', DS, $this->scope) . '.' . $args['format'];
 		}
 
 		parent::__construct($this->scope, $class);
