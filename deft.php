@@ -945,12 +945,11 @@ function __ ( /*polymorphic*/) {
 		return;
 	}
 	$args = func_get_args();
-
 	$phrase = array_shift($args);
 
-	if (\Deft::locale()->isDefault() === false) {
-		$phrase = \Deft::locale()->getPhrase($phrase);
-	}
+//	if (\Deft::locale()->isDefault() === false) {
+//		$phrase = \Deft::locale()->getPhrase($phrase);
+//	}
 
 	if (count($args)) {
 		$phrase = vsprintf($phrase, $args);
