@@ -24,6 +24,6 @@
 // TODO: send to a wrapper function for the Deft payloads stuff
 echo json_encode([
 	'deft' => Deft::VERSION,
-	'querySelector' => 'textarea',
+	'querySelector' => 'textarea#json_test',
 	'data' => "[['time' => \Deft\Lib\Sanitize::forHtml(time())],[3234324 => 'LOREM IPSUM', 'FOO' => 'BAR'], [[[[[[[[[['baz' => 'qux']]]]]]]]]]]"
 ]);

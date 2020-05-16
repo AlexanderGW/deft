@@ -25,34 +25,15 @@
 
 use Deft\Lib\Http;
 
-Deft::response()->prependTitle(__('cURL request'));
+Deft::response()->prependTitle(__('JSON API request'));
 
 Deft::response()->addScript( 'plugin/example/asset/js/request.js' );
-
-// Send a POST request to "/response" on the example plugin
-//$request = Http::request(
-//	// URI
-//	'/response',
-//
-//	// cURL options
-//	null,
-//
-//	// POST data
-//	array(
-//		'foobar' => 'Testing post'
-//	)
-//);
-
-// Capture response and build a <textarea> around it.
-ob_start();
-var_dump($request);
-$result = ob_get_clean();
 
 $form = Deft::form('example')
 	->field('textarea')
 	->label('Response')
+	->id('json_test')
 	->description('Output of the request')
-	->value($result)
 	->readOnly(true)
 	->cols(40)
 	->rows(20);
@@ -60,7 +41,7 @@ $form = Deft::form('example')
 ?>
 <div>
 	<div>
-		<h1><?php ___('Deft &ndash; The cURL request helper') ?></h1>
+		<h1><?php ___('Deft &ndash; The JSON API') ?></h1>
 		<p><a href="./">Return to previous page.</a><br>A brief example of the JSON API provided with Deft. Requested data using <code>Deft.get()</code> (an HTTP GET wrapper for <code>Deft.request()</code>), for a response created with <code>Deft::response()-output()</code></p>
 	</div>
 	<?php echo $form->content() ?>
