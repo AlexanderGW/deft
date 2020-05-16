@@ -63,7 +63,7 @@ class Log extends \Deft_Concrete {
 	 * @param null $stack
 	 */
 	function add ($message = null, $code = 0, $stack = null, $level = self::ERROR) {
-		
+
 		// Too many watchdog errors
 		$limit = \Deft::config()->get('log.error.max', 30);
 		if ($limit && count($this->entries[self::ERROR]) >= $limit)
@@ -75,8 +75,8 @@ class Log extends \Deft_Concrete {
 		if (!is_string($stack))
 			$stack = 'app';
 
-		if (!array_key_exists($stack, $this->entries))
-			$this->entries[$stack] = [];
+		if (!array_key_exists($level, $this->entries))
+			$this->entries[$level] = [];
 
 		// Unknown log level, default to a warning
 		if (!in_array($level, [
@@ -86,8 +86,8 @@ class Log extends \Deft_Concrete {
 		]))
 			$level = self::WARNING;
 
-		if (!array_key_exists($level, $this->entries[$stack]))
-			$this->entries[$stack][$level] = [];
+		if (!array_key_exists($stack, $this->entries[$level]))
+			$this->entries[$level][$stack] = [];
 
 		$entry = [
 			'stack' => $stack,
@@ -98,8 +98,18 @@ class Log extends \Deft_Concrete {
 
 		$entry = \Deft::filter()->exec('newLogEntry', $entry);
 		if ($entry) {
-			$this->entries[$stack][$level] = $entry;
+			$this->entries[$level][$stack][] = $entry;
 			\Deft::event()->exec('newLogEntry', $entry);
 		}
+
+		return true;
+	}
+
+	public function get($level = null) {
+		if (array_key_exists($level, $this->entries)) {
+			return $this->entries[$level];
+		}
+
+		return false;
 	}
 }
