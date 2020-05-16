@@ -28,6 +28,7 @@ class Request extends \Deft_Concrete {
 	protected $parsed = false;
 	protected $post = false;
 	protected $max_size = -1;
+	protected $working_size = 0;
 	protected $files_in = [];
 	protected $files_out = [];
 
@@ -84,11 +85,13 @@ class Request extends \Deft_Concrete {
 
 			// Process uploaded files
 			if( $_FILES and count( $_FILES ) ) {
-				$this->max_size = min(
+				$this->max_size = $this->working_size = min(
 					Helper::getBytesFromShno( ini_get( 'post_max_size' ) ),
 					Helper::getBytesFromShno( ini_get( 'upload_max_filesize' ) ),
 					Helper::getBytesFromShno( ini_get( 'memory_limit' ) )
 				);
+
+				$this->mimes = \Deft::config()->get('request.files.mimes', []);
 
 				$this->files_in = \Deft::filter()->exec('requestFilesIn', $_FILES);
 
@@ -97,7 +100,7 @@ class Request extends \Deft_Concrete {
 						continue;
 					if( !array_key_exists( $group, $this->files_out ) )
 						$this->files_out[ $group ] = array();
-					$this->files_out[ $group ][] = self::_file( $data, $this->max_size );
+					$this->files_out[ $group ][] = $this->_fileGroup( $group, $data );
 				}
 
 				$this->files_out = \Deft::filter()->exec('requestFilesOut', $this->files_out);
@@ -121,50 +124,231 @@ class Request extends \Deft_Concrete {
 
 	/**
 	 * @param null $data
-	 * @param null $max_size
+	 * @param null $this->max_size
 	 *
-	 * @return array
+	 * @return array|bool
 	 */
-	private static function _file( $data = null, $max_size = 0 ) {
-		if( array_key_exists( 'name', $data ) and
-		    array_key_exists( 'type', $data ) and
-		    array_key_exists( 'size', $data ) and
-		    array_key_exists( 'tmp_name', $data ) and
-		    array_key_exists( 'error', $data ) and
-		    !is_array( $data['error'] )
+	private function _fileGroup( $group = null, $items = null ) {
+		if( is_array($this->mimes) and
+		    array_key_exists( 'name', $items ) and
+		    array_key_exists( 'type', $items ) and
+		    array_key_exists( 'size', $items ) and
+		    array_key_exists( 'tmp_name', $items ) and
+		    array_key_exists( 'error', $items )
 		) {
-			$result = array(
-				'error' => null
-			);
+			$total = count($items['error']);
+			$results = [];
+			for ($i = 0; $i < $total; $i++) {
+				$validated = false;
+				$results[$i] = [
+					'error' => null,
+					'validated' => false
+				];
 
-			switch( $data['error'] ) {
-				case UPLOAD_ERR_OK:
-					break;
-				case UPLOAD_ERR_NO_FILE:
-					$result['error'] = __( 'No file sent' );
-					break;
-				case UPLOAD_ERR_INI_SIZE:
-				case UPLOAD_ERR_FORM_SIZE:
-					$result['error'] = __( 'Exceeded upload file size limit of %1$s', $max_size );
-					break;
-				default:
-					$result['error'] = __( 'Unknown error' );
-					break;
+				// Process PHP upload error codes
+				if ($items['error'][$i] !== 0) {
+					switch( $items['error'][$i] ) {
+						case UPLOAD_ERR_OK:
+							break;
+						case UPLOAD_ERR_NO_FILE:
+							$results[$i]['error'] = __( 'No file sent' );
+							break;
+						case UPLOAD_ERR_INI_SIZE:
+						case UPLOAD_ERR_FORM_SIZE:
+							$results[$i]['error'] = __( 'Exceeded upload file size limit of %1$s', $this->max_size );
+							break;
+						default:
+							$results[$i]['error'] = __( 'Unknown error' );
+							break;
+					}
+				}
+
+				// Uploads have exceeded the maximum possible upload size
+				if( $this->working_size && $items['size'][$i] > $this->working_size )
+					$results[$i]['error'] = __( 'Exceeded remaining upload limit of %1$s', $this->working_size );
+
+				// Add standard $_FILES results
+				$results[$i]['name'] = Sanitize::forText( $items['name'][$i] );
+				$results[$i]['tmp_name'] = Sanitize::forText( $items['tmp_name'][$i] );
+				$results[$i]['type'] = Sanitize::forText( $items['type'][$i] );
+				$results[$i]['size'] = (int)$items['size'][$i];
+
+				// No errors found
+				if( is_null( $results[$i]['error'] ) ) {
+
+					// Deduct file size from upload limit
+					$this->working_size -= $results[$i]['size'];
+
+					// Check that PHP uploaded the file
+					if( is_uploaded_file($results[$i]['tmp_name']) === FALSE) {
+						\Deft::log()->add( __( 'The request file %1$s[%2$d] failed with "%3$s"', $group, $i, $results[ $i ][ 'tmp_name' ], $results[$i]['error'] ), 1, 'request' );
+					} else {
+						$results[$i]['clean_tmp_name'] = str_replace('\\', '/', $items['tmp_name'][$i]);
+
+						// Get file MIME information
+						$fi = finfo_open( FILEINFO_MIME_TYPE );
+						if (!is_resource($fi)) {
+							\Deft::log()->add( __( 'Failed to open file information database for file MIMEs' ), 2, 'request' );
+							break;
+						} else {
+
+							// Store the MIME type
+							$results[$i]['clean_type'] = strtolower(finfo_file($fi, $results[$i]['clean_tmp_name']));
+
+							// Sanitised 'tmp' location of the file
+							$results[$i]['clean_name'] = Sanitize::forFileName($results[$i]['name']);
+
+							// Get basic filename name and extension parts
+							$pos = strrpos($results[$i]['clean_name'], '.');
+							$results[$i]['clean_extension'] = substr($results[$i]['clean_name'], ($pos+1));
+							$results[$i]['clean_name'] = substr($results[$i]['clean_name'], 0, $pos);
+
+							// Lookup file extension, if possible
+							if (version_compare(PHP_VERSION, '7.2.0') >= 0) {
+								$fi = finfo_open( FILEINFO_EXTENSION );
+								if (!is_resource($fi)) {
+									\Deft::log()->add( __( 'Failed to open file information database for file extensions' ), 3, 'request' );
+									break;
+								} else {
+									$extension_list = finfo_file($fi, $results[$i]['clean_tmp_name']);
+
+									// Extensions found for MIME type
+									if ($extension_list != '???') {
+										$array = explode('/', $extension_list);
+
+										// Current file extension not supported for this MIME time, use the first on the list
+										if (!in_array($results[$i]['clean_extension'], $array))
+											$results[$i]['clean_extension'] = array_shift($array);
+									}
+								}
+							}
+
+							// Set cleaned file name with best the extension for this MIME type
+							$results[$i]['clean_name'] = DEFT_TMP_PATH . '/' . $results[$i]['clean_name'] . '.' . $results[$i]['clean_extension'];
+
+							// Filter the entry before handling
+							$results[$i] = \Deft::filter()->exec('requestFileOutGroupEntry', $results[$i]);
+
+							// Only continue with allowed MIME types
+							$matches = [];
+							if (
+
+								// No exact match
+								in_array($results[$i]['clean_type'], $this->mimes) === false
+
+								// Prefix and suffix search
+								&& count($matches = array_filter(array_map(
+
+									/* Function: Test allowed MIME entry (prefix or suffix only) matches, request file MIME */
+									function ($mime) use ($results, $i) {
+
+										// Suffix match
+										if (
+											strpos($mime, '*') === 0
+											&& preg_match('#' . substr($mime, 1) . '$#', $results[$i]['clean_type'], $matches)
+										)
+											return $mime;
+
+										// Prefix match
+										elseif (
+											strpos($mime, '*') === (strlen($mime)-1)
+											&& preg_match('#^' . substr($mime, 0, -1) . '#', $results[$i]['clean_type'], $matches)
+										)
+											return $mime;
+										return null;
+									}
+								, $this->mimes))) === 0
+							) {
+								\Deft::log()->add( __( 'The request file %1$s[%2$d] MIME format "%3$s" is not allowed.', $group, $i, $results[ $i ][ 'clean_type' ] ), 5, 'request' );
+							} else {
+
+								// Store the MIME patterns, that this file matched
+								$results[$i]['mime_match'] = count($matches) ? $matches : [$results[$i]['clean_type']];
+
+								// Sanitise images by passing them through the GD library.
+								if (substr($results[$i]['clean_type'], 0, 5) === 'image') {
+									$fh = fopen($results[$i]['clean_tmp_name'],'rb');
+									if ($fh) {
+
+										// Get first six bytes from the file, and handle by one of three core types
+										$peek6 = fread($fh,6);
+										fclose($fh);
+
+										if ($peek6 !== FALSE) {
+											$img = $result_img = false;
+
+											// JPEG
+											if (substr($peek6,0,3) == "\xff\xd8\xff") {
+												$img = imagecreatefromjpeg($results[$i]['clean_tmp_name']);
+												if ($img)
+													$result_img = imagejpeg($img, $results[$i]['clean_name']);
+											}
+
+											// PNG
+											elseif ($peek6 == "\x89PNG\x0d\x0a") {
+												$img = imagecreatefrompng($results[$i]['clean_tmp_name']);
+												if ($img)
+													$result_img = imagepng($img, $results[$i]['clean_name']);
+											}
+
+											// GIF
+											elseif ($peek6 == 'GIF87a' || $peek6 == 'GIF89a') {
+												$img = imagecreatefromgif($results[$i]['clean_tmp_name']);
+												if ($img)
+													$result_img = imagegif($img, $results[$i]['clean_name']);
+											}
+
+											// GD resource event
+											$result_event = \Deft::event()->exec('requestFileOutGroupEntryImageResource', $img, $results[$i]);
+
+											// Failed to process image
+											if ($img == false && $result_img === false && $result_event === false) {
+												\Deft::log()->add(__('Failed to process request file image %1$s[%2$d] of MIME type "%3$s"', $group, $i, $results[$i]['clean_type']), 6, 'request');
+											} else {
+
+												// Clean up
+												if ($img)
+													imagedestroy($img);
+												unlink($results[$i]['clean_tmp_name']);
+
+												// Validated
+												$validated = true;
+											}
+										}
+									}
+								}
+
+								// All other files
+								else {
+
+									// Filter the entry before handling
+									$results[$i] = \Deft::filter()->exec('requestFileOutGroupEntry', $results[$i]);
+
+									// Failed to move
+									if (move_uploaded_file($results[$i]['tmp_name'], $results[$i]['clean_name']) === false) {
+										\Deft::log()->add(__('Failed to move request file %1$s[%2$d] to "%3$s"', $group, $i, $results[$i]['clean_name']), 4, 'request');
+									}
+
+									// Validated
+									else
+										$validated = true;
+								}
+							}
+
+							finfo_close($fi);
+						}
+					}
+				}
+
+				// File was successfully uploaded, and processed, into the Deft 'tmp' directory
+				$results[$i]['validated'] = $validated;
 			}
 
-			if( empty( $result['error'] ) ) {
-				if( $max_size and $data['size'] > $max_size )
-					$result['error'] = __( 'Exceeded file size limit of %1$s', $max_size );
-
-				$finfo = finfo_open( FILEINFO_MIME_TYPE );
-				$result['type'] = finfo_file( $finfo, $data['tmp_name'] );
-				$result['name'] = Sanitize::forText( $data['name'] );
-				$result['tmp_name'] = Sanitize::forText( $data['tmp_name'] );
-			}
-
-			return $result;
+			var_dump($results);
+			return $results;
 		}
-		return null;
+
+		return FALSE;
 	}
 
 	/**
