@@ -181,14 +181,14 @@ class Request extends \Deft_Concrete {
 
 					// Check that PHP uploaded the file
 					if( is_uploaded_file($results[$i]['tmp_name']) === FALSE) {
-						\Deft::log()->add( __( 'The request file %1$s[%2$d] failed with "%3$s"', $group, $i, $results[ $i ][ 'tmp_name' ], $results[$i]['error'] ), 1, 'request' );
+						\Deft::log()->add( __( 'The request file %1$s[%2$d] failed with "%3$s"', $group, $i, $results[ $i ][ 'tmp_name' ], $results[$i]['error'] ), 'request' );
 					} else {
 						$results[$i]['clean_tmp_name'] = str_replace('\\', '/', $items['tmp_name'][$i]);
 
 						// Get file MIME information
 						$fi = finfo_open( FILEINFO_MIME_TYPE );
 						if (!is_resource($fi)) {
-							\Deft::log()->add( __( 'Failed to open file information database for file MIMEs' ), 2, 'request' );
+							\Deft::log()->add( __( 'Failed to open file information database for file MIMEs' ), 'request' );
 							break;
 						} else {
 
@@ -207,7 +207,7 @@ class Request extends \Deft_Concrete {
 							if (version_compare(PHP_VERSION, '7.2.0') >= 0) {
 								$fi = finfo_open( FILEINFO_EXTENSION );
 								if (!is_resource($fi)) {
-									\Deft::log()->add( __( 'Failed to open file information database for file extensions' ), 3, 'request' );
+									\Deft::log()->add( __( 'Failed to open file information database for file extensions' ), 'request' );
 									break;
 								} else {
 									$extension_list = finfo_file($fi, $results[$i]['clean_tmp_name']);
@@ -259,7 +259,7 @@ class Request extends \Deft_Concrete {
 									}
 								, $this->mimes))) === 0
 							) {
-								\Deft::log()->add( __( 'The request file %1$s[%2$d] MIME format "%3$s" is not allowed.', $group, $i, $results[ $i ][ 'clean_type' ] ), 5, 'request' );
+								\Deft::log()->add( __( 'The request file %1$s[%2$d] MIME format "%3$s" is not allowed.', $group, $i, $results[ $i ][ 'clean_type' ] ), 'request' );
 							} else {
 
 								// Store the MIME patterns, that this file matched
@@ -303,7 +303,7 @@ class Request extends \Deft_Concrete {
 
 											// Failed to process image
 											if ($img == false && $result_img === false && $result_event === false) {
-												\Deft::log()->add(__('Failed to process request file image %1$s[%2$d] of MIME type "%3$s"', $group, $i, $results[$i]['clean_type']), 6, 'request');
+												\Deft::log()->add(__('Failed to process request file image %1$s[%2$d] of MIME type "%3$s"', $group, $i, $results[$i]['clean_type']), 'request');
 											} else {
 
 												// Clean up
@@ -326,7 +326,7 @@ class Request extends \Deft_Concrete {
 
 									// Failed to move
 									if (move_uploaded_file($results[$i]['tmp_name'], $results[$i]['clean_name']) === false) {
-										\Deft::log()->add(__('Failed to move request file %1$s[%2$d] to "%3$s"', $group, $i, $results[$i]['clean_name']), 4, 'request');
+										\Deft::log()->add(__('Failed to move request file %1$s[%2$d] to "%3$s"', $group, $i, $results[$i]['clean_name']), 'request');
 									}
 
 									// Validated

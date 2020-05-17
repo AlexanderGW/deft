@@ -62,7 +62,7 @@ class Log extends \Deft_Concrete {
 	 * @param int $code
 	 * @param null $stack
 	 */
-	function add ($message = null, $code = 0, $stack = null, $level = self::ERROR) {
+	function add ($message = null, $stack = null, $level = self::ERROR) {
 
 		// Too many watchdog errors
 		$limit = \Deft::config()->get('log.error.max', 30);
@@ -92,7 +92,6 @@ class Log extends \Deft_Concrete {
 		$entry = [
 			'stack' => $stack,
 			'level' => $level,
-			'code' => $code,
 			'message' => $message,
 		];
 
