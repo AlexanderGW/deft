@@ -84,28 +84,30 @@ xhr2.onreadystatechange = function () {
 			}
 
 
-			var html = '<article class="sy-debug-report"><div>' +
+			var html = '<section class="deft-debug"><div>' +
 				'<h2>Deft &ndash; Response for "'+debug.querySelector+'"</h2>' +
 				'<div>Version: '+debug.deft + '</div>';
 
 			for (key in debug) {
 				switch (typeof debug[key]) {
 					case 'object':
-						html += '<section class="expanded">';
+						html += '<section class="expanded"><div>';
 						html += '<h3>'+key+'</h3>';
-						html += Deft.example.recursiveTableObject(debug[key], 0, key);
-						html += '</section>';
+						html += '</div><div class="detail">';
+						html += Deft.debug.recursiveTableObject(debug[key], 0, key);
+						html += '</div></section>';
 						break;
 					case 'string':
-						html += '<section class="expanded">';
+						html += '<section class="expanded"><div>';
 						html += '<h3>'+key+'</h3>';
+						html += '</div><div class="detail">';
 						html += debug[key];
-						html += '</section>';
+						html += '</div></section>';
 						break;
 				}
 			}
 
-			html += '</div></article>';
+			html += '</div></section>';
 
 			document.querySelector('body').innerHTML += html;
 		} else {
