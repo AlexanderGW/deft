@@ -70,6 +70,13 @@ class Deft {
 	private static $logs = array();
 
 	/**
+	 * App environment is CLI?
+	 *
+	 * @var bool
+	 */
+	public static $cli = false;
+
+	/**
 	 * App start time in micro seconds.
 	 *
 	 * @var int
@@ -90,7 +97,7 @@ class Deft {
 	 */
 	static function init ($config) {
 		if (self::$initialized || !is_array($config)) {
-			return;
+			return null;
 		}
 
 //		set_error_handler(['Deft', 'errorHandler']);
@@ -148,38 +155,62 @@ class Deft {
 			self::error('Failed to import core libraries: %1$s', implode(', ', $array));
 		}
 
+		// CLI environment?
+		self::$cli = (PHP_SAPI  == 'cli' && !defined('DEFT_TESTING'));
+
 		// Deft init time
 		self::$start = \Deft\Lib\Helper::getMicroTime();
 
-		// URLs
-		define('DEFT_URL_PATH', str_replace(
-			str_replace("\\", '/', $_SERVER['DOCUMENT_ROOT']),
-			'',
-			str_replace("\\", '/', dirname(DEFT_INITIATOR))
-		));
-		define('DEFT_URL',
-			self::request()->scheme() . '://' .
-			self::request()->host() .
-			(self::request()->port() <> 80 ? ':' . self::request()->port() : NULL) .
-			DEFT_URL_PATH
-		);
-		define('DEFT_ASSET_URL', DEFT_URL . '/' . self::$config['directory.public.asset'] . '/');
-		define('DEFT_PLUGIN_URL', DEFT_URL . '/' . self::$config['directory.plugin'] . '/');
+		// Process request
+		$request = \Deft::request();
 
-		// Requested route relative to Deft URL.
-		define('DEFT_ROUTE',
-			\Deft\Lib\Sanitize::forHtml(
-				\Deft\Lib\Sanitize::forText(
-					substr(
-						\Deft::request()->path(),
-						(strlen(DEFT_URL_PATH . '/'))
+		// CLI environment
+		if (self::$cli === true) {
+			if (count(self::import(
+				'lib.cli'
+			))) {
+				self::error('Failed to import CLI library');
+			}
+
+			$args = $request->args();
+			define('DEFT_ROUTE',
+				array_shift($args)
+			);
+		} else {
+
+			// URLs
+			define('DEFT_URL_PATH', str_replace(
+				str_replace("\\", '/', $_SERVER['DOCUMENT_ROOT']),
+				'',
+				str_replace("\\", '/', dirname(DEFT_INITIATOR))
+			));
+			define('DEFT_URL',
+				$request->scheme() . '://' .
+				$request->host() .
+				($request->port() <> 80 ? ':' . $request->port() : NULL) .
+				DEFT_URL_PATH
+			);
+			define('DEFT_ASSET_URL', DEFT_URL . '/' . self::$config['directory.public.asset'] . '/');
+			define('DEFT_PLUGIN_URL', DEFT_URL . '/' . self::$config['directory.plugin'] . '/');
+
+			// Requested route relative to Deft URL.
+			define('DEFT_ROUTE',
+				\Deft\Lib\Sanitize::forHtml(
+					\Deft\Lib\Sanitize::forText(
+						substr(
+							$request->path(),
+							(strlen(DEFT_URL_PATH . '/'))
+						)
 					)
 				)
-			)
-		);
+			);
 
-		// URL separator
-		define('US', self::$config['url_separator']);
+			// URL separator
+			define('US', self::$config['url_separator']);
+		}
+
+		// Prevent 'Deft::init()' from being called again
+		self::$initialized = true;
 
 		// Runtime plugins
 		if (count(self::$config['plugins'])) {
@@ -208,9 +239,6 @@ class Deft {
 				));
 			}
 		}
-
-		// Prevent 'Deft::init()' from being called again
-		self::$initialized = true;
 
 		// Run this callback after initialization
 		if (array_key_exists('ready_callback', self::$config)) {
@@ -358,6 +386,7 @@ class Deft {
 		// First time calls may need to import library
 		if (!count($log)) {
 
+
 			// Import if not already
 			if (!class_exists($class)) {
 				$offset = 0;
@@ -405,6 +434,9 @@ class Deft {
 		return \Deft::get('lib.' . $scope, $args);
 	}
 
+	/**
+	 * @return \Deft\Lib\Log
+	 */
 	public static function log ($args = array()) {
 		return self::lib('log', $args);
 	}
@@ -494,11 +526,12 @@ class Deft {
 	}
 
 	/**
-	 * @return \Deft\Lib\Request
+	 * @return \Deft\Lib\Request\Cli|\Deft\Lib\Request\Http
 	 */
-
 	public static function request () {
-		return self::lib('request');
+		$scope = 'request.' . (self::$cli ? 'cli' : 'http');
+		$return = self::lib($scope);
+		return $return;
 	}
 
 	/**
@@ -771,12 +804,12 @@ class Deft_Concrete {
 	/**
 	 * @var array
 	 */
-	public $args = array();
+	protected $args = array();
 
 	/**
 	 * @var null|string*
 	 */
-	public $stack = null;
+	protected $stack = null;
 
 	/**
 	 * App_Class constructor.

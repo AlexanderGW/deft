@@ -38,6 +38,13 @@ class Route extends \Deft_Concrete {
 	 */
 	private static $parsed = false;
 
+	/**
+	 * Default rules group
+	 *
+	 * @var array
+	 */
+	private static $group = NULL;
+
 	private static $rules = array();
 
 	private static $route = array();
@@ -49,6 +56,9 @@ class Route extends \Deft_Concrete {
 		if ( self::$initialized ) {
 			return;
 		}
+
+		// Default rules group, based on request type
+		self::$group = \Deft::request()->isCli() ? 'cli' : 'http';
 
 		// Process request query string
 //		if ($query = \Deft::request()->query()) {
@@ -197,7 +207,7 @@ class Route extends \Deft_Concrete {
 	 * @param null $path
 	 * @param array $args
 	 */
-	public function add( $name = null, $path = null, $args = array(), $callback = null ) {
+	public function add( $name = null, $path = null, $args = array(), $callback = null, $group = null ) {
 
 		// TODO: Need to split path by separator
 
@@ -207,6 +217,10 @@ class Route extends \Deft_Concrete {
 
 		if ( is_null( $name ) ) {
 			$name = md5( $path );
+		}
+
+		if ( is_null( $group ) ) {
+			$group = self::$group;
 		}
 
 		$sep = \Deft::config()->get( 'url_separator', '/' );
@@ -245,7 +259,7 @@ class Route extends \Deft_Concrete {
 		}
 
 		// Store rule
-		self::$rules[ $path ] = array(
+		self::$rules[$group][ $path ] = array(
 			'name'     => $name,
 			'data'     => $args,
 			'pattern'  => $patterns,
@@ -257,18 +271,41 @@ class Route extends \Deft_Concrete {
 
 	/**
 	 * @param null $path
+	 * @param array $args
 	 */
-	public function get( $path = null ) {
+	public function cli( $name = null, $path = null, $args = array(), $callback = null ) {
+		if ( is_null( $path ) )
+			return null;
+
+		return self::add($name, $path, $args, $callback, 'cli');
+	}
+
+	/**
+	 * @param null $path
+	 * @param array $args
+	 */
+	public function http( $name = null, $path = null, $args = array(), $callback = null ) {
+		if ( is_null( $path ) )
+			return null;
+
+		return self::add($name, $path, $args, $callback, 'http');
+	}
+
+	/**
+	 * @param null $path
+	 */
+	public function get( $path = null, $group = null ) {
 		if ( is_null( $path ) )
 			return NULL;
-
+		if (is_null($group))
+			$group = self::$group;
 		$sep = \Deft::config()->get( 'url_separator', '/' );
 		if ( strpos( $path, $sep ) === 0 ) {
 			$path = substr( $path, strlen( $sep ) );
 		}
 
-		if (array_key_exists($path, self::$rules) )
-			return self::$rules[ $path ];
+		if (array_key_exists($path, self::$rules[$group]) )
+			return self::$rules[$group][ $path ];
 
 		return FALSE;
 	}
@@ -276,19 +313,23 @@ class Route extends \Deft_Concrete {
 	/**
 	 * @return array
 	 */
-	public function getRules() {
-		return self::$rules;
+	public function getRules($group = null) {
+		if (is_null($group))
+			$group = self::$group;
+		return self::$rules[$group];
 	}
 
 	/**
 	 * @param null $path
 	 */
-	public function remove( $path = null ) {
+	public function remove( $path = null, $group = null ) {
 		if ( strpos( $path, '/' ) === 0 ) {
 			$path = substr( $path, 1 );
 		}
-		if ( array_key_exists( $path, self::$rules ) ) {
-			unset( self::$rules[ $path ] );
+		if (is_null($group))
+			$group = self::$group;
+		if ( array_key_exists( $path, self::$rules[$group] ) ) {
+			unset( self::$rules[$group][ $path ] );
 		}
 	}
 
