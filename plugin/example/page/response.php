@@ -25,5 +25,5 @@
 echo json_encode([
 	'deft' => Deft::VERSION,
 	'querySelector' => 'textarea#json_test',
-	'data' => "[['time' => \Deft\Lib\Sanitize::forHtml(time())],[3234324 => 'LOREM IPSUM', 'FOO' => 'BAR'], [[[[[[[[[['baz' => 'qux']]]]]]]]]]]"
+	'data' => "[['time' => " . \Deft\Lib\Sanitize::forHtml(time()) . "],['FOO' => 'BAR'], [['baz' => 'qux']]]"
 ]);
