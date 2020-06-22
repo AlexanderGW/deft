@@ -21,10 +21,6 @@
  * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Composer
-if (file_exists('../vendor/autoload.php'))
-	$loader = include_once '../vendor/autoload.php';
-
 // Bootstrap Deft
 require '../bootstrap.php';
 
