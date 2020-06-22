@@ -1,6 +1,6 @@
 Deft.debug = {};
 
-/* Recursivly render some buggy time bars */
+/* Recursively render some buggy time bars */
 Deft.debug.generateTimeline = function(thing){
 	let html = '';
 	if (typeof thing == 'object') {
@@ -121,12 +121,12 @@ xhr.onreadystatechange = function () {
 			Deft.debug.time = debug.time;
 			let html = '<section class="deft-debug"><div>' +
 				'<h2>Deft stack</h2>' +
-				'<div>Run time: '+debug.time+' seconds. Memory usage: '+debug.memory + '</div>';
+				'<p>Run time: '+debug.time+' seconds. Memory usage: '+debug.memory + '</p>';
 
 			for (key in debug) {
 				switch (typeof debug[key]) {
 					case 'object':
-						html += '<section class="collapsed1 expanded"><div>';
+						html += '<section class="'+(key == 'event' ? 'expanded' : 'collapsed')+'"><div>';
 						html += '<h3>'+key+'</h3>';
 						html += '</div><div class="timeline">';
 						html += Deft.debug.generateTimeline(debug[key]);
