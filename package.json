@@ -1,5 +1,5 @@
 {
-  "name": "snappy",
+  "name": "deft",
   "version": "1.0.0",
   "description": "A PHP micro framework",
   "main": "Gruntfile.js",
@@ -7,19 +7,20 @@
     "test": "tests"
   },
   "scripts": {
+    "up": "php -S localhost:8000 -t ./public",
     "test": "./vendor/bin/phpunit --configuration ./phpunit.xml --verbose",
     "debug": "./vendor/bin/phpunit --debug --configuration ./phpunit.xml"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlexanderGW/Snappy.git"
+    "url": "git+https://github.com/AlexanderGW/Deft.git"
   },
   "author": "Alexander Gailey-White",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/AlexanderGW/Snappy/issues"
+    "url": "https://github.com/AlexanderGW/Deft/issues"
   },
-  "homepage": "https://github.com/AlexanderGW/Snappy#readme",
+  "homepage": "https://github.com/AlexanderGW/Deft#readme",
   "devDependencies": {
     "grunt": "^1.1.0",
     "grunt-contrib-watch": "^1.1.0",

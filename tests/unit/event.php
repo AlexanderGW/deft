@@ -1,35 +1,35 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
- * Here is my attempt to convey my thought process for Snappy core, and how it should work.
+ * Here is my attempt to convey my thought process for Deft core, and how it should work.
  *
- * Class SnappyUnitEventTest
+ * Class DeftUnitEventTest
  *
  * @group unit.event
  */
 
-class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
+class TestDeftUnitEvent extends \PHPUnit\Framework\TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -38,12 +38,12 @@ class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test setting event action
 	 *
-	 * @covers \Snappy\Lib\Event::set
+	 * @covers \Deft\Lib\Event::set
 	 */
 	public function test_event_set() {
 
 		// Set an event action, to change the response title
-		$event = Snappy::event()->set('foo', function(){}, 999);
+		$event = Deft::event()->set('foo', function(){}, 999);
 
 		// Check that event set returned TRUE
 		$this->assertTrue(
@@ -57,12 +57,12 @@ class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_event_set
 	 *
-	 * @covers \Snappy\Lib\Event::get
+	 * @covers \Deft\Lib\Event::get
 	 */
 	public function test_event_get() {
 
 		// Check that we can get the event entry
-		$result = \Snappy::event()->get('foo');
+		$result = \Deft::event()->get('foo');
 		$count = count($result);
 
 		$this->assertCount(
@@ -79,12 +79,12 @@ class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_event_get
 	 *
-	 * @covers \Snappy\Lib\Event::clear
+	 * @covers \Deft\Lib\Event::clear
 	 */
 	public function test_event_clear() {
 
 		// Check event clear returns TRUE
-		$result = \Snappy::event()->clear('foo');
+		$result = \Deft::event()->clear('foo');
 
 		$this->assertTrue(
 			$result,
@@ -92,7 +92,7 @@ class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Clear all actions for an event, returns empty list
-		$result = \Snappy::event()->get('foo');
+		$result = \Deft::event()->get('foo');
 		$count = count($result);
 
 		$this->assertCount(
@@ -102,8 +102,8 @@ class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Clear an event action
-		\Snappy::event()->clear('foo', 'bar');
-		$result = \Snappy::event()->get('foo');
+		\Deft::event()->clear('foo', 'bar');
+		$result = \Deft::event()->get('foo');
 		$count = count($result);
 
 		$this->assertCount(
@@ -118,14 +118,14 @@ class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_event_clear
 	 *
-	 * @covers \Snappy\Lib\Event::exec
+	 * @covers \Deft\Lib\Event::exec
 	 */
 	public function test_event_exec() {
 
 		// Execute a valid event
-		Snappy::event()->set('foo', function() {}, $priority = 999);
+		Deft::event()->set('foo', function() {}, $priority = 999);
 
-		$result = \Snappy::event()->exec('foo');
+		$result = \Deft::event()->exec('foo');
 
 		$this->assertTrue(
 			$result,
@@ -133,7 +133,7 @@ class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Check 1 stack log entry exists
-		$log = Snappy::getLog("event/foo");
+		$log = Deft::stack("event/foo");
 		$count = count($log);
 
 		$this->assertCount(
@@ -158,7 +158,7 @@ class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
 		//TODO: Test 'return' key on log
 
 		// Execute an invalid event
-		$result = \Snappy::event()->exec('bar');
+		$result = \Deft::event()->exec('bar');
 
 		$this->assertFalse(
 			$result,
@@ -166,9 +166,9 @@ class SnappyUnitEventTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Valid event execution, with an invalid callback, returns FALSE
-		\Snappy::event()->clear('foo');
-		\Snappy::event()->set('foo', 'bar');
-		$result = \Snappy::event()->exec('foo');
+		\Deft::event()->clear('foo');
+		\Deft::event()->set('foo', 'bar');
+		$result = \Deft::event()->exec('foo');
 
 		$this->assertFalse(
 			$result,

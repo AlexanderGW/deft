@@ -2,43 +2,39 @@
 	font-size: 12pt;
 }
 
-$background-color: #eae6e9;
-$white: #fff;
+$background-color: #3a3a3a;
+$white: #efefef;
 
 
 body {
 	margin: 0;
-	padding: 5rem 0 0;
+	padding: 0;
 	border: none;
 	box-sizing: border-box;
 	font-family: 'Raleway', sans-serif;
-	line-height: 1.5;
+	line-height: 1.25;
 	background-color: $background-color;
 	letter-spacing: .075rem;
 	text-align: initial;
-	padding-bottom: 20px;
 	@extend %font-root;
 	> main {
-		background-color: $white;
+		background-color: #000;
+		color: #fff;
 		max-width: 50em;
-		margin: 0 auto;
+		margin: 10em auto;
 		> * {
-			padding: .75rem;
+			padding: 1.5em;
 			> * {
 				padding: 0 .75rem;
 			}
 			> p {
-				padding: .5rem .75rem;
+				padding: 1em;
 			}
-			&:first-child {
-				background-color: #403838;
-				color: #fff;
-				a {
-					color: #fff;
-					&:focus, &:hover {
-						text-decoration: none;
-						color: #ccc;
-					}
+			a {
+				color: #ffce1b;
+				&:focus, &:hover {
+					text-decoration: none;
+					color: #ccc;
 				}
 			}
 		}
@@ -48,6 +44,8 @@ body {
 h1 {
 	margin: 0;
 	padding: 0;
+	font-size: 4em;
+	font-weight: 400;
 }
 
 .scr-read {
@@ -144,15 +142,19 @@ h1 {
 			outline: .25rem solid #ffce1b;
 			outline-offset: 0;
 		}
+		&[type="file"], select {
+			font-family: 'Raleway', sans-serif;
+		}
 	}
 	input[type="submit"] {
-		font-size: 1rem;
+		font-family: 'Raleway', sans-serif;
+		font-size: 1.25rem;
 		border: none;
 		background-color: #333;
 		color: #fff;
 		padding: .5rem 1.5rem;
 		box-sizing: border-box;
-		&:hover, &:focus {
+		&:hover {
 			background-color: #007dff;
 		}
 	}
@@ -161,11 +163,11 @@ h1 {
 p {
 	margin: 0;
 	&.cta {
-		background-color: rgba(0, 0, 0, .125);
+		background-color: #252525;
 	}
 }
 
-.snappy {
+.deft {
 	&.watchdog {
 		background-color: #007eff;
 		border-top: .75rem solid #005ab7;

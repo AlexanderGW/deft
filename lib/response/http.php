@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib\Response;
+namespace Deft\Lib\Response;
 
-use Snappy\Lib\Response;
+use Deft\Lib\Response;
 
 class Http extends Response {
 
@@ -51,10 +51,10 @@ class Http extends Response {
 	public function location( $path = null ) {
 		if( !is_string( $path ) )
 			$uri = null;
-		$this->header('Location', SNAPPY_URL . $path);
+		$this->header('Location', DEFT_URL . $path);
 
 		// Set an event to empty the body
-		\Snappy::event()->set('beforeResponseOutput', '\Snappy\Lib\Response\Http::event__responseOutput', 999);
+		\Deft::event()->set('beforeResponseOutput', '\Deft\Lib\Response\Http::event__responseOutput', 999);
 
 		return TRUE;
 	}
@@ -104,7 +104,7 @@ class Http extends Response {
 
 			// If empty response, show an error template
 			if( $this->isEmpty() ) {
-				$content = \Snappy::capture( 'template.' . $code );
+				$content = \Deft::capture( 'template.' . $code );
 				if( is_string( $content ) ) {
 					$this->setBody( $content );
 				}
@@ -131,9 +131,9 @@ class Http extends Response {
 	public function output($content = '') {
 		parent::output();
 
-		$this->header('X-Generator', 'Snappy/' . \Snappy::VERSION);
+		$this->header('X-Generator', 'Deft/' . \Deft::VERSION);
 
-		$this->headers = \Snappy::filter()->exec('responseOutputHeaders', $this->headers);
+		$this->headers = \Deft::filter()->exec('responseOutputHeaders', $this->headers);
 		foreach($this->headers as $key => $value) {
 			header($key . ': ' . $value, true);
 		}
@@ -146,6 +146,6 @@ class Http extends Response {
 	 * @param null $args
 	 */
 	public function event__responseOutput($args = null) {
-		\Snappy::response($args)->buffer(NULL);
+		\Deft::response($args)->buffer(NULL);
 	}
 }

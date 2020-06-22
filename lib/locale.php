@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib;
+namespace Deft\Lib;
 
-define('SNAPPY_LOCALE_PATH', SNAPPY_PATH . DS . 'locale' . DS);
+define('DEFT_LOCALE_PATH', DEFT_PATH . DS . 'locale' . DS);
 
 class Locale {
 	const DEFAULT_LOCALE = 'en-GB';
@@ -47,18 +47,18 @@ class Locale {
 	 		return;
 		}
 
-		$config     = \Snappy::config();
+		$config     = \Deft::config();
 		$locales = $config->get('locales', array());
 
-		$string = \Snappy::request()->post('locale');
+		$string = \Deft::request()->post('locale');
 		if (!$string) {
-			$string = \Snappy::request()->query('locale');
+			$string = \Deft::request()->query('locale');
 		}
 		if (!$string) {
 			$string = Token::get('locale');
 		}
 		if (!$string) {
-			$query = (array)\Snappy::route()->current('data');
+			$query = (array)\Deft::route()->current('data');
 			if (array_key_exists('data', $query))
 				$string['locale'];
 		}
@@ -110,7 +110,7 @@ class Locale {
 		}
 
 		if ($locale != self::DEFAULT_LOCALE) {
-			$config = \Snappy::config('locale.' . strtolower($locale));
+			$config = \Deft::config('locale.' . strtolower($locale));
 			if (!$config->isEmpty()) {
 				$args = $config->get(0);
 				if ($args) {
@@ -135,7 +135,7 @@ class Locale {
 		}
 
 		setlocale(LC_ALL, $locale . '.utf8');
-		\Snappy::event()->exec('initLanguage');
+		\Deft::event()->exec('initLanguage');
 		self::$initialized = true;
 	}
 
@@ -144,7 +144,7 @@ class Locale {
 	 */
 	public static function negotiate ($locale = null) {
 		if (is_string($locale) and (strlen($locale) == 2 or strlen($locale) == 5)) {
-			$config     = \Snappy::config();
+			$config     = \Deft::config();
 			$locales = $config->get('locales', array());
 
 			if (strlen($locale) == 5) {

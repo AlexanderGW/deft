@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib;
+namespace Deft\Lib;
 
-class Route extends \Snappy_Concrete {
+class Route extends \Deft_Concrete {
 	/**
 	 * Set TRUE once init() executes.
 	 *
@@ -38,6 +38,13 @@ class Route extends \Snappy_Concrete {
 	 */
 	private static $parsed = false;
 
+	/**
+	 * Default rules group
+	 *
+	 * @var array
+	 */
+	private static $group = NULL;
+
 	private static $rules = array();
 
 	private static $route = array();
@@ -50,8 +57,11 @@ class Route extends \Snappy_Concrete {
 			return;
 		}
 
+		// Default rules group, based on request type
+		self::$group = \Deft::request()->isCli() ? 'cli' : 'http';
+
 		// Process request query string
-//		if ($query = \Snappy::request()->query()) {
+//		if ($query = \Deft::request()->query()) {
 //			if (count($query)) {
 //				foreach ($query as $key => $val) {
 //					$key        = Sanitize::forText($key);
@@ -62,7 +72,7 @@ class Route extends \Snappy_Concrete {
 //		}
 
 		// Load config based routes
-		$config = \Snappy::config( 'config.route' );
+		$config = \Deft::config( 'config.route' );
 		if ( ! $config->isEmpty() ) {
 			$routes = $config->get( 'routes', array() );
 			if ( count( $routes ) ) {
@@ -86,14 +96,14 @@ class Route extends \Snappy_Concrete {
 		$start = Helper::getMicroTime();
 
 		// Process requested route
-		self::$route = \Snappy::route()->get( SNAPPY_ROUTE );
+		self::$route = \Deft::route()->get( DEFT_ROUTE );
 
 		// No match
-		if ( self::$route === null and strlen( SNAPPY_ROUTE ) ) {
-			$routes  = \Snappy::route()->getRules();
-			$divider = \Snappy::config()->get( 'url_separator', '/' );
+		if ( self::$route === FALSE and strlen( DEFT_ROUTE ) ) {
+			$routes  = \Deft::route()->getRules();
+			$divider = \Deft::config()->get( 'url_separator', '/' );
 
-			$request = explode( $divider, SNAPPY_ROUTE );
+			$request = explode( $divider, DEFT_ROUTE );
 			array_pop( $request );
 			$max = count( $request );
 			//$request = implode( $divider, $request );
@@ -124,7 +134,7 @@ class Route extends \Snappy_Concrete {
 					}
 
 					// Run pattern
-					preg_match( $path_pattern, SNAPPY_ROUTE, $matches );
+					preg_match( $path_pattern, DEFT_ROUTE, $matches );
 					if ( count( $matches ) ) {
 						preg_match_all( '#\[([a-z0-9]+)\]#', $path, $keys );
 						array_shift( $matches );
@@ -162,18 +172,18 @@ class Route extends \Snappy_Concrete {
 		}
 
 		// Logging
-		\Snappy::log( 'route/' . self::$route[ 'name' ], array(
+		\Deft::stack( 'route/' . self::$route[ 'name' ], array(
 			'time'     => Helper::getMoment( $start ),
 			'name'     => self::$route[ 'name' ],
-			'request'  => SNAPPY_ROUTE,
-			'path'     => self::$route[ 'path' ],
+			'request'  => DEFT_ROUTE,
+			'path'     => array_key_exists('path', self::$route) ? self::$route[ 'path' ] : '',
 			'pattern'  => self::$route[ 'pattern' ],
 			'data'     => self::$route[ 'data' ],
 			'callback' => self::$route[ 'callback' ]
 		) );
 
 		if ( self::$route === null ) {
-			\Snappy::response()->status( 404 );
+			\Deft::response()->status( 404 );
 		}
 
 		self::$parsed = true;
@@ -197,7 +207,7 @@ class Route extends \Snappy_Concrete {
 	 * @param null $path
 	 * @param array $args
 	 */
-	public function add( $name = null, $path = null, $args = array(), $callback = null ) {
+	public function add( $name = null, $path = null, $args = array(), $callback = null, $group = null ) {
 
 		// TODO: Need to split path by separator
 
@@ -209,7 +219,11 @@ class Route extends \Snappy_Concrete {
 			$name = md5( $path );
 		}
 
-		$sep = \Snappy::config()->get( 'url_separator', '/' );
+		if ( is_null( $group ) ) {
+			$group = self::$group;
+		}
+
+		$sep = \Deft::config()->get( 'url_separator', '/' );
 		if ( strpos( $path, $sep ) === 0 ) {
 			$path = substr( $path, strlen( $sep ) );
 		}
@@ -219,8 +233,9 @@ class Route extends \Snappy_Concrete {
 		}
 
 		// Process route arguments
+		$patterns = array();
 		if ( is_array( $args ) and count( $args ) ) {
-			$patterns = $errors = array();
+			$errors = array();
 
 			// Test for route placeholders
 			preg_match_all( '#\[([a-z0-9]+)\]#', $path, $matches );
@@ -238,13 +253,13 @@ class Route extends \Snappy_Concrete {
 
 				// Throw route rule pattern errors
 				if ( count( $errors ) ) {
-					\Snappy::error( 'Route rule "%1$s" missing required parameter(s): %2$s', $path, implode( ', ', $errors ) );
+					\Deft::error( 'Route rule "%1$s" missing required parameter(s): %2$s', $path, implode( ', ', $errors ) );
 				}
 			}
 		}
 
 		// Store rule
-		self::$rules[ $path ] = array(
+		self::$rules[$group][ $path ] = array(
 			'name'     => $name,
 			'data'     => $args,
 			'pattern'  => $patterns,
@@ -256,36 +271,65 @@ class Route extends \Snappy_Concrete {
 
 	/**
 	 * @param null $path
+	 * @param array $args
 	 */
-	public function get( $path = null ) {
-		if ( is_null( $path ) ) {
+	public function cli( $name = null, $path = null, $args = array(), $callback = null ) {
+		if ( is_null( $path ) )
 			return null;
-		}
 
-		$sep = \Snappy::config()->get( 'url_separator', '/' );
-		if ( strpos( $path, $sep ) === 0 ) {
-			$path = substr( $path, strlen( $sep ) );
-		}
-
-		return self::$rules[ $path ];
+		return self::add($name, $path, $args, $callback, 'cli');
 	}
 
 	/**
-	 * @return array
+	 * @param null $path
+	 * @param array $args
 	 */
-	public function getRules() {
-		return self::$rules;
+	public function http( $name = null, $path = null, $args = array(), $callback = null ) {
+		if ( is_null( $path ) )
+			return null;
+
+		return self::add($name, $path, $args, $callback, 'http');
 	}
 
 	/**
 	 * @param null $path
 	 */
-	public function remove( $path = null ) {
+	public function get( $path = null, $group = null ) {
+		if ( is_null( $path ) )
+			return NULL;
+		if (is_null($group))
+			$group = self::$group;
+		$sep = \Deft::config()->get( 'url_separator', '/' );
+		if ( strpos( $path, $sep ) === 0 ) {
+			$path = substr( $path, strlen( $sep ) );
+		}
+
+		if (array_key_exists($path, self::$rules[$group]) )
+			return self::$rules[$group][ $path ];
+
+		return FALSE;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getRules($group = null) {
+		if (is_null($group))
+			$group = self::$group;
+		return self::$rules[$group];
+	}
+
+	/**
+	 * @param null $path
+	 */
+	public function remove( $path = null, $group = null ) {
 		if ( strpos( $path, '/' ) === 0 ) {
 			$path = substr( $path, 1 );
 		}
-		if ( array_key_exists( $path, self::$rules ) ) {
-			unset( self::$rules[ $path ] );
+		if (is_null($group))
+			$group = self::$group;
+		if ( array_key_exists( $path, self::$rules[$group] ) ) {
+			unset( self::$rules[$group][ $path ] );
 		}
 	}
 
@@ -307,7 +351,7 @@ class Route extends \Snappy_Concrete {
 	 *
 	 */
 	public function save() {
-		$config = \Snappy::config( 'config.route' );
+		$config = \Deft::config( 'config.route' );
 		$config->set( self::getRules() );
 		$config->save();
 	}
@@ -348,7 +392,7 @@ class Route extends \Snappy_Concrete {
 }
 
 // Load route rules
-\Snappy::event()->set( 'init', '\Snappy\Lib\Route::init', 10 );
+\Deft::event()->set( 'init', '\Deft\Lib\Route::init', 10 );
 
 // Process HTTP request against available route rules
-\Snappy::event()->set( 'init', '\Snappy\Lib\Route::parse', 500 );
+\Deft::event()->set( 'init', '\Deft\Lib\Route::parse', 500 );

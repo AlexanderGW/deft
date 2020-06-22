@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib;
+namespace Deft\Lib;
 
 class Element {
 
@@ -45,7 +45,7 @@ class Element {
 			return;
 		}
 
-		\Snappy::event()->exec('htmlInit');
+		\Deft::event()->exec('htmlInit');
 		self::$initialized = true;
 	}
 
@@ -90,7 +90,7 @@ class Element {
 
 		// Filter structure
 		if( is_string( $filter ) )
-			$value = Filter::exec( $filter, $value );
+			$value = \Deft::filter()->exec( $filter, $value );
 
 		// Not an element, may be an array of elements...
 		if( !array_key_exists( '@tag', $value ) and !array_key_exists( '@markup', $value ) ) {
@@ -108,7 +108,7 @@ class Element {
 		}
 
 		// A nested array of elements in markup...
-		elseif( is_array( $value['@markup'] ) ) {
+		elseif( array_key_exists( '@markup', $value ) && is_array( $value['@markup'] ) ) {
 			$markup = array();
 			foreach( $value['@markup'] as $key => $val ) {
 				$element = self::html( $val );
@@ -167,7 +167,7 @@ class Element {
 			$props =& $value['@props'];
 
 		$element = '';
-		if (SNAPPY_DEBUG) {
+		if (DEFT_DEBUG) {
 			$element .= "<!-- Element({$value['@tag']})";
 			if ($filter) {
 				$element .= " >>> Filter({$filter})";
@@ -182,18 +182,18 @@ class Element {
 
 		// Close markup
 		else
-			$element .= '<' . $value['@tag'] . $props . '>' . $value['@markup'] . '</' . $value['@tag'] . '>' . "\r\n";
+			$element .= '<' . $value['@tag'] . $props . '>' . (array_key_exists('@markup', $value) ? $value['@markup'] : NULL) . '</' . $value['@tag'] . '>' . "\r\n";
 
-		if (SNAPPY_DEBUG) {
+		if (DEFT_DEBUG) {
 			$element .= "<!-- /Element({$value['@tag']}) -->";
 
-			if (SNAPPY_DEBUG > 1)
+			if (DEFT_DEBUG > 1 && array_key_exists( '@markup', $value ))
 				$value['@markup'] = htmlspecialchars($value['@markup']);
 			else
 				$value['@markup'] = null;
 		}
 
-		\Snappy::log('element/' . $filter, array(
+		\Deft::stack('element/' . $filter, array(
 			'time'     => Helper::getMoment( $start ),
 			'element' => $value
 		));
@@ -202,4 +202,4 @@ class Element {
 	}
 }
 
-\Snappy::event()->set('init', '\Snappy\Lib\Element::init');
+//\Deft::event()->set('init', '\Deft\Lib\Element::init');

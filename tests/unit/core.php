@@ -1,41 +1,41 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
- * Here is my attempt to convey my thought process for Snappy core, and how it should work.
+ * Here is my attempt to convey my thought process for Deft core, and how it should work.
  *
- * Class SnappyUnitCoreTest
+ * Class DeftUnitCoreTest
  *
- * @group unit.snappy
+ * @group unit.deft
  */
 
-class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
+class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
 
 		$this->scope = 'lib.response';
-		$this->class = \Snappy\Lib\Response::class;
+		$this->class = \Deft\Lib\Response::class;
 		$this->args = [
 			'foo' => 'bar'
 		];
@@ -44,10 +44,10 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test library importing
 	 *
-	 * @covers Snappy::import
+	 * @covers Deft::import
 	 */
 	public function test_import() {
-		$errors = Snappy::import(
+		$errors = Deft::import(
 			$this->scope
 		);
 		$this->assertCount(
@@ -56,7 +56,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 			"Valid library returned a failure"
 		);
 
-		$errors = Snappy::import(
+		$errors = Deft::import(
 			'foo.bar'
 		);
 		$this->assertCount(
@@ -69,33 +69,33 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test plugin checks
 	 *
-	 * @covers Snappy::havePlugin
+	 * @covers Deft::havePlugin
 	 */
 	public function test_havePlugin() {
-		$result = Snappy::havePlugin(
+		$result = Deft::havePlugin(
 			'example'
 		);
-		$this->assertEquals(Snappy::PLUGIN_LOADED, $result);
+		$this->assertEquals(Deft::PLUGIN_LOADED, $result);
 
-		$result = Snappy::havePlugin(
+		$result = Deft::havePlugin(
 			'debug'
 		);
-		$this->assertEquals(Snappy::PLUGIN_EXISTS, $result);
+		$this->assertEquals(Deft::PLUGIN_EXISTS, $result);
 
-		$result = Snappy::havePlugin(
+		$result = Deft::havePlugin(
 			'foobar'
 		);
-		$this->assertEquals(Snappy::PLUGIN_MISSING, $result);
+		$this->assertEquals(Deft::PLUGIN_MISSING, $result);
 	}
 
 	/**
 	 * Test instance key
 	 *
-	 * @covers Snappy::getInstanceKey
+	 * @covers Deft::getInstanceKey
 	 */
 	public function test_getInstanceKey() {
-		$key = Snappy::getInstanceKey($this->class, $this->args);
-		$expected = $this->class . '_' . md5(serialize($this->args));
+		$key = Deft::getInstanceKey($this->class, $this->args);
+		$expected = $this->class . '#' . md5(serialize($this->args));
 		$this->assertEquals(
 			$expected,
 			$key,
@@ -108,17 +108,17 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_getInstanceKey
 	 *
-	 * @covers Snappy::log
-	 * @covers Snappy::getLog
+	 * @covers Deft::log
+	 * @covers Deft::stack
 	 */
-	public function test_log() {
-		$key = Snappy::getInstanceKey($this->class, $this->args);
+	public function test_stack() {
+		$key = Deft::getInstanceKey($this->class, $this->args);
 
 		$stack = "instance/{$this->class}/{$key}";
 
 		// Create stack log entry
-		Snappy::log($stack, $this->args, $replace = FALSE);
-		$log = Snappy::getLog($stack);
+		Deft::stack($stack, $this->args, $replace = FALSE);
+		$log = Deft::stack($stack);
 		$count = count($log);
 
 		$this->assertCount(
@@ -145,8 +145,8 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 				'foo' => 'baz'
 			]
 		);
-		Snappy::log($stack, $args, $replace = FALSE);
-		$log = Snappy::getLog($stack);
+		Deft::stack($stack, $args, $replace = FALSE);
+		$log = Deft::stack($stack);
 		$count = count($log);
 
 		$this->assertCount(
@@ -175,8 +175,8 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 				'foo' => 'qux'
 			]
 		);
-		Snappy::log($stack, $args, $replace = TRUE);
-		$log = Snappy::getLog($stack);
+		Deft::stack($stack, $args, $replace = TRUE);
+		$log = Deft::stack($stack);
 		$count = count($log);
 
 		$this->assertCount(
@@ -197,13 +197,13 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_getInstanceKey
 	 *
-	 * @covers Snappy_Concrete
+	 * @covers Deft_Concrete
 	 */
 	public function test_concrete() {
-		$class = 'Snappy_Concrete';
-		$key = Snappy::getInstanceKey($class, $this->args);
+		$class = 'Deft_Concrete';
+		$key = Deft::getInstanceKey($class, $this->args);
 		$stack = "instance/{$class}/{$key}";
-		$instance = new \Snappy_Concrete($this->args);
+		$instance = new \Deft_Concrete($this->args);
 
 		$this->assertEquals(
 			$stack,
@@ -248,20 +248,20 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_import
 	 *
-	 * @covers Snappy::newInstance
+	 * @covers Deft::newInstance
 	 */
 	public function test_newInstance() {
-		$key = Snappy::getInstanceKey($this->class, $this->args);
+		$key = Deft::getInstanceKey($this->class, $this->args);
 
 		// First instance created
-		$instance = Snappy::newInstance($this->class, $this->args);
+		$instance = Deft::newInstance($this->class, $this->args);
 		$this->assertInstanceOf(
 			$this->class,
 			$instance,
 			"An instance of {$this->class}, was not returned"
 		);
 
-		$log = Snappy::getLog("instance/{$this->class}/{$key}/calls");
+		$log = Deft::stack("instance/{$this->class}/{$key}/calls");
 		$count = count($log);
 
 		$this->assertCount(
@@ -281,16 +281,16 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_getInstanceKey
 	 *
-	 * @covers Snappy::haveInstance
+	 * @covers Deft::haveInstance
 	 */
 	public function test_haveInstance() {
 		$this->assertTrue(
-			Snappy::haveInstance(Snappy::getInstanceKey($this->class, $this->args)),
+			Deft::haveInstance(Deft::getInstanceKey($this->class, $this->args)),
 			"Valid instance returned as not exists"
 		);
 
 		$this->assertFalse(
-			Snappy::haveInstance(Snappy::getInstanceKey($this->class, 'baz')),
+			Deft::haveInstance(Deft::getInstanceKey($this->class, 'baz')),
 			"Invalid instance returned as exists"
 		);
 	}
@@ -300,21 +300,21 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_newInstance
 	 *
-	 * @covers Snappy::get
+	 * @covers Deft::get
 	 */
 	public function test_getInstance() {
 		$args = 'foo';
-		$key = Snappy::getInstanceKey($this->class, $this->args);
+		$key = Deft::getInstanceKey($this->class, $this->args);
 
-		$instance = Snappy::get($this->scope, $this->args);
+		$instance = Deft::get($this->scope, $this->args);
 
 		$this->assertInstanceOf(
 			$this->class,
 			$instance,
-			"Returned value was not an instance of \\Snappy\\Lib::class"
+			"Returned value was not an instance of \\Deft\\Lib::class"
 		);
 
-		$log = Snappy::getLog("instance/{$this->class}/{$key}/calls");
+		$log = Deft::stack("instance/{$this->class}/{$key}/calls");
 		$count = count($log);
 
 		$this->assertCount(
@@ -327,17 +327,17 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test encode
 	 *
-	 * @covers Snappy::encode
+	 * @covers Deft::encode
 	 */
 	public function test_encode() {
-		$config = Snappy::config();
+		$config = Deft::config();
 
 		$this->assertNull(
 			$config->get('secret'),
 			"Secret should not initially exist"
 		);
 
-		$encoded = Snappy::encode($this->args);
+		$encoded = Deft::encode($this->args);
 
 		$this->assertRegExp(
 			'%^[!-~]+$%',
@@ -357,12 +357,12 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_encode
 	 *
-	 * @covers Snappy::decode
+	 * @covers Deft::decode
 	 */
 	public function test_decode() {
 		$this->assertEquals(
 			$this->args,
-			Snappy::decode(Snappy::encode($this->args)),
+			Deft::decode(Deft::encode($this->args)),
 			'The encoded object does not decode to the original value'
 		);
 	}
@@ -370,10 +370,10 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test object capture
 	 *
-	 * @covers Snappy::capture
+	 * @covers Deft::capture
 	 */
 	public function test_capture() {
-		$config = Snappy::config();
+		$config = Deft::config();
 
 		$scope = 'template.response.html5';
 
@@ -382,7 +382,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 //			"Capture hash should not initially exist"
 //		);
 
-		$capture = Snappy::capture($scope);
+		$capture = Deft::capture($scope);
 //		var_dump($scope);
 
 		$this->assertRegExp(
@@ -403,7 +403,7 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 			'HTML5 template does not end with carriage return & new line'
 		);
 
-		$log = Snappy::getLog("capture/{$scope}");
+		$log = Deft::stack("capture/{$scope}");
 		$count = count($log);
 
 		$this->assertCount(
@@ -429,11 +429,11 @@ class SnappyUnitCoreTest extends \PHPUnit\Framework\TestCase {
 	 * Test critical error
 	 * TODO: Expand test once finalised
 	 *
-	 * @covers Snappy::error
+	 * @covers Deft::error
 	 */
 	public function test_error() {
 		$this->expectOutputRegex('%\<h1\>App error\<\/h1\>%');
 
-		Snappy::error('foobar');
+		Deft::error('foobar');
 	}
 }

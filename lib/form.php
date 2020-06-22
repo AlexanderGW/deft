@@ -1,31 +1,31 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Snappy\Lib;
+namespace Deft\Lib;
 
-use Snappy\Lib\Random;
+use Deft\Lib\Random;
 
-class Form extends \Snappy_Concrete {
+class Form extends \Deft_Concrete {
 	private $element = array();
 	private $fields = array();
 
@@ -33,7 +33,7 @@ class Form extends \Snappy_Concrete {
 		$this->element['@tag'] = 'form';
 		$this->element['@props']['method'] = 'POST';
 		if (is_null($value)) {
-			$this->prop('id', 'sf_' . Random::getChars(5));
+			$this->prop('id', 'df_' . Random::getChars(5));
 		}
 		if (is_string($value)) {
 			$this->prop('id', $value);
@@ -60,7 +60,7 @@ class Form extends \Snappy_Concrete {
 	 * @return mixed
 	 */
 	public function validate ($form = null, $state = null) {
-		if (\Snappy::request()->isPost()) {
+		if (\Deft::request()->isPost()) {
 //			var_dump($form, $state);
 //			die('validate form');
 		}
@@ -127,14 +127,28 @@ class Form extends \Snappy_Concrete {
 		}
 
 		if (!array_key_exists($scope, $this->fields)) {
-			if (strpos($scope, 'select') === 0 or strpos($scope, 'textarea') === 0) {
-				list($tag, $name, $id) = explode('.', $scope);
-				$type = null;
+			$tag = $type = $name = $id = null;
+			if ((strpos($scope, 'select') === 0 or strpos($scope, 'textarea') === 0) or substr_count('.', $scope)) {
+				$items = explode('.', $scope);
+				if (array_key_exists(0, $items))
+					$tag = $items[0];
+				if (array_key_exists(1, $items))
+					$name = $items[2];
+				if (array_key_exists(2, $items))
+					$id = $items[3];
 			} else {
-				list($tag, $type, $name, $id) = explode('.', $scope);
+				$items = explode('.', $scope);
+				if (array_key_exists(0, $items))
+					$tag = $items[0];
+				if (array_key_exists(1, $items))
+					$type = $items[1];
+				if (array_key_exists(2, $items))
+					$name = $items[2];
+				if (array_key_exists(3, $items))
+					$id = $items[3];
 			}
 			if (empty($id)) {
-				$id = 'syf__' . ($name ? $name : ($type ? $tag . '_' . $type : $tag));
+				$id = 'df__' . ($name ? $name : ($type ? $tag . '_' . $type : $tag));
 			}
 			$this->fields[$scope] = new formField($tag, $type, $name, $id);
 		}
@@ -150,14 +164,17 @@ class Form extends \Snappy_Concrete {
 			if ($field->prop('type') == 'file' and !$this->prop('enctype')) {
 				$this->prop('enctype', 'multipart/form-data');
 			}
-			$this->element['@markup'] .= $field->content();
+			if (array_key_exists('@markup', $this->element))
+				$this->element['@markup'] .= $field->content();
+			else
+				$this->element['@markup'] = $field->content();
 		}
 
 		return Element::html($this->element, $this->prop('id') ? 'element.form.' . $this->prop('id') : 'element.form');
 	}
 
 	public function save () {
-		$config = \Snappy::config('config.form.' . $this->prop('id'));
+		$config = \Deft::config('config.form.' . $this->prop('id'));
 
 		$array = array();
 		foreach ($this->fields as $field) {

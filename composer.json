@@ -1,7 +1,9 @@
 {
-    "name": "alexandergw/snappy",
+    "name": "alexandergw/deft",
     "type": "project",
     "require": {
+      "ext-fileinfo": "*",
+      "ext-gd": "*",
       "ext-json": "*"
     },
     "require-dev": {

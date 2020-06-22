@@ -1,9 +1,9 @@
 <?php
 
-namespace Snappy\Lib\Storage\Database;
+namespace Deft\Lib\Storage\Database;
 
-use Snappy\Lib\Filter;
-use Snappy\Lib\Storage\Database;
+use Deft\Lib\Filter;
+use Deft\Lib\Storage\Database;
 
 class Mysql extends Database {
 

@@ -1,35 +1,35 @@
 <?php
 
 /**
- * Snappy, a micro framework for PHP.
+ * Deft, a micro framework for PHP.
  *
  * @author Alexander Gailey-White <alex@gailey-white.com>
  *
- * This file is part of Snappy.
+ * This file is part of Deft.
  *
- * Snappy is free software: you can redistribute it and/or modify
+ * Deft is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Snappy is distributed in the hope that it will be useful,
+ * Deft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Snappy.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
- * Here is my attempt to convey my thought process for Snappy core, and how it should work.
+ * Here is my attempt to convey my thought process for Deft core, and how it should work.
  *
- * Class SnappyUnitFilterTest
+ * Class DeftUnitFilterTest
  *
  * @group unit.filter
  */
 
-class SnappyUnitFilterTest extends \PHPUnit\Framework\TestCase {
+class TestDeftUnitFilter extends \PHPUnit\Framework\TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -38,12 +38,12 @@ class SnappyUnitFilterTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Test setting filter action
 	 *
-	 * @covers \Snappy\Lib\Filter::add
+	 * @covers \Deft\Lib\Filter::add
 	 */
 	public function test_filter_add() {
 
 		// Set an filter action, to change the response title
-		$filter = Snappy::filter()->add('foo', function(){}, 999);
+		$filter = Deft::filter()->add('foo', function(){}, 999);
 
 		// Check that filter set returned TRUE
 		$this->assertTrue(
@@ -57,12 +57,12 @@ class SnappyUnitFilterTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_filter_add
 	 *
-	 * @covers \Snappy\Lib\Filter::get
+	 * @covers \Deft\Lib\Filter::get
 	 */
 	public function test_filter_get() {
 
 		// Check that we can get the filter entry
-		$result = \Snappy::filter()->get('foo');
+		$result = \Deft::filter()->get('foo');
 		$count = count($result);
 
 		$this->assertCount(
@@ -79,12 +79,12 @@ class SnappyUnitFilterTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_filter_get
 	 *
-	 * @covers \Snappy\Lib\Filter::clear
+	 * @covers \Deft\Lib\Filter::clear
 	 */
 	public function test_filter_clear() {
 
 		// Check filter clear returns TRUE
-		$result = \Snappy::filter()->clear('foo');
+		$result = \Deft::filter()->clear('foo');
 
 		$this->assertTrue(
 			$result,
@@ -92,7 +92,7 @@ class SnappyUnitFilterTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Clear all actions for an filter, returns empty list
-		$result = \Snappy::filter()->get('foo');
+		$result = \Deft::filter()->get('foo');
 		$count = count($result);
 
 		$this->assertCount(
@@ -102,8 +102,8 @@ class SnappyUnitFilterTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Clear an filter action
-		\Snappy::filter()->clear('foo', 'bar');
-		$result = \Snappy::filter()->get('foo');
+		\Deft::filter()->clear('foo', 'bar');
+		$result = \Deft::filter()->get('foo');
 		$count = count($result);
 
 		$this->assertCount(
@@ -118,16 +118,16 @@ class SnappyUnitFilterTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @depends test_filter_clear
 	 *
-	 * @covers \Snappy\Lib\Filter::exec
+	 * @covers \Deft\Lib\Filter::exec
 	 */
 	public function test_filter_exec() {
 
 		// Execute a valid filter
-		Snappy::filter()->add('foo', function($value = NULL) {
+		Deft::filter()->add('foo', function($value = NULL) {
 			return $value . ' baz';
 		}, $priority = 999);
 
-		$result = \Snappy::filter()->exec('foo', 'bar');
+		$result = \Deft::filter()->exec('foo', 'bar');
 
 		$this->assertEquals(
 			'bar baz',
@@ -136,7 +136,7 @@ class SnappyUnitFilterTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Check 1 stack log entry exists
-		$log = Snappy::getLog("filter/foo");
+		$log = Deft::stack("filter/foo");
 		$count = count($log);
 
 		$this->assertCount(
@@ -159,7 +159,7 @@ class SnappyUnitFilterTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Execute an invalid filter
-		$result = \Snappy::filter()->exec('bar');
+		$result = \Deft::filter()->exec('bar');
 
 		$this->assertNull(
 			$result,
@@ -167,9 +167,9 @@ class SnappyUnitFilterTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		// Valid filter execution, with an invalid callback, returns exact same value
-		\Snappy::filter()->clear('foo');
-		\Snappy::filter()->add('foo', 'bar');
-		$result = \Snappy::filter()->exec('foo', 'baz');
+		\Deft::filter()->clear('foo');
+		\Deft::filter()->add('foo', 'bar');
+		$result = \Deft::filter()->exec('foo', 'baz');
 
 		$this->assertEquals(
 			'baz',

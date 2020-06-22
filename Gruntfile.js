@@ -10,7 +10,8 @@ module.exports = function (grunt) {
 					sourceMap: true
 				},
 				files: {
-					'plugin/example/asset/css/example.css': 'plugin/example/asset/scss/example.scss'
+					'plugin/example/asset/css/example.css': 'plugin/example/asset/scss/example.scss',
+					'plugin/debug/asset/debug.css': 'plugin/debug/asset/debug.scss'
 				}
 			}
 		},

@@ -21,17 +21,20 @@
  * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-\Deft::response()->prependTitle( __( 'Welcome' ) );
+namespace Deft\Lib\Response;
 
-//echo Sanitize::forHtml(Deft::request()->query('aaa'));
+use Deft\Lib\Log;
+use Deft\Lib\Response;
 
-?>
-<div>
-	<h1>Deft, a micro framework for PHP & JavaScript.</h1>
-	<p>This is the sample page, routed to <strong>Deft\Plugin\Example</strong>. For examples on what Deft can do,
-		visit <a href="https://gailey-white.com/deft-php-framework">this post</a> on my blog.</p>
-	<p class="cta"><strong><?php ___('User environment') ?> (<a href="./user">modify</a>)</strong><br><?php ___( 'Language' ) ?> (<?php echo \Deft::locale()->getLocale() ?>)</p>
-	<p>
-		<a href="./request">JSON API</a>
-	</p>
-</div>
+class Cli extends Response {
+
+	/**
+	 * @param null $scope
+	 *
+	 * @return string
+	 */
+	public function output($content = '') {
+		parent::output();
+		return $content;
+	}
+}

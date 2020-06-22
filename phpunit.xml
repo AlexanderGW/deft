@@ -4,16 +4,17 @@
         colors="true"
         beStrictAboutTestsThatDoNotTestAnything="true">
     <testsuites>
-        <testsuite name="Snappy unit tests">
-            <file>tests/unit/snappy.php</file>
+        <testsuite name="Deft unit tests">
+            <file>tests/unit/core.php</file>
             <file>tests/unit/event.php</file>
             <file>tests/unit/filter.php</file>
+            <file>tests/unit/filesystem.php</file>
             <file>tests/unit/response/http.php</file>
             <file>tests/unit/response/http/html.php</file>
             <file>tests/unit/response/http/json.php</file>
         </testsuite>
-        <testsuite name="Snappy integration tests">
-            <file>tests/integration/snappy.php</file>
+        <testsuite name="Deft integration tests">
+            <file>tests/integration/core.php</file>
             <file>tests/integration/event.php</file>
             <file>tests/integration/filter.php</file>
         </testsuite>

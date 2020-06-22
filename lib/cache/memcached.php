@@ -1,13 +1,13 @@
 <?php
 
-namespace Snappy\Lib\Cache\Memcached;
+namespace Deft\Lib\Cache\Memcached;
 
-\Snappy::import('cache');
+\Deft::import('cache');
 
-use Snappy\Lib\Event;
-use Snappy\Lib\Filter;
+use Deft\Lib\Event;
+use Deft\Lib\Filter;
 
-class Memcached extends \Snappy\Lib\Cache {
+class Memcached extends \Deft\Lib\Cache {
 	var $args = array();
 	var $connected = null;
 	var $link = false;
@@ -28,7 +28,7 @@ class Memcached extends \Snappy\Lib\Cache {
 		}
 
 		// TODO: what to do with this
-		$result = \Snappy::lib('cache.memcached')->get(\Snappy::request()->url());
+		$result = \Deft::lib('cache.memcached')->get(\Deft::request()->url());
 		if ($result) {
 			echo $result; exit;
 		}
@@ -55,7 +55,7 @@ class Memcached extends \Snappy\Lib\Cache {
 	 * @return array
 	 */
 	public static function getArgs ($args = array()) {
-		$config = \Snappy::config('config.cache.memcached');
+		$config = \Deft::config('config.cache.memcached');
 		$args = array_merge(array(
 			'host' => $config->get('host', '127.0.0.1'),
 			'port' => $config->get('port', 11211)
@@ -88,20 +88,20 @@ class Memcached extends \Snappy\Lib\Cache {
 
 	public static function documentOutput($value) {
 		// Cache the ouput
-		if (\Snappy::request()->isPost() === false) {
-			$url = \Snappy::request()->url();
+		if (\Deft::request()->isPost() === false) {
+			$url = \Deft::request()->url();
 			if (strpos($url, 'debug') === false) {
 				$key = $url;
-				$state = \Snappy::lib('cache.memcached')->set($key, $value);
+				$state = \Deft::lib('cache.memcached')->set($key, $value);
 			}
 //			var_dump($state);exit;
-//			var_dump(Snappy::cache()->get($key));exit;
+//			var_dump(Deft::cache()->get($key));exit;
 		}
 		return $value;
 	}
 }
 
 // Process HTTP request against available route rules
-\Snappy::event()->set( 'init', '\Snappy\Lib\Cache\Memcached::init', 20 );
+\Deft::event()->set( 'init', '\Deft\Lib\Cache\Memcached::init', 20 );
 
-Filter::add('documentOutput', '\Snappy\Lib\Cache\Memcached::documentOutput', 999);
+Filter::add('documentOutput', '\Deft\Lib\Cache\Memcached::documentOutput', 999);
