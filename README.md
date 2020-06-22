@@ -1,19 +1,23 @@
 # Deft
-An evolving micro framework for JavaScript and PHP.
+### A micro framework for PHP & JavaScript.
 
-An attempt to put together code, for common functionality. Such as handling requests, responses, routing, events, filters, plugins, sanitation, data storage, etc.
+Conceptualising common interfaces across HTTP and CLI such as; request, response, route, cache, event, filter, storage, and more
+
+Ideas for this framework stem from experience with Drupal, Laravel, WordPress, and other knowledge accrued over the years.
 
 https://gailey-white.com/deft-php-framework
 
-##### Default docroot for web servers
+#### Default public docroot
 `~/public`
 
-##### Default config
+#### Default config
 `~/config/deft.php`
 
 If left unchanged, Deft will default to the **example**, and **debug** plugins.
 
-##### NPM
+#### NPM
+
+`up` run PHP server `localhost:8000` on `public` directory
 
 `test` run PHPUnit tests.
 
