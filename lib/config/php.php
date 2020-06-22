@@ -158,9 +158,9 @@ class Php extends Config {
 			if ($result)
 				return TRUE;
 
-			\Deft::log()->add(__('Failed to write "%1$s" over filesystem "%2$s"', $this->path, $args['scope']), 2, 'config.php');
+			\Deft::log()->add(__('Failed to write "%1$s" over filesystem "%2$s"', $this->path, $args['scope']), 'config.php');
 		} else {
-			\Deft::log()->add(__('Failed to instantiate filesystem "%1$s"', $args['scope']), 1, 'config.php');
+			\Deft::log()->add(__('Failed to instantiate filesystem "%1$s"', $args['scope']), 'config.php');
 		}
 
 		return FALSE;
