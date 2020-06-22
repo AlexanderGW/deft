@@ -30,13 +30,11 @@ body {
 			> p {
 				padding: 1em;
 			}
-			&:first-child {
-				a {
-					color: #fff;
-					&:focus, &:hover {
-						text-decoration: none;
-						color: #ccc;
-					}
+			a {
+				color: #ffce1b;
+				&:focus, &:hover {
+					text-decoration: none;
+					color: #ccc;
 				}
 			}
 		}
@@ -144,15 +142,19 @@ h1 {
 			outline: .25rem solid #ffce1b;
 			outline-offset: 0;
 		}
+		&[type="file"], select {
+			font-family: 'Raleway', sans-serif;
+		}
 	}
 	input[type="submit"] {
-		font-size: 1rem;
+		font-family: 'Raleway', sans-serif;
+		font-size: 1.25rem;
 		border: none;
 		background-color: #333;
 		color: #fff;
 		padding: .5rem 1.5rem;
 		box-sizing: border-box;
-		&:hover, &:focus {
+		&:hover {
 			background-color: #007dff;
 		}
 	}
