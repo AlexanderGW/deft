@@ -27,11 +27,13 @@ class Log extends \Deft_Concrete {
 	const INFORMATION = 0;
 	const WARNING = 1;
 	const ERROR = 2;
+	const STATUS = 3;
 
 	private $entries = [
-		self::ERROR => [],
+		self::INFORMATION => [],
 		self::WARNING => [],
-		self::INFORMATION => []
+		self::ERROR => [],
+		self::STATUS => []
 	];
 
 	/**
@@ -62,7 +64,7 @@ class Log extends \Deft_Concrete {
 	 * @param int $code
 	 * @param null $stack
 	 */
-	function add ($message = null, $stack = null, $level = self::ERROR) {
+	function add ($message = null, $stack = null, $level = self::STATUS) {
 
 		// Too many watchdog errors
 		$limit = \Deft::config()->get('log.error.max', 30);
@@ -81,6 +83,7 @@ class Log extends \Deft_Concrete {
 		// Unknown log level, default to a warning
 		if (!in_array($level, [
 			self::ERROR,
+			self::STATUS,
 			self::WARNING,
 			self::INFORMATION
 		]))
@@ -102,6 +105,22 @@ class Log extends \Deft_Concrete {
 		}
 
 		return true;
+	}
+
+	public function error($message = null, $stack = null) {
+		self::add($message, $stack, self::ERROR);
+	}
+
+	public function warning($message = null, $stack = null) {
+		self::add($message, $stack, self::WARNING);
+	}
+
+	public function status($message = null, $stack = null) {
+		self::add($message, $stack, self::STATUS);
+	}
+
+	public function info($message = null, $stack = null) {
+		self::add($message, $stack, self::INFORMATION);
 	}
 
 	public function get($level = null) {
