@@ -7,6 +7,7 @@
     "test": "tests"
   },
   "scripts": {
+    "up": "php -S localhost:8000 -t ./public",
     "test": "./vendor/bin/phpunit --configuration ./phpunit.xml --verbose",
     "debug": "./vendor/bin/phpunit --debug --configuration ./phpunit.xml"
   },
