@@ -23,12 +23,7 @@
 
 namespace Deft\Plugin;
 
-use Deft\Lib\Log;
-use Deft\Lib\Plugin;
-use Deft\Lib\Event;
-use Deft\Lib\Watchdog;
-
-class Example extends Plugin {
+class Example extends \Deft\Lib\Plugin {
 	private static $path;
 
 	public static function init() {
