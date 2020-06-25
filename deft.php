@@ -966,6 +966,19 @@ class Deft_Concrete {
 
 		return $return;
 	}
+
+	/**
+	 * @param $key
+	 *
+	 * @return mixed|null
+	 */
+	public function __get($key) {
+		return $this->getArg($key);
+	}
+
+//	public function __set($key, $value) {
+//		return $this->setArg($key, $value);
+//	}
 }
 
 /**
