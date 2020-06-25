@@ -34,6 +34,11 @@ class Example extends Plugin {
 	public static function init() {
 		self::$path = DEFT_PLUGIN_PATH . DS . 'example' . DS;
 
+		\Deft::route()->cli( 'example.cli', 'example', null, function(){
+			\Deft::log()->info(__('Hello world!'));
+			\Deft::response()->appendBody('Hello world!');
+		});
+
 		/**
 		 * Route rules can be automatically loaded at runtime after being stored with \Deft::route()->save()
 		 */
@@ -65,7 +70,7 @@ class Example extends Plugin {
 	public static function content() {
 
 		// Do we have a 'page' parameter in the route data?
-		if (is_array($query = \Deft::route()->current('data'))) {
+		if (is_array($query = \Deft::route()->current()->data)) {
 			$page = $query['page'];
 		}
 
