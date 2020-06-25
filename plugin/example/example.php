@@ -98,8 +98,8 @@ class Example extends Plugin {
 		$content = \Deft::capture( 'plugin.example.page.' . $page );
 		if( is_string( $content ) ) {
 
-			// Add to the content to response
-			if ($res->getArg('type') === 'http.json')
+			// Add the content to response
+			if ($res->type === 'http.json')
 				$res->buffer($content);
 			else
 				$res->appendBody($content);
