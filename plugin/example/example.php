@@ -23,16 +23,16 @@
 
 namespace Deft\Plugin;
 
-use Deft\Lib\Log;
-use Deft\Lib\Plugin;
-use Deft\Lib\Event;
-use Deft\Lib\Watchdog;
-
-class Example extends Plugin {
+class Example extends \Deft\Lib\Plugin {
 	private static $path;
 
 	public static function init() {
 		self::$path = DEFT_PLUGIN_PATH . DS . 'example' . DS;
+
+		\Deft::route()->cli( 'example.cli', 'example', null, function(){
+			\Deft::log()->info(__('Hello world!'));
+			\Deft::response()->appendBody('Hello world!');
+		});
 
 		/**
 		 * Route rules can be automatically loaded at runtime after being stored with \Deft::route()->save()
@@ -65,7 +65,7 @@ class Example extends Plugin {
 	public static function content() {
 
 		// Do we have a 'page' parameter in the route data?
-		if (is_array($query = \Deft::route()->current('data'))) {
+		if (is_array($query = \Deft::route()->current()->data)) {
 			$page = $query['page'];
 		}
 
@@ -98,8 +98,8 @@ class Example extends Plugin {
 		$content = \Deft::capture( 'plugin.example.page.' . $page );
 		if( is_string( $content ) ) {
 
-			// Add to the content to response
-			if ($res->getArg('type') === 'http.json')
+			// Add the content to response
+			if ($res->type === 'http.json')
 				$res->buffer($content);
 			else
 				$res->appendBody($content);

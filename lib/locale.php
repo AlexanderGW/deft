@@ -59,7 +59,7 @@ class Locale {
 		}
 		if (!$string) {
 			$query = (array)\Deft::route()->current('data');
-			if (array_key_exists('data', $query))
+			if (array_key_exists('locale', $query))
 				$string['locale'];
 		}
 		if (!$string) {
@@ -144,16 +144,15 @@ class Locale {
 	 */
 	public static function negotiate ($locale = null) {
 		if (is_string($locale) and (strlen($locale) == 2 or strlen($locale) == 5)) {
-			$config     = \Deft::config();
-			$locales = $config->get('locales', array());
+			$locales = \Deft::config()->get('locales', []);
 
-			if (strlen($locale) == 5) {
+			if (strlen($locale) === 5) {
 				if (in_array($locale, $locales)) {
 					return $locale;
 				}
 				$locale = substr($locale, 0, 2);
 			}
-			if (strlen($locale) == 2 and in_array($locale, $locales)) {
+			if (strlen($locale) === 2 and in_array($locale, $locales)) {
 				return $locale;
 			}
 		}

@@ -35,7 +35,7 @@ define('TIME_UTC', (time() - date('Z')));
  * Class Deft
  */
 class Deft {
-	const VERSION = '0.7';
+	const VERSION = '0.8';
 
 	const PLUGIN_LOADED = 2;
 	const PLUGIN_EXISTS = 1;
@@ -95,7 +95,7 @@ class Deft {
 	 *
 	 * @param array $args
 	 */
-	static function init ($config) {
+	static function init ($config = []) {
 		if (self::$initialized || !is_array($config)) {
 			return null;
 		}
@@ -966,6 +966,19 @@ class Deft_Concrete {
 
 		return $return;
 	}
+
+	/**
+	 * @param $key
+	 *
+	 * @return mixed|null
+	 */
+	public function __get($key) {
+		return $this->getArg($key);
+	}
+
+//	public function __set($key, $value) {
+//		return $this->setArg($key, $value);
+//	}
 }
 
 /**
@@ -980,9 +993,9 @@ function __ ( /*polymorphic*/) {
 	$args = func_get_args();
 	$phrase = array_shift($args);
 
-//	if (\Deft::locale()->isDefault() === false) {
-//		$phrase = \Deft::locale()->getPhrase($phrase);
-//	}
+	if (\Deft::locale()->isDefault() === false) {
+		$phrase = \Deft::locale()->getPhrase($phrase);
+	}
 
 	if (count($args)) {
 		$phrase = vsprintf($phrase, $args);

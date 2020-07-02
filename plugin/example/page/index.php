@@ -27,11 +27,20 @@
 
 ?>
 <div>
-	<h1>Deft, a micro framework for PHP & JavaScript.</h1>
-	<p>This is the sample page, routed to <strong>Deft\Plugin\Example</strong>. For examples on what Deft can do,
-		visit <a href="https://gailey-white.com/deft-php-framework">this post</a> on my blog.</p>
-	<p class="cta"><strong><?php ___('User environment') ?> (<a href="./user">modify</a>)</strong><br><?php ___( 'Language' ) ?> (<?php echo \Deft::locale()->getLocale() ?>)</p>
-	<p>
-		<a href="./request">JSON API</a>
-	</p>
+	<div class="grid">
+		<div class="col-3">
+			<div class="logo"><div>Deft</div><div>Version <?php echo \Deft::VERSION ?></div></div>
+		</div>
+		<div class="col-9">
+			<div class="pad-l1">
+				<h1>A micro framework for PHP & JavaScript.</h1>
+				<p>This is the sample page, routed to <strong>Deft\Plugin\Example</strong>. For examples on what Deft can do,
+					visit <a href="https://gailey-white.com/deft-php-framework">this post</a> on my blog.</p>
+				<p class="cta"><strong><?php ___('User environment') ?> (<a href="./user">modify</a>)</strong><br><?php ___( 'Language' ) ?> (<?php echo \Deft::locale()->getLocale() ?>)</p>
+				<p>
+					<a href="./request">JSON API</a>
+				</p>
+			</div>
+		</div>
+	</div>
 </div>

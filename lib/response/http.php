@@ -26,6 +26,8 @@ namespace Deft\Lib\Response;
 use Deft\Lib\Response;
 
 class Http extends Response {
+	protected $cookies = [];
+	protected $headers = [];
 
 	/**
 	 * @param null $uri

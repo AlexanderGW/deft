@@ -110,10 +110,11 @@ class Cli extends \Deft_Concrete {
 	 * Cache management
 	 */
 	public static function cacheManagement() {
+		$data = \Deft::route()->current()->data ?: [];
 		$actions = [
 			'clear'
 		];
-		$action = \Deft::route()->current()->data['action'];
+		$action = $data['action'];
 
 		if (!in_array($action, $actions))
 			\Deft::log()->error(__('Unknown cache management action "%1$s"', $action));
@@ -124,12 +125,12 @@ class Cli extends \Deft_Concrete {
 				'all',
 				'public'
 			];
-			$task = \Deft::route()->current()->data['task'];
+			$task = array_key_exists('task', $data) ? $data['task'] : 'all';
 
 			if (!in_array($task, $tasks))
 				return \Deft::log()->error(__('Unknown cache management action "clear" task "%1$s"', $task));
 
-			\Deft::log()->status(__('Started clearing "%1$s" caches', $task));
+			___('Started clearing "%1$s" caches', $task);
 
 			$fs = \Deft::filesystem();
 
@@ -143,6 +144,11 @@ class Cli extends \Deft_Concrete {
 
 				\Deft::event()->exec('cliCacheClearPublic');
 				self::logLastEventCall('cliCacheClearPublic');
+			}
+
+			if ($task === 'storage' || $task === 'all') {
+				\Deft::event()->exec('cliCacheClearStorage');
+				self::logLastEventCall('cliCacheClearStorage');
 			}
 
 			if ($task === 'all') {

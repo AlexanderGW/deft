@@ -44,6 +44,18 @@ class Response extends \Deft_Concrete {
 	 *
 	 * @return string
 	 */
+	public function type($buffer = NULL) {
+		if (is_null($buffer))
+			return $this->getArg('type');
+		$this->setArg('type', $buffer);
+		return TRUE;
+	}
+
+	/**
+	 * @param null $buffer
+	 *
+	 * @return string
+	 */
 	public function buffer($buffer = NULL) {
 		$this->buffer = $buffer;
 		return TRUE;
