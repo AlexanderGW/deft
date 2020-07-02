@@ -30,7 +30,7 @@ return array(
 		'locale' => 'es-ES'
 	),
 	array(
-		'Environment settings' => 'La configuración del entorno',
+		'User environment' => 'La configuración del entorno',
 		'Hello' => 'Hola',
 		'Language' => 'Idioma',
 		'Welcome' => 'Bienvenido'
