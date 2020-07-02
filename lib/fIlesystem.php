@@ -3,6 +3,7 @@
 
 namespace Deft\Lib;
 
+// TODO: Switch to filesystem.local
 
 class Filesystem extends \Deft_Concrete {
 

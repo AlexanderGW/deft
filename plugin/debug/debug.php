@@ -33,17 +33,26 @@ class Debug extends Plugin {
 	private static $hash;
 
 	public static function init () {
-		\Deft::route()->add('debug', 'debug', null, '\Deft\Plugin\Debug::returnSetting');
-		\Deft::route()->add('debug.request', 'debug/request/[hash]', array(
+		\Deft::route()->http('debug', 'debug', null, '\Deft\Plugin\Debug::returnSetting');
+		\Deft::route()->http('debug.request', 'debug/request/[hash]', array(
 			'hash' => '[0-9a-z]{32}'
 		), '\Deft\Plugin\Debug::returnRequest');
 
 		\Deft::event()->set('ready', '\Deft\Plugin\Debug::setResponseAssets');
+
+		\Deft::event()->set('cliCacheClearStorage', function(){
+			$fs = \Deft::filesystem();
+			if ($fs->exists(DEFT_STORAGE_PATH . DS . 'debug')) {
+				if (!$fs->delete(DEFT_STORAGE_PATH . DS . 'debug', true)) {
+					\Deft::log()->warning(__('Failed to delete debug storage'));
+				}
+			}
+		});
 	}
 
 	public static function setResponseAssets() {
 		$res = \Deft::response();
-		if ($res->getArg('type') === 'http.html') {
+		if ($res->type === 'http.html') {
 			$hash = \Deft\Plugin\Debug::getHash();
 			$res->addScriptContent("var Deft = Deft || {}; Deft.debugHash = '{$hash}';");
 			$res->addScript('plugin/debug/asset/debug.js');
@@ -112,7 +121,7 @@ class Debug extends Plugin {
 		// Set response output to JSON
 		\Deft::config()->set('response.type', 'http.json');
 
-		$content = file_get_contents(self::getPath() . DS . \Deft::route()->getParam('hash') . '.json');
+		$content = \Deft::filesystem()->read(self::getPath() . DS . \Deft::route()->getParam('hash') . '.json');
 
 		// Buffer the content
 		\Deft::response()->buffer($content);
@@ -125,9 +134,13 @@ class Debug extends Plugin {
 	}
 
 	public static function captureWriteJson() {
-		if (!is_dir(self::getPath()))
-			mkdir(self::getPath());
-		file_put_contents(self::getPath() . DS . self::getHash() . '.json', \Deft::capture('plugin.debug.template.json'));
+		$fs = \Deft::filesystem();
+
+		if ($fs->exists(self::getPath()) === false)
+			$fs->install(self::getPath());
+
+		if (!$fs->write(self::getPath() . DS . self::getHash() . '.json', \Deft::capture('plugin.debug.template.json')))
+			\Deft::log()->warning(__('Failed to write debug stack JSON to storage'));
 	}
 }
 
