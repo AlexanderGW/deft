@@ -1,5 +1,7 @@
 %font-root {
 	font-size: 12pt;
+	letter-spacing: .075rem;
+	line-height: 1.25;
 }
 
 $background-color: #3a3a3a;
@@ -12,9 +14,7 @@ body {
 	border: none;
 	box-sizing: border-box;
 	font-family: 'Raleway', sans-serif;
-	line-height: 1.25;
 	background-color: $background-color;
-	letter-spacing: .075rem;
 	text-align: initial;
 	@extend %font-root;
 	> main {
@@ -41,10 +41,55 @@ body {
 	}
 }
 
+.pad-l1 {
+	padding-left: 2em;
+}
+
+.grid {
+	font-size: 0;
+	letter-spacing: 0;
+	line-height: 1;
+	> div {
+		display: inline-block;
+		vertical-align: top;
+		@extend %font-root;
+		width: 100%;
+		&.col-9 {
+			width: 75%;
+		}
+		&.col-6 {
+			width: 50%;
+		}
+		&.col-3 {
+			width: 25%;
+		}
+	}
+}
+
+.logo {
+	box-sizing: border-box;
+	display: inline-block;
+	border: .25em solid #fff;
+	padding: 2em 1em 1em;
+	width: 172px;
+	height: 172px;
+	line-height: 1;
+	div:first-child {
+		font-size: 4em;
+	}
+	div:last-child {
+		text-align: center;
+		text-transform: uppercase;
+		font-weight: 700;
+		letter-spacing: .125em;
+		margin-top: 1.25em;
+	}
+}
+
 h1 {
-	margin: 0;
+	margin: 0 0 .5em 0;
 	padding: 0;
-	font-size: 4em;
+	font-size: 2.5em;
 	font-weight: 400;
 }
 
@@ -164,6 +209,8 @@ p {
 	margin: 0;
 	&.cta {
 		background-color: #252525;
+		padding: 1em;
+		margin: 1em 0;
 	}
 }
 
