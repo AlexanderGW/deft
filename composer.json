@@ -1,10 +1,11 @@
 {
     "name": "alexandergw/deft",
-    "type": "project",
+    "type": "deft-kernel",
     "require": {
       "ext-fileinfo": "*",
       "ext-gd": "*",
-      "ext-json": "*"
+      "ext-json": "*",
+      "php": ">=7.3"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.5",
