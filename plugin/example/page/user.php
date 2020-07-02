@@ -36,7 +36,7 @@ if ($locale) {
 	$code = \Deft::locale()->negotiate($locale);
 	Token::set('locale', $code);
 	Token::saveCookie();
-//	\Deft::response()->location('/user');
+	\Deft::response()->location('/user');
 } else {
 //	var_dump(Token::get('locale'), \Deft::locale()->getLocale());
 }
@@ -100,7 +100,7 @@ $form->save();
 
 ?>
 <div>
-	<h1><?php ___('User settings') ?></h1>
+	<h1><?php ___('User environment') ?></h1>
 	<p><a href="./">Return to previous page.</a><br>Here is a basic form created with <code>Deft::form()</code>
 		to set the user's locale/language (information is stored and retrieved from a PHP session and browser
 		cookie using the <code>Token</code> class). See source of this script.</p>
