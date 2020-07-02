@@ -95,7 +95,7 @@ class Deft {
 	 *
 	 * @param array $args
 	 */
-	static function init ($config) {
+	static function init ($config = []) {
 		if (self::$initialized || !is_array($config)) {
 			return null;
 		}
@@ -993,9 +993,9 @@ function __ ( /*polymorphic*/) {
 	$args = func_get_args();
 	$phrase = array_shift($args);
 
-//	if (\Deft::locale()->isDefault() === false) {
-//		$phrase = \Deft::locale()->getPhrase($phrase);
-//	}
+	if (\Deft::locale()->isDefault() === false) {
+		$phrase = \Deft::locale()->getPhrase($phrase);
+	}
 
 	if (count($args)) {
 		$phrase = vsprintf($phrase, $args);
