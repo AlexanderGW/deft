@@ -224,29 +224,42 @@ class Deft {
 
 		// Runtime plugins
 		if (count(self::$config['plugins'])) {
-			foreach (self::$config['plugins'] as $plugin) {
-				$state = Deft::PLUGIN_MISSING;
-				$path  = DEFT_PLUGIN_PATH . DS . $plugin;
-				$ext = '.php';
 
-				if (file_exists($path . $ext)) {
-					$state = Deft::PLUGIN_EXISTS;
-				} elseif (is_dir($path) && file_exists($path . DS . $plugin . $ext)) {
-					$state = Deft::PLUGIN_EXISTS;
-					$path  .= DS . $plugin;
+			// Prepare plugin paths
+			$paths = [];
+			if (array_key_exists('path.plugins', self::$config))
+				$paths[] = self::$config['path.plugins'];
+			$paths[] = DEFT_PLUGIN_PATH;
+
+			$plugins = self::$config['plugins'];
+
+			foreach ($paths as $i => $path) {
+				foreach ($plugins as $k => $plugin) {
+					$state = Deft::PLUGIN_MISSING;
+					$path = DEFT_PLUGIN_PATH . DS . $plugin;
+					$ext = '.php';
+
+					if (file_exists($path . $ext)) {
+						$state = Deft::PLUGIN_EXISTS;
+					} elseif (is_dir($path) && file_exists($path . DS . $plugin . $ext)) {
+						$state = Deft::PLUGIN_EXISTS;
+						$path .= DS . $plugin;
+					}
+
+					$start = 0;
+					if ($state === Deft::PLUGIN_EXISTS) {
+						$start = \Deft\Lib\Helper::getMicroTime();
+						include $path . $ext;
+						$state = Deft::PLUGIN_LOADED;
+						unset($plugins[$k]);
+					}
+
+					self::stack('plugin/' . $plugin, array(
+						'time'  => ($state ? \Deft\Lib\Helper::getMoment($start) : 0),
+						'loaded' => $state,
+						'path' => $path
+					));
 				}
-
-				$start = 0;
-				if ($state === Deft::PLUGIN_EXISTS) {
-					$start = \Deft\Lib\Helper::getMicroTime();
-					include $path . $ext;
-					$state = Deft::PLUGIN_LOADED;
-				}
-
-				self::stack('plugin/' . $plugin, array(
-					'time'   => ($state ? \Deft\Lib\Helper::getMoment($start) : 0),
-					'loaded' => $state
-				));
 			}
 		}
 
