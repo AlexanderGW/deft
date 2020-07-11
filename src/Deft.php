@@ -232,24 +232,25 @@ class Deft {
 			$paths[] = DEFT_PLUGIN_PATH;
 
 			$plugins = self::$config['plugins'];
+			$ext = '.php';
 
 			foreach ($paths as $i => $path) {
 				foreach ($plugins as $k => $plugin) {
 					$state = Deft::PLUGIN_MISSING;
-					$path = DEFT_PLUGIN_PATH . DS . $plugin;
-					$ext = '.php';
+					$plugin_path = $path . DS . $plugin;
 
-					if (file_exists($path . $ext)) {
+					if (file_exists($plugin_path . $ext)) {
 						$state = Deft::PLUGIN_EXISTS;
-					} elseif (is_dir($path) && file_exists($path . DS . $plugin . $ext)) {
+					} elseif (is_dir($plugin_path) && file_exists($plugin_path . DS . $plugin . $ext)) {
 						$state = Deft::PLUGIN_EXISTS;
-						$path .= DS . $plugin;
+						$plugin_path .= DS . $plugin;
 					}
 
 					$start = 0;
 					if ($state === Deft::PLUGIN_EXISTS) {
 						$start = \Deft\Lib\Helper::getMicroTime();
-						include $path . $ext;
+						$plugin_path .= $ext;
+						include $plugin_path;
 						$state = Deft::PLUGIN_LOADED;
 						unset($plugins[$k]);
 					}
@@ -257,7 +258,7 @@ class Deft {
 					self::stack('plugin/' . $plugin, array(
 						'time'  => ($state ? \Deft\Lib\Helper::getMoment($start) : 0),
 						'loaded' => $state,
-						'path' => $path
+						'path' => $plugin_path
 					));
 				}
 			}
