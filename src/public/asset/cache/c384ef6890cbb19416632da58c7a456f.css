@@ -1,0 +1,708 @@
+/* (1/4) plugin/example/asset/css/example.css */
+body, .grid > div {
+  font-size: 12pt;
+  letter-spacing: .075rem;
+  line-height: 1.25; }
+
+body {
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+  font-family: 'Raleway', sans-serif;
+  background-color: #3a3a3a;
+  text-align: initial; }
+  body > main {
+    background-color: #000;
+    color: #fff;
+    max-width: 50em;
+    margin: 10em auto; }
+    body > main > * {
+      padding: 1.5em; }
+      body > main > * > * {
+        padding: 0 .75rem; }
+      body > main > * > p {
+        padding: 1em; }
+      body > main > * a {
+        color: #ffce1b; }
+        body > main > * a:focus, body > main > * a:hover {
+          text-decoration: none;
+          color: #ccc; }
+
+.pad-l1 {
+  padding-left: 2em; }
+
+.grid {
+  font-size: 0;
+  letter-spacing: 0;
+  line-height: 1; }
+  .grid > div {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%; }
+    .grid > div.col-9 {
+      width: 75%; }
+    .grid > div.col-6 {
+      width: 50%; }
+    .grid > div.col-3 {
+      width: 25%; }
+
+.logo {
+  box-sizing: border-box;
+  display: inline-block;
+  border: .25em solid #fff;
+  padding: 2em 1em 1em;
+  width: 172px;
+  height: 172px;
+  line-height: 1; }
+  .logo div:first-child {
+    font-size: 4em; }
+  .logo div:last-child {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: .125em;
+    margin-top: 1.25em; }
+
+h1 {
+  margin: 0 0 .5em 0;
+  padding: 0;
+  font-size: 2.5em;
+  font-weight: 400; }
+
+.scr-read {
+  display: none;
+  position: absolute;
+  left: -9999em;
+  top: -9999em; }
+
+.sy-field {
+  padding: .75rem .75rem; }
+  .sy-field .control .option {
+    position: relative;
+    display: inline-block;
+    padding: 0 .5rem 0 2rem; }
+    .sy-field .control .option > input {
+      display: inline-block;
+      cursor: pointer;
+      width: 1.5rem;
+      height: 1.5rem;
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      opacity: 0;
+      float: left;
+      z-index: 1; }
+      .sy-field .control .option > input:checked + label:before {
+        box-shadow: 0 0 0 .2rem #ffce1b; }
+      .sy-field .control .option > input:checked + label:after {
+        content: '';
+        font-size: 1.75rem;
+        font-weight: 700;
+        position: absolute;
+        line-height: 1.25rem;
+        box-sizing: border-box;
+        top: .5rem;
+        left: .5rem;
+        width: .5rem;
+        height: .5rem;
+        border-radius: 50%;
+        background-color: #fff;
+        border: .25rem solid #333; }
+      .sy-field .control .option > input:focus, .sy-field .control .option > input:hover {
+        outline: .25rem solid yellow; }
+    .sy-field .control .option > label {
+      display: inline-block;
+      float: left; }
+      .sy-field .control .option > label:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        border: .175rem solid #333;
+        background-color: #fff;
+        box-sizing: border-box; }
+  .sy-field:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.05); }
+  .sy-field:not(:first-child) {
+    border-top: 0.125rem solid rgba(0, 0, 0, 0.1); }
+  .sy-field > label {
+    position: relative;
+    margin-top: 1rem;
+    font-weight: bold; }
+  .sy-field > label + p {
+    margin-bottom: .5rem;
+    font-size: 1rem; }
+  .sy-field input, .sy-field textarea, .sy-field select {
+    font-size: 1rem;
+    box-sizing: border-box; }
+    .sy-field input:not([type="submit"]):not([type="color"]), .sy-field textarea:not([type="submit"]):not([type="color"]), .sy-field select:not([type="submit"]):not([type="color"]) {
+      border: .175rem solid #555;
+      padding: .5rem; }
+    .sy-field input:hover, .sy-field input:focus, .sy-field textarea:hover, .sy-field textarea:focus, .sy-field select:hover, .sy-field select:focus {
+      outline: .25rem solid #ffce1b;
+      outline-offset: 0; }
+    .sy-field input[type="file"], .sy-field input select, .sy-field textarea[type="file"], .sy-field textarea select, .sy-field select[type="file"], .sy-field select select {
+      font-family: 'Raleway', sans-serif; }
+  .sy-field input[type="submit"] {
+    font-family: 'Raleway', sans-serif;
+    font-size: 1.25rem;
+    border: none;
+    background-color: #333;
+    color: #fff;
+    padding: .5rem 1.5rem;
+    box-sizing: border-box; }
+    .sy-field input[type="submit"]:hover {
+      background-color: #007dff; }
+
+p {
+  margin: 0; }
+  p.cta {
+    background-color: #252525;
+    padding: 1em;
+    margin: 1em 0; }
+
+.deft.watchdog {
+  background-color: #007eff;
+  border-top: .75rem solid #005ab7;
+  padding: .75rem 1rem 1rem; }
+  .deft.watchdog > div > strong {
+    font-size: 1.25rem; }
+
+/*# sourceMappingURL=example.css.map */
+
+/* (2/4) plugin/example/asset/css/example.css */
+body, .grid > div {
+  font-size: 12pt;
+  letter-spacing: .075rem;
+  line-height: 1.25; }
+
+body {
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+  font-family: 'Raleway', sans-serif;
+  background-color: #3a3a3a;
+  text-align: initial; }
+  body > main {
+    background-color: #000;
+    color: #fff;
+    max-width: 50em;
+    margin: 10em auto; }
+    body > main > * {
+      padding: 1.5em; }
+      body > main > * > * {
+        padding: 0 .75rem; }
+      body > main > * > p {
+        padding: 1em; }
+      body > main > * a {
+        color: #ffce1b; }
+        body > main > * a:focus, body > main > * a:hover {
+          text-decoration: none;
+          color: #ccc; }
+
+.pad-l1 {
+  padding-left: 2em; }
+
+.grid {
+  font-size: 0;
+  letter-spacing: 0;
+  line-height: 1; }
+  .grid > div {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%; }
+    .grid > div.col-9 {
+      width: 75%; }
+    .grid > div.col-6 {
+      width: 50%; }
+    .grid > div.col-3 {
+      width: 25%; }
+
+.logo {
+  box-sizing: border-box;
+  display: inline-block;
+  border: .25em solid #fff;
+  padding: 2em 1em 1em;
+  width: 172px;
+  height: 172px;
+  line-height: 1; }
+  .logo div:first-child {
+    font-size: 4em; }
+  .logo div:last-child {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: .125em;
+    margin-top: 1.25em; }
+
+h1 {
+  margin: 0 0 .5em 0;
+  padding: 0;
+  font-size: 2.5em;
+  font-weight: 400; }
+
+.scr-read {
+  display: none;
+  position: absolute;
+  left: -9999em;
+  top: -9999em; }
+
+.sy-field {
+  padding: .75rem .75rem; }
+  .sy-field .control .option {
+    position: relative;
+    display: inline-block;
+    padding: 0 .5rem 0 2rem; }
+    .sy-field .control .option > input {
+      display: inline-block;
+      cursor: pointer;
+      width: 1.5rem;
+      height: 1.5rem;
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      opacity: 0;
+      float: left;
+      z-index: 1; }
+      .sy-field .control .option > input:checked + label:before {
+        box-shadow: 0 0 0 .2rem #ffce1b; }
+      .sy-field .control .option > input:checked + label:after {
+        content: '';
+        font-size: 1.75rem;
+        font-weight: 700;
+        position: absolute;
+        line-height: 1.25rem;
+        box-sizing: border-box;
+        top: .5rem;
+        left: .5rem;
+        width: .5rem;
+        height: .5rem;
+        border-radius: 50%;
+        background-color: #fff;
+        border: .25rem solid #333; }
+      .sy-field .control .option > input:focus, .sy-field .control .option > input:hover {
+        outline: .25rem solid yellow; }
+    .sy-field .control .option > label {
+      display: inline-block;
+      float: left; }
+      .sy-field .control .option > label:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        border: .175rem solid #333;
+        background-color: #fff;
+        box-sizing: border-box; }
+  .sy-field:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.05); }
+  .sy-field:not(:first-child) {
+    border-top: 0.125rem solid rgba(0, 0, 0, 0.1); }
+  .sy-field > label {
+    position: relative;
+    margin-top: 1rem;
+    font-weight: bold; }
+  .sy-field > label + p {
+    margin-bottom: .5rem;
+    font-size: 1rem; }
+  .sy-field input, .sy-field textarea, .sy-field select {
+    font-size: 1rem;
+    box-sizing: border-box; }
+    .sy-field input:not([type="submit"]):not([type="color"]), .sy-field textarea:not([type="submit"]):not([type="color"]), .sy-field select:not([type="submit"]):not([type="color"]) {
+      border: .175rem solid #555;
+      padding: .5rem; }
+    .sy-field input:hover, .sy-field input:focus, .sy-field textarea:hover, .sy-field textarea:focus, .sy-field select:hover, .sy-field select:focus {
+      outline: .25rem solid #ffce1b;
+      outline-offset: 0; }
+    .sy-field input[type="file"], .sy-field input select, .sy-field textarea[type="file"], .sy-field textarea select, .sy-field select[type="file"], .sy-field select select {
+      font-family: 'Raleway', sans-serif; }
+  .sy-field input[type="submit"] {
+    font-family: 'Raleway', sans-serif;
+    font-size: 1.25rem;
+    border: none;
+    background-color: #333;
+    color: #fff;
+    padding: .5rem 1.5rem;
+    box-sizing: border-box; }
+    .sy-field input[type="submit"]:hover {
+      background-color: #007dff; }
+
+p {
+  margin: 0; }
+  p.cta {
+    background-color: #252525;
+    padding: 1em;
+    margin: 1em 0; }
+
+.deft.watchdog {
+  background-color: #007eff;
+  border-top: .75rem solid #005ab7;
+  padding: .75rem 1rem 1rem; }
+  .deft.watchdog > div > strong {
+    font-size: 1.25rem; }
+
+/*# sourceMappingURL=example.css.map */
+
+/* (3/4) plugin/example/asset/css/example.css */
+body, .grid > div {
+  font-size: 12pt;
+  letter-spacing: .075rem;
+  line-height: 1.25; }
+
+body {
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+  font-family: 'Raleway', sans-serif;
+  background-color: #3a3a3a;
+  text-align: initial; }
+  body > main {
+    background-color: #000;
+    color: #fff;
+    max-width: 50em;
+    margin: 10em auto; }
+    body > main > * {
+      padding: 1.5em; }
+      body > main > * > * {
+        padding: 0 .75rem; }
+      body > main > * > p {
+        padding: 1em; }
+      body > main > * a {
+        color: #ffce1b; }
+        body > main > * a:focus, body > main > * a:hover {
+          text-decoration: none;
+          color: #ccc; }
+
+.pad-l1 {
+  padding-left: 2em; }
+
+.grid {
+  font-size: 0;
+  letter-spacing: 0;
+  line-height: 1; }
+  .grid > div {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%; }
+    .grid > div.col-9 {
+      width: 75%; }
+    .grid > div.col-6 {
+      width: 50%; }
+    .grid > div.col-3 {
+      width: 25%; }
+
+.logo {
+  box-sizing: border-box;
+  display: inline-block;
+  border: .25em solid #fff;
+  padding: 2em 1em 1em;
+  width: 172px;
+  height: 172px;
+  line-height: 1; }
+  .logo div:first-child {
+    font-size: 4em; }
+  .logo div:last-child {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: .125em;
+    margin-top: 1.25em; }
+
+h1 {
+  margin: 0 0 .5em 0;
+  padding: 0;
+  font-size: 2.5em;
+  font-weight: 400; }
+
+.scr-read {
+  display: none;
+  position: absolute;
+  left: -9999em;
+  top: -9999em; }
+
+.sy-field {
+  padding: .75rem .75rem; }
+  .sy-field .control .option {
+    position: relative;
+    display: inline-block;
+    padding: 0 .5rem 0 2rem; }
+    .sy-field .control .option > input {
+      display: inline-block;
+      cursor: pointer;
+      width: 1.5rem;
+      height: 1.5rem;
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      opacity: 0;
+      float: left;
+      z-index: 1; }
+      .sy-field .control .option > input:checked + label:before {
+        box-shadow: 0 0 0 .2rem #ffce1b; }
+      .sy-field .control .option > input:checked + label:after {
+        content: '';
+        font-size: 1.75rem;
+        font-weight: 700;
+        position: absolute;
+        line-height: 1.25rem;
+        box-sizing: border-box;
+        top: .5rem;
+        left: .5rem;
+        width: .5rem;
+        height: .5rem;
+        border-radius: 50%;
+        background-color: #fff;
+        border: .25rem solid #333; }
+      .sy-field .control .option > input:focus, .sy-field .control .option > input:hover {
+        outline: .25rem solid yellow; }
+    .sy-field .control .option > label {
+      display: inline-block;
+      float: left; }
+      .sy-field .control .option > label:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        border: .175rem solid #333;
+        background-color: #fff;
+        box-sizing: border-box; }
+  .sy-field:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.05); }
+  .sy-field:not(:first-child) {
+    border-top: 0.125rem solid rgba(0, 0, 0, 0.1); }
+  .sy-field > label {
+    position: relative;
+    margin-top: 1rem;
+    font-weight: bold; }
+  .sy-field > label + p {
+    margin-bottom: .5rem;
+    font-size: 1rem; }
+  .sy-field input, .sy-field textarea, .sy-field select {
+    font-size: 1rem;
+    box-sizing: border-box; }
+    .sy-field input:not([type="submit"]):not([type="color"]), .sy-field textarea:not([type="submit"]):not([type="color"]), .sy-field select:not([type="submit"]):not([type="color"]) {
+      border: .175rem solid #555;
+      padding: .5rem; }
+    .sy-field input:hover, .sy-field input:focus, .sy-field textarea:hover, .sy-field textarea:focus, .sy-field select:hover, .sy-field select:focus {
+      outline: .25rem solid #ffce1b;
+      outline-offset: 0; }
+    .sy-field input[type="file"], .sy-field input select, .sy-field textarea[type="file"], .sy-field textarea select, .sy-field select[type="file"], .sy-field select select {
+      font-family: 'Raleway', sans-serif; }
+  .sy-field input[type="submit"] {
+    font-family: 'Raleway', sans-serif;
+    font-size: 1.25rem;
+    border: none;
+    background-color: #333;
+    color: #fff;
+    padding: .5rem 1.5rem;
+    box-sizing: border-box; }
+    .sy-field input[type="submit"]:hover {
+      background-color: #007dff; }
+
+p {
+  margin: 0; }
+  p.cta {
+    background-color: #252525;
+    padding: 1em;
+    margin: 1em 0; }
+
+.deft.watchdog {
+  background-color: #007eff;
+  border-top: .75rem solid #005ab7;
+  padding: .75rem 1rem 1rem; }
+  .deft.watchdog > div > strong {
+    font-size: 1.25rem; }
+
+/*# sourceMappingURL=example.css.map */
+
+/* (4/4) plugin/example/asset/css/example.css */
+body, .grid > div {
+  font-size: 12pt;
+  letter-spacing: .075rem;
+  line-height: 1.25; }
+
+body {
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+  font-family: 'Raleway', sans-serif;
+  background-color: #3a3a3a;
+  text-align: initial; }
+  body > main {
+    background-color: #000;
+    color: #fff;
+    max-width: 50em;
+    margin: 10em auto; }
+    body > main > * {
+      padding: 1.5em; }
+      body > main > * > * {
+        padding: 0 .75rem; }
+      body > main > * > p {
+        padding: 1em; }
+      body > main > * a {
+        color: #ffce1b; }
+        body > main > * a:focus, body > main > * a:hover {
+          text-decoration: none;
+          color: #ccc; }
+
+.pad-l1 {
+  padding-left: 2em; }
+
+.grid {
+  font-size: 0;
+  letter-spacing: 0;
+  line-height: 1; }
+  .grid > div {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%; }
+    .grid > div.col-9 {
+      width: 75%; }
+    .grid > div.col-6 {
+      width: 50%; }
+    .grid > div.col-3 {
+      width: 25%; }
+
+.logo {
+  box-sizing: border-box;
+  display: inline-block;
+  border: .25em solid #fff;
+  padding: 2em 1em 1em;
+  width: 172px;
+  height: 172px;
+  line-height: 1; }
+  .logo div:first-child {
+    font-size: 4em; }
+  .logo div:last-child {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: .125em;
+    margin-top: 1.25em; }
+
+h1 {
+  margin: 0 0 .5em 0;
+  padding: 0;
+  font-size: 2.5em;
+  font-weight: 400; }
+
+.scr-read {
+  display: none;
+  position: absolute;
+  left: -9999em;
+  top: -9999em; }
+
+.sy-field {
+  padding: .75rem .75rem; }
+  .sy-field .control .option {
+    position: relative;
+    display: inline-block;
+    padding: 0 .5rem 0 2rem; }
+    .sy-field .control .option > input {
+      display: inline-block;
+      cursor: pointer;
+      width: 1.5rem;
+      height: 1.5rem;
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      opacity: 0;
+      float: left;
+      z-index: 1; }
+      .sy-field .control .option > input:checked + label:before {
+        box-shadow: 0 0 0 .2rem #ffce1b; }
+      .sy-field .control .option > input:checked + label:after {
+        content: '';
+        font-size: 1.75rem;
+        font-weight: 700;
+        position: absolute;
+        line-height: 1.25rem;
+        box-sizing: border-box;
+        top: .5rem;
+        left: .5rem;
+        width: .5rem;
+        height: .5rem;
+        border-radius: 50%;
+        background-color: #fff;
+        border: .25rem solid #333; }
+      .sy-field .control .option > input:focus, .sy-field .control .option > input:hover {
+        outline: .25rem solid yellow; }
+    .sy-field .control .option > label {
+      display: inline-block;
+      float: left; }
+      .sy-field .control .option > label:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        border: .175rem solid #333;
+        background-color: #fff;
+        box-sizing: border-box; }
+  .sy-field:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.05); }
+  .sy-field:not(:first-child) {
+    border-top: 0.125rem solid rgba(0, 0, 0, 0.1); }
+  .sy-field > label {
+    position: relative;
+    margin-top: 1rem;
+    font-weight: bold; }
+  .sy-field > label + p {
+    margin-bottom: .5rem;
+    font-size: 1rem; }
+  .sy-field input, .sy-field textarea, .sy-field select {
+    font-size: 1rem;
+    box-sizing: border-box; }
+    .sy-field input:not([type="submit"]):not([type="color"]), .sy-field textarea:not([type="submit"]):not([type="color"]), .sy-field select:not([type="submit"]):not([type="color"]) {
+      border: .175rem solid #555;
+      padding: .5rem; }
+    .sy-field input:hover, .sy-field input:focus, .sy-field textarea:hover, .sy-field textarea:focus, .sy-field select:hover, .sy-field select:focus {
+      outline: .25rem solid #ffce1b;
+      outline-offset: 0; }
+    .sy-field input[type="file"], .sy-field input select, .sy-field textarea[type="file"], .sy-field textarea select, .sy-field select[type="file"], .sy-field select select {
+      font-family: 'Raleway', sans-serif; }
+  .sy-field input[type="submit"] {
+    font-family: 'Raleway', sans-serif;
+    font-size: 1.25rem;
+    border: none;
+    background-color: #333;
+    color: #fff;
+    padding: .5rem 1.5rem;
+    box-sizing: border-box; }
+    .sy-field input[type="submit"]:hover {
+      background-color: #007dff; }
+
+p {
+  margin: 0; }
+  p.cta {
+    background-color: #252525;
+    padding: 1em;
+    margin: 1em 0; }
+
+.deft.watchdog {
+  background-color: #007eff;
+  border-top: .75rem solid #005ab7;
+  padding: .75rem 1rem 1rem; }
+  .deft.watchdog > div > strong {
+    font-size: 1.25rem; }
+
+/*# sourceMappingURL=example.css.map */
+

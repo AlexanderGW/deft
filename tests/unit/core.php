@@ -73,14 +73,14 @@ class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 	 */
 	public function test_havePlugin() {
 		$result = Deft::havePlugin(
+			'debug'
+		);
+		$this->assertGreaterThan(Deft::PLUGIN_EXISTS, $result);
+
+		$result = Deft::havePlugin(
 			'example'
 		);
 		$this->assertEquals(Deft::PLUGIN_LOADED, $result);
-
-		$result = Deft::havePlugin(
-			'debug'
-		);
-		$this->assertEquals(Deft::PLUGIN_EXISTS, $result);
 
 		$result = Deft::havePlugin(
 			'foobar'

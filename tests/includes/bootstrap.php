@@ -6,7 +6,7 @@
 define('DEFT_TESTING', true);
 
 // Replace separators on Windows for test passing
-define('DEFT_ABS_PATH', str_replace("\\", '/', realpath(__DIR__ . '/../..')));
+define('DEFT_ABS_PATH', str_replace("\\", '/', realpath(__DIR__ . '/../../src')));
 
 define('DEFT_INITIATOR', DEFT_ABS_PATH . '/deft.php');
 
@@ -20,13 +20,11 @@ $_SERVER['REQUEST_URI'] = '/';
 if (file_exists('vendor/autoload.php'))
 	$loader = include_once 'vendor/autoload.php';
 
-// Get the framework
-require 'deft.php';
-
 // Init Deft with a test config
 \Deft::init([
+	'path.storage' => sys_get_temp_dir(),
 	'plugins' => [
-		'example',
-		'test'
+		'debug',
+		'example'
 	]
 ]);
