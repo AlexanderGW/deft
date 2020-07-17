@@ -148,8 +148,14 @@ class Deft {
 		define('DEFT_TMP_PATH', self::$config['path.tmp']);
 
 		define('DEFT_PLUGIN_PATH', DEFT_PATH . DS . self::$config['directory.plugin']);
-		define('DEFT_PUBLIC_PATH', DEFT_PATH . DS . self::$config['directory.public']);
-		define('DEFT_PUBLIC_ASSET_PATH', DEFT_PUBLIC_PATH . DS . self::$config['directory.public.asset']);
+
+		if (!array_key_exists('path.public', self::$config))
+			self::$config['path.public'] = DEFT_PATH . DS . self::$config['directory.public'];
+		define('DEFT_PUBLIC_PATH', self::$config['path.public']);
+
+		if (!array_key_exists('path.public.asset', self::$config))
+			self::$config['path.public.asset'] = DEFT_PUBLIC_PATH . DS . self::$config['directory.public.asset'];
+		define('DEFT_PUBLIC_ASSET_PATH', self::$config['path.public.asset']);
 
 		// Libraries to load
 		$array = self::import(
