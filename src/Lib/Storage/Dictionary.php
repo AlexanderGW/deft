@@ -21,8 +21,12 @@
  * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Deft\Lib;
+namespace Deft\Lib\Storage;
 
-class Storage extends \Deft_Concrete {
+use Deft\Lib\Event;
+use Deft\Lib\Filter;
+use Deft\Lib\Storage;
+
+class Dictionary extends Storage {
 
 }

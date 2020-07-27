@@ -34,6 +34,8 @@ class Cache extends \Deft_Concrete {
 
 	private $data = array();
 
+	private $storage = NULL;
+
 	/**
 	 *
 	 */
@@ -52,6 +54,19 @@ class Cache extends \Deft_Concrete {
 	 */
 	function __construct ($scope = null) {
 		$this->scope = self::getArgs($scope);
+//		$config = \Deft::config('cache.' . $scope);
+
+		$config  = \Deft::config();
+		$this->storage = \Deft::storage(array(
+			'structure'    => $config->get('cache.structure', 'dictionary'),
+			'type'         => $config->get('cache.type', 'memcached'),
+			'host'         => $config->get('cache.hostname'),
+			'username'     => $config->get('cache.username'),
+			'password'     => $config->get('cache.password'),
+			'dbname'       => $config->get('cache.name'),
+			'table_prefix' => $config->get('cache.table.prefix'),
+			'port'         => $config->get('cache.port')
+		));
 	}
 
 	/**
@@ -67,9 +82,17 @@ class Cache extends \Deft_Concrete {
 		return $args;
 	}
 
+	public function storage($args = NULL) {
+		if (is_null($args))
+			return $this->storage;
+	}
+
 	public function get($key = null) {
 //		if (!is_null($key) AND array_key_exists($key, $this->data)) {
 			$key = md5($key);
+			if (array_key_exists($key, $this->data)) {
+				$this->data[$key] = $this->storage()->get($key);
+			}
 			return ($this->data[$key]);
 //		}
 		return;

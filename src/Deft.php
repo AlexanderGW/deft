@@ -496,7 +496,7 @@ class Deft {
 					'filesystem.type' => 'local'
 				), $args);
 
-				if (empty($args['format']))
+				if (array_key_exists('format', $args) && is_string($args['format']))
 					$args['format'] = 'php';
 
 				$scope = "config.{$args['format']}";
@@ -508,7 +508,9 @@ class Deft {
 
 	public static function database ($args = []) {
 		$config  = self::config();
-		$args = array_merge(array(
+		return self::storage(array_merge(array(
+			'structure'    => $config->get('database.structure', 'relational'),
+			'type'         => $config->get('database.type', 'sql'),
 			'driver'       => $config->get('database.driver'),
 			'host'         => $config->get('database.hostname'),
 			'username'     => $config->get('database.username'),
@@ -516,10 +518,24 @@ class Deft {
 			'dbname'       => $config->get('database.name'),
 			'table_prefix' => $config->get('database.table.prefix'),
 			'port'         => $config->get('database.port')
+		), $args));
+	}
+
+	public static function storage ($args = []) {
+		$c  = self::config();
+		$args = array_merge(array(
+			'structure'    => $c->get('storage.structure', 'filesystem'),
+			'type'         => $c->get('storage.type', 'local')
 		), $args);
 
-		$scope = 'storage.database';
-		if ($args['driver'])
+		$scope = 'storage';
+		self::import('lib.' . $scope);
+		$scope .= '.' . $args['structure'];
+		self::import('lib.' . $scope);
+		$scope .= '.' . $args['type'];
+		self::import('lib.' . $scope);
+
+		if (array_key_exists('driver', $args) && is_string($args['driver']))
 			$scope .= '.'.$args['driver'];
 
 		return self::lib($scope, $args);
@@ -580,14 +596,10 @@ class Deft {
 	 */
 	public static function filesystem ($args = []) {
 		$config = self::config();
-
-		if ($config) {
-			$args = array_merge(array(
-				'type' => $config->get('filesystem.type', 'local')
-			), $args);
-		}
-
-		return self::lib('filesystem', $args);
+		return self::storage($args = array_merge(array(
+			'structure' => $config->get('filesystem.type', 'filesystem'),
+			'type' => $config->get('filesystem.type', 'local')
+		), $args));
 	}
 
 	/**

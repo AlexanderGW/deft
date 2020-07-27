@@ -1,9 +1,29 @@
 <?php
 
+/**
+ * Deft, a micro framework for PHP.
+ *
+ * @author Alexander Gailey-White <alex@gailey-white.com>
+ *
+ * This file is part of Deft.
+ *
+ * Deft is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Deft is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-namespace Deft\Lib;
+namespace Deft\Lib\Storage\Filesystem;
 
-class Local extends Filesystem {
+class Local extends \Deft_Concrete {
 
 	/**
 	 *
@@ -23,8 +43,10 @@ class Local extends Filesystem {
 	 *
 	 */
 	public function makeRelative($path) {
-		$path = substr($path, strlen(DEFT_PATH)+1);
-		$path = str_replace('\\', '/', $path);
+		if (strpos($path, DEFT_PATH) === 0) {
+			$path = substr($path, strlen(DEFT_PATH)+1);
+			$path = str_replace('\\', '/', $path);
+		}
 		return $path;
 	}
 
@@ -32,18 +54,18 @@ class Local extends Filesystem {
 	 *
 	 */
 	public function install($path = NULL, $mode = NULL) {
-		if (strpos($path, DEFT_PATH) !== 0)
-			return NULL;
-
 		if (is_null($mode))
 			$mode = 0750;
 		$mode = intval($mode, 8);
-		$path = $this->makeRelative($path);
+
+//		$path = $this->makeRelative($path);
 
 		$directories = explode('/', $path);
-		$path = DEFT_PATH;
-		foreach ($directories as $directory) {
-			$path .= "/{$directory}";
+		$path = '';
+		foreach ($directories as $i => $directory) {
+			if ($i)
+				$path .= '/';
+			$path .= "{$directory}";
 			if (!is_dir($path)) {
 				if (!mkdir($path))
 					return FALSE;
@@ -139,19 +161,20 @@ class Local extends Filesystem {
 	 *
 	 */
 	public function delete($path = NULL, $recursive = FALSE) {
+		$result = FALSE;
 		if (!is_dir($path) && is_file($path))
 			return unlink($path);
 
 		if (!is_bool($recursive))
 			$recursive = FALSE;
 
-		$path = $this->makeRelative($path);
+//		$path = $this->makeRelative($path);
 
 		// Recursive deletion, get all items to process
 		if ($recursive) {
-			$failed = FALSE;
 			$items = $this->scan($path, TRUE, 1);
 			if ($items) {
+				$failed = FALSE;
 				foreach ($items as $key => $value) {
 
 					// Delete file, $value is the full path
@@ -162,8 +185,8 @@ class Local extends Filesystem {
 					}
 
 					// Delete the content of the directory
-					elseif($value === TRUE) {
-						$path_directory = DEFT_PATH . DS . $path . '/' . $key;
+					elseif ($value === TRUE) {
+						$path_directory = $path . '/' . $key;
 						if ($this->delete($path_directory, TRUE) === FALSE) {
 							$failed = TRUE;
 							break;
@@ -177,7 +200,8 @@ class Local extends Filesystem {
 		}
 
 		// Delete directory
-		$result = rmdir(DEFT_PATH . DS . $path);
+		if (is_dir($path))
+			$result = rmdir($path);
 		return $result;
 	}
 }

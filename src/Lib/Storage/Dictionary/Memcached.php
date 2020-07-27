@@ -1,13 +1,12 @@
 <?php
 
-namespace Deft\Lib\Cache\Memcached;
-
-\Deft::import('cache');
+namespace Deft\Lib\Storage\Dictionary;
 
 use Deft\Lib\Event;
 use Deft\Lib\Filter;
+use Deft\Lib\Storage\Dictionary;
 
-class Memcached extends \Deft\Lib\Cache {
+class Memcached extends Dictionary {
 	var $args = array();
 	var $connected = null;
 	var $link = false;

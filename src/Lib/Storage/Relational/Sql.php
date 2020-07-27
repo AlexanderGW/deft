@@ -21,14 +21,15 @@
  * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Deft\Lib\Storage;
+namespace Deft\Lib\Storage\Relational;
 
 use Deft\Lib\Helper;
+use Deft\Lib\Log;
 use Deft\Lib\Sanitize;
-use Deft\Lib\Storage;
+use Deft\Lib\Storage\Relational;
 use Deft\Lib\Watchdog;
 
-class Database extends Storage {
+class Sql extends Relational {
 	var $args = array();
 	var $connected = null;
 	var $link = false;
@@ -80,15 +81,17 @@ class Database extends Storage {
 	 * @return array
 	 */
 	public static function getArgs ($args = array()) {
-		$config  = \Deft::config();
+		$c  = \Deft::config();
 		$args = array_merge(array(
-			'driver'       => $config->get('database.driver', 'mysql'),
-			'host'         => $config->get('database.hostname', 'localhost'),
-			'username'     => $config->get('database.username'),
-			'password'     => $config->get('database.password'),
-			'dbname'       => $config->get('database.name'),
-			'table_prefix' => $config->get('database.table.prefix'),
-			'port'         => $config->get('database.port')
+			'structure'    => 'relational',
+			'type'         => 'sql',
+			'driver'       => $c->get('storage.relational.sql.driver'),
+			'host'         => $c->get('storage.relational.sql.hostname', '127.0.0.1'),
+			'username'     => $c->get('storage.relational.sql.username'),
+			'password'     => $c->get('storage.relational.sql.password'),
+			'name'         => $c->get('storage.relational.sql.name'),
+			'table_prefix' => $c->get('storage.relational.sql.table.prefix'),
+			'port'         => $c->get('storage.relational.sql.port')
 		), $args);
 
 		return $args;
@@ -109,6 +112,15 @@ class Database extends Storage {
 	}
 
 	/**
+	 * @param null $str
+	 *
+	 * @return string|string[]|null
+	 */
+	public function addTablePrefix($str = NULL) {
+		return str_replace('#_', $this->args['table_prefix'], $str);
+	}
+
+	/**
 	 * @return string
 	 */
 	public function sql ( /*polymorphic*/) {
@@ -117,7 +129,7 @@ class Database extends Storage {
 		}
 
 		$values = func_get_args();
-		$statement  = str_replace('#_', $this->args['table_prefix'], array_shift($values));
+		$statement  = $this->addTablePrefix(array_shift($values));
 		if (!count($values)) {
 			return $statement;
 		} else {
@@ -176,7 +188,7 @@ class Database extends Storage {
 
 			// Non-conditional query
 			else {
-				$this->statement = str_replace('#_', $this->args['table_prefix'], $args[0]);
+				$this->statement = $this->addTablePrefix($args[0]);
 			}
 
 			// Debug timer
@@ -189,10 +201,10 @@ class Database extends Storage {
 				$this->resource = $this->link->query($this->statement);
 			}
 			catch (\PDOException $e) {
-				\Deft::log()->add($e->getMessage(), $e->getCode(), $this->getStack());
+				\Deft::log()->add($e->getCode() . ': ' . $e->getMessage(), $this->getStack(), Log::ERROR);
 			}
 
-			// TODO: This is messing up due to the getArgs() != to Deft::database() args
+			// TODO: This is messing up due to the getArgs() != to Deft::storage() args
 //			if (DEFT_DEBUG > 0) {
 //				$statement = Sanitize::forText($this->statement);
 //				$entry = array(
@@ -250,9 +262,11 @@ class Database extends Storage {
 			return;
 		}
 
-		$table = str_replace('#_', $this->args['table_prefix'], $table);
+		$table = $this->addTablePrefix($table);
 
-		$statement = "INSERT INTO `" . $table . "` ( `" . implode("`,`", array_keys($args)) . "` ) VALUES( " . preg_replace('/, $/', '', str_repeat('?, ', count($args))) . " )";
+		$statement = "INSERT INTO `" . $table . "` "
+		. "( `" . implode("`,`", array_keys($args)) . "` ) "
+		. "VALUES( " . preg_replace('/, $/', '', str_repeat('?, ', count($args))) . " )";
 
 		$array = array_values($args);
 		array_unshift($array, $statement);
@@ -270,11 +284,11 @@ class Database extends Storage {
 	 * @return int
 	 */
 	public function update ($table = null, $args = array(), $conditonal = array()) {
-		if (!is_string($table) or !is_array($args) or !count($args) or !is_array($args) or !count($conditonal)) {
+		if (!is_string($table) or !is_array($args) or !count($args) or !count($conditonal)) {
 			return;
 		}
 
-		$table = str_replace('#_', $this->args['table_prefix'], $table);
+		$table = $this->addTablePrefix($table);
 
 		$set = array();
 		foreach ($args AS $arg => $value) {
@@ -286,7 +300,9 @@ class Database extends Storage {
 			$where[] = "`" . $arg . "` = ?";
 		}
 
-		$statement = "UPDATE `" . $table . "` SET " . implode(' AND ', $set) . "  WHERE ( " . implode(' AND ', $where) . " )";
+		$statement = "UPDATE `" . $table . "` "
+		. "SET " . implode(' AND ', $set) . " "
+		. "WHERE ( " . implode(' AND ', $where) . " );";
 
 		$array = array_merge(array_values($args), array_values($conditonal));
 		array_unshift($array, $statement);
@@ -307,14 +323,15 @@ class Database extends Storage {
 			return;
 		}
 
-		$table = str_replace('#_', $this->args['table_prefix'], $table);
+		$table = $this->addTablePrefix($table);
 
 		$where = array();
 		foreach ($args AS $arg => $value) {
 			$where[] = "`" . $arg . "` = ?";
 		}
 
-		$statement = "DELETE FROM `" . $table . "` WHERE ( " . implode(' AND ', $where) . " )";
+		$statement = "DELETE FROM `" . $table . "` "
+		. "WHERE ( " . implode(' AND ', $where) . " );";
 
 		$array = array_values($args);
 		array_unshift($array, $statement);
@@ -334,7 +351,7 @@ class Database extends Storage {
 			return false;
 
 		if (!$this->resource)
-			return;
+			return NULL;
 
 		if ($this->resource instanceof \PDOStatement) {
 			$row = $this->resource->fetch(\PDO::FETCH_NUM);
