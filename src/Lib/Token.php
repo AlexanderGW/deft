@@ -46,7 +46,7 @@ class Token {
 
 		$hash = self::getHash();
 		$data = null;
-		if( array_key_exists( $hash, $_SESSION ) )
+		if( !empty($_SESSION) && array_key_exists( $hash, $_SESSION ) )
 			$data =& $_SESSION[ $hash ];
 		elseif( array_key_exists( $hash, $_COOKIE ) ) {
 			$data =& $_COOKIE[ $hash ];
