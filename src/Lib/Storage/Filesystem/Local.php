@@ -61,15 +61,19 @@ class Local extends \Deft_Concrete {
 //		$path = $this->makeRelative($path);
 
 		$directories = explode('/', $path);
-		$path = '';
+		$result = '';
 		foreach ($directories as $i => $directory) {
+			if (is_null($directory))
+				continue;
 			if ($i)
-				$path .= '/';
-			$path .= "{$directory}";
-			if (!is_dir($path)) {
-				if (!mkdir($path))
+				$result .= '/';
+			$result .= "{$directory}";
+			if (strlen($result) && !is_dir($result)) {
+				if (!mkdir($result)) {
 					return FALSE;
-				chmod($path, $mode);
+				}
+
+				chmod($result, $mode);
 			}
 		}
 
