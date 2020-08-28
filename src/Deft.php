@@ -105,8 +105,8 @@ class Deft {
 		self::$config = array_merge(array(
 			'config_format'          => 'php',
 			'debug'                  => 0,
-			'directory.lib'          => 'lib',
-			'directory.plugin'       => 'plugin',
+			'directory.lib'          => 'Lib',
+			'directory.plugin'       => 'Plugin',
 			'directory.storage'      => 'storage',
 			'directory.tmp'          => 'tmp',
 			'directory.public'       => 'public',
@@ -596,6 +596,8 @@ class Deft {
 	 */
 	public static function filesystem ($args = []) {
 		$config = self::config();
+
+		/** @returns \Deft\Lib\Storage\Filesystem\Local */
 		return self::storage($args = array_merge(array(
 			'structure' => $config->get('filesystem.type', 'filesystem'),
 			'type' => $config->get('filesystem.type', 'local')
@@ -688,44 +690,53 @@ class Deft {
 	/**
 	 * Capture and return output of a script.
 	 *
-	 * @param null $path
-	 *
-	 * @return bool|mixed|string|void
+	 * @param null $scope
+	 * @param null $hash
 	 */
-	static function capture ($scope = null) {
+	static function capture ($scope = null, $hash = null) {
 		if (!is_string($scope)) {
 			return;
 		}
 
 		$config  = self::config();
-		$hash = $config->get('capture_hash');
+		if (is_null($hash))
+			$hash = $config->get('capture_hash');
+
 		if (is_null($hash)) {
 			$hash = \Deft\Lib\Random::getMd5();
 			$config->set('capture_hash', $hash);
-//			$config->save();
 		}
 
-		${'scope_' . $hash} = \Deft::filter()->exec('beforeCapture', $scope);
-		${'path_' . $hash}  = DEFT_PATH . DS . str_replace('.', DS, ${'scope_' . $hash}) . '.php';
+		${'capture_scope__' . $hash} = strtolower(\Deft::filter()->exec('beforeCapture', $scope));
 
-		if (!file_exists(${'path_' . $hash})) {
+		$path = ${'capture_scope__' . $hash};
+		if (substr($path, 0, 7) === 'plugin.')
+			$path = ucfirst($path);
+
+		$path  = DEFT_PATH . DS . str_replace('.', DS, $path) . '.php';
+
+		if (!file_exists($path)) {
 			return;
 		}
 
-		\Deft::event()->exec('beforeCapture', ${'scope_' . $hash});
+		${'capture_path__' . $hash} = $path;
+		\Deft::event()->exec('beforeCapture',
+			\Deft::event()->exec('beforeCapture__' . $hash, ${'capture_scope__' . $hash})
+		);
 
-		${'start_' . $hash} = \Deft\Lib\Helper::getMicroTime();
+
+		${'capture_start__' . $hash} = \Deft\Lib\Helper::getMicroTime();
 
 		ob_start();
-		include ${'path_' . $hash};
-		${'content_' . $hash} = ob_get_contents();
+		include ${'capture_path__' . $hash};
+		${'capture_content__' . $hash} = ob_get_contents();
 		ob_end_clean();
 
-		self::stack('capture/' . ${'scope_' . $hash}, array(
-			'time' => \Deft\Lib\Helper::getMoment(${'start_' . $hash})
+		self::stack('capture/' . ${'capture_scope__' . $hash}, array(
+			'time' => \Deft\Lib\Helper::getMoment(${'capture_start__' . $hash})
 		));
 
-		return \Deft::filter()->exec('captureContent', ${'content_' . $hash});
+		return \Deft::filter()->exec('captureContent', ${'capture_content__' . $hash});
 	}
 
 	/**

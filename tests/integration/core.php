@@ -59,7 +59,7 @@ class TestDeftIntegrationCore extends \PHPUnit\Framework\TestCase {
 			"The root Deft path does not match"
 		);
 
-		$path = DEFT_ABS_PATH . DS . 'lib';
+		$path = DEFT_ABS_PATH . DS . 'Lib';
 
 		$this->assertEquals(
 			$path,
@@ -75,7 +75,7 @@ class TestDeftIntegrationCore extends \PHPUnit\Framework\TestCase {
 //			"The default Deft 'tmp' path '" . DEFT_TMP_PATH . "' does not match '$path'"
 //		);
 
-		$path = DEFT_ABS_PATH . DS . 'plugin';
+		$path = DEFT_ABS_PATH . DS . 'Plugin';
 
 		$this->assertEquals(
 			$path,
@@ -128,15 +128,6 @@ class TestDeftIntegrationCore extends \PHPUnit\Framework\TestCase {
 			$url_asset,
 			DEFT_ASSET_URL,
 			"The DEFT_ASSET_URL (The URL to Deft public assets) '" . DEFT_ASSET_URL . "' does not match '$url_asset'"
-		);
-
-		// Check the Deft URL for plugins
-		$url_plugin = "{$uri}/plugin/";
-
-		$this->assertEquals(
-			$url_plugin,
-			DEFT_PLUGIN_URL,
-			"The DEFT_PLUGIN_URL (The URL to Deft public assets) '" . DEFT_PLUGIN_URL . "' does not match '$url_plugin'"
 		);
 
 		// Check the Deft route path
