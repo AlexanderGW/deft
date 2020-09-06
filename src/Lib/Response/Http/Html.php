@@ -775,6 +775,9 @@ class Html extends Http {
 				foreach ($hashes as $hash) {
 					$this->links[$hash]['href'] = Sanitize::forText($this->links[$hash]['href']);
 
+					if (strpos($this->links[$hash]['href'], 'plugin/') === 0)
+						$this->links[$hash]['href'] = 'Plugin/' . substr($this->links[$hash]['href'], 7);
+
 					// Add meta..
 					if (
 
@@ -1133,7 +1136,10 @@ class Html extends Http {
 			$scripts = array();
 			foreach ($this->scripts['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
-					$this->links[$hash]['@props']['src'] = array_key_exists('src', $this->scripts[$hash]['@props']) ? Sanitize::forText($this->scripts[$hash]['@props']['src']) : NULL;
+					$this->scripts[$hash]['@props']['src'] = array_key_exists('src', $this->scripts[$hash]['@props']) ? Sanitize::forText($this->scripts[$hash]['@props']['src']) : NULL;
+
+					if (strpos($this->scripts[$hash]['@props']['src'], 'plugin/') === 0)
+						$this->scripts[$hash]['@props']['src'] = 'Plugin/' . substr($this->scripts[$hash]['@props']['src'], 7);
 
 					// Add script..
 					if (
