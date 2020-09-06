@@ -1,14 +1,24 @@
 {
-    "name": "alexandergw/deft",
-    "type": "deft-kernel",
-    "require": {
-      "ext-fileinfo": "*",
-      "ext-gd": "*",
-      "ext-json": "*",
-      "php": ">=7.3"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^8.5",
-        "johnkary/phpunit-speedtrap": "^3.2"
+  "name": "alexandergw/deft",
+  "type": "deft-kernel",
+  "require": {
+    "ext-fileinfo": "*",
+    "ext-gd": "*",
+    "ext-json": "*",
+    "php": ">=5.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^8.5",
+    "johnkary/phpunit-speedtrap": "^3.2"
+  },
+  "autoload": {
+    "classmap": [
+      "src/Deft.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Deft\\Tests\\": "tests/"
     }
+  }
 }

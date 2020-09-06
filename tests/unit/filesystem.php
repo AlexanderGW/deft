@@ -76,7 +76,7 @@ class TestDeftUnitFilesystem extends \PHPUnit\Framework\TestCase {
 
 		$this->assertTrue(
 			$result,
-			"Failed to install filesystem path"
+			"Failed to install filesystem path '{$this->path}'"
 		);
 	}
 
@@ -152,14 +152,6 @@ class TestDeftUnitFilesystem extends \PHPUnit\Framework\TestCase {
 
 		$parent_path = realpath($this->path.'/..');
 
-		// Check file delete returns TRUE
-		$result = \Deft::filesystem()->delete($this->file);
-
-		$this->assertTrue(
-			$result,
-			"Deleting an existing file should return TRUE, instead '$result'"
-		);
-
 		// Check non-recursive directory delete (wth content) returns FALSE
 		$result = \Deft::filesystem()->delete($parent_path, FALSE);
 
@@ -168,12 +160,20 @@ class TestDeftUnitFilesystem extends \PHPUnit\Framework\TestCase {
 			"Attempt to non-recursive remove directory with content, should return FALSE, instead '$result'"
 		);
 
+		// Check file delete returns TRUE
+		$result = \Deft::filesystem()->delete($this->file);
+
+		$this->assertTrue(
+			$result,
+			"Deleting an existing file should return TRUE, instead '$result'"
+		);
+
 		// Check not empty directory non-recursive delete, returns FALSE
 		$result = \Deft::filesystem()->delete($parent_path, TRUE);
 
 		$this->assertTrue(
 			$result,
-			"Attempt to recursive remove directory with content, should return TRUE, instead $result"
+			"Attempt to recursive remove directory with content, should return TRUE, instead '$result'"
 		);
 	}
 }

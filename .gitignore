@@ -1,2 +1,3 @@
-puphpet/config-custom.yaml
-public/asset
+.idea
+vendor
+src/public/asset
