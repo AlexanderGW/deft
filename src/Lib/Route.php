@@ -96,14 +96,46 @@ class Route extends \Deft_Concrete {
 		$start = Helper::getMicroTime();
 
 		// Process requested route
-		self::$route = \Deft::route()->get( DEFT_ROUTE );
+		self::$route = self::match(DEFT_ROUTE);
+
+		// Class event - Is JSON route?
+		// TODO: Make this overridable, move into events?
+		if (self::$route['class'] == 'json')
+			\Deft::config()->set('response.type', 'http.json');
+
+		// Route callback
+		if ( is_callable( self::$route[ 'callback'  ] ) )
+			call_user_func( self::$route[ 'callback' ] );
+
+		// Null? Throw a 404 for non-CLI
+		elseif ( \Deft::request()->isCli() === false )
+			\Deft::response()->status( \Deft::config()->get('route.parse.response.status.null', 404) );
+
+		// Logging
+		\Deft::stack( 'route/' . self::$route[ 'name' ], array_merge(
+			[
+				'time' => Helper::getMoment($start)
+			],
+			self::$route
+		) );
+
+		return self::$parsed = true;
+	}
+
+	/**
+	 * @param null $path
+	 */
+	public static function match ($string = null) {
+
+		// Process requested route
+		$route = \Deft::route()->get( $string );
 
 		// No match
-		if ( self::$route === FALSE and strlen( DEFT_ROUTE ) ) {
+		if ( $route === FALSE and strlen( $string ) ) {
 			$routes  = \Deft::route()->getRules();
-			$divider = \Deft::config()->get( 'url_separator', '/' );
+			$divider = self::getSeparator();
 
-			$request = explode( $divider, DEFT_ROUTE );
+			$request = explode( $divider, $string );
 			array_pop( $request );
 			$max = count( $request );
 			//$request = implode( $divider, $request );
@@ -111,7 +143,7 @@ class Route extends \Deft_Concrete {
 			foreach ( $routes as $path => $args ) {
 				if (
 
-					// Check for potentials with the same depth (path dividers), which also has placeholder(s)
+					// Check for potentials within the same depth (by number of path dividers), which also has placeholder(s)
 					substr_count( $path, $divider ) == $max
 
 					// Has placeholders
@@ -143,7 +175,7 @@ class Route extends \Deft_Concrete {
 							$args[ 'data' ][ $keys[ 1 ][ $i ] ] = $match;
 						}
 
-						self::$route = array_merge(
+						$route = array_merge(
 							$args,
 							array(
 								'path'    => $path,
@@ -158,11 +190,11 @@ class Route extends \Deft_Concrete {
 		}
 
 		// Apply route environment
-		if ( is_array( self::$route[ 'data' ] ) ) {
-			foreach ( self::$route[ 'data' ] as $key => $value ) {
+		if ( is_array( $route[ 'data' ] ) ) {
+			foreach ( $route[ 'data' ] as $key => $value ) {
 				$key                           = Sanitize::forText( $key );
 				$value                         = Sanitize::forText( $value );
-				self::$route[ 'data' ][ $key ] = $value;
+				$route[ 'data' ][ $key ] = $value;
 			}
 		}
 
@@ -171,22 +203,16 @@ class Route extends \Deft_Concrete {
 			call_user_func( self::$route[ 'callback' ] );
 		}
 
-		// Logging
-		\Deft::stack( 'route/' . self::$route[ 'name' ], array(
-			'time'     => Helper::getMoment( $start ),
-			'name'     => self::$route[ 'name' ],
-			'request'  => DEFT_ROUTE,
-			'path'     => array_key_exists('path', self::$route) ? self::$route[ 'path' ] : '',
-			'pattern'  => self::$route[ 'pattern' ],
-			'data'     => self::$route[ 'data' ],
-			'callback' => self::$route[ 'callback' ]
-		) );
-
-		if ( self::$route === null ) {
-			\Deft::response()->status( 404 );
-		}
-
-		self::$parsed = true;
+		// Return match
+		return array(
+			'name'     => $route[ 'name' ],
+			'class'    => $route[ 'class' ],
+			'request'  => $string,
+			'path'     => array_key_exists('path', $route) ? $route[ 'path' ] : '',
+			'pattern'  => $route[ 'pattern' ],
+			'data'     => $route[ 'data' ],
+			'callback' => $route[ 'callback' ]
+		);
 	}
 
 	/**
