@@ -25,24 +25,39 @@
 
 use Deft\Lib\Http;
 
-Deft::response()->prependTitle(__('JSON API request'));
+$res = Deft::response();
+$res->prependTitle(__('JSON tools'));
+$res->addScript( 'plugin/example/asset/js/request.js' );
 
-Deft::response()->addScript( 'plugin/example/asset/js/request.js' );
+$form = Deft::form('request');
 
-$form = Deft::form('example')
-	->field('textarea')
-	->label('Response')
-	->id('json_test')
-	->description('Output of the request')
+$form->field('textarea.url')
+     ->label('Raw JSON URL')
+     ->readOnly(true)
+     ->cols(45)
+     ->rows(2)
+     ->value(\Deft::route()->toUrl('abs.example.json'));
+
+$form->field('textarea.req')
+	->label('Or a JS request to DOM')
 	->readOnly(true)
-	->cols(40)
-	->rows(20);
+	->cols(45)
+	->rows(2)
+->value("Deft.get('/example/json').asText('#response')");
+
+$form->field('textarea.res')
+     ->label('The #response field')
+     ->id('response')
+     ->readOnly(true)
+     ->cols(45)
+     ->rows(2);
 
 ?>
 <div>
-	<div>
-		<h1><?php ___('Deft &ndash; The JSON API') ?></h1>
-		<p><a href="./">Return to previous page.</a><br>A brief example of the JSON API provided with Deft. Requested data using <code>Deft.get()</code> (an HTTP GET wrapper for <code>Deft.request()</code>), for a response created with <code>Deft::response()-output()</code></p>
-	</div>
-	<?php echo $form->content() ?>
+	<h1><?php ___('Deft Example') ?></h1>
+	<h2><?php ___('JSON tools') ?></h2>
+	<p>
+		<a href="<?php echo DEFT_URL ?>">Return to previous page.</a><br>
+		Basic example of the JSON API. JS request and inject response as plain text into DOM. Routed by <code>Deft::route()->http()</code></p>
 </div>
+<?php echo $form;

@@ -23,7 +23,7 @@
 
 use Deft\Lib\Token;
 
-\Deft::response()->prependTitle(__('User environment'));
+\Deft::response()->prependTitle(__('Form API'));
 
 /**
  * POST of locale, negotiate with available locales, store in token, and reload page
@@ -33,10 +33,8 @@ $locale = \Deft::request()->post('locale');
 if ($locale) {
 	$code = \Deft::locale()->negotiate($locale);
 	Token::set('locale', $code);
-	Token::saveCookie();
-//	\Deft::response()->location('/user');
-} else {
-//	var_dump(Token::get('locale'), \Deft::locale()->getLocale());
+	Token::save();
+	\Deft::response()->location('/form');
 }
 
 /*
@@ -45,7 +43,6 @@ if ($locale) {
  */
 $config = \Deft::config();
 $locales = $config->get('locales');
-
 if (!$locales) {
 	$locales = array('es-ES');
 	$config->set('locales', $locales);
@@ -53,28 +50,60 @@ if (!$locales) {
 }
 array_unshift($locales, 'en-GB');
 
+$options = array_combine($locales, $locales);
+
 /**
  * Build form to set locale environment
  */
-$form = \Deft::form('user_locale');
+$form = \Deft::form('example.form');
 
 $form->validate(['', '']);
 
 $form->field('input.radio.locale')
-     ->label(__('Language'))
-     ->description(__('Select a locale then click Submit to save your preferences.'))
-     ->options(array_combine($locales, $locales))
+     ->label(__('Radios'))
+     ->description(__('Descriptions and labels are WCAG ready with ARIA properties'))
+     ->options($options)
      ->value(\Deft::locale()->getLocale());
+
+$form->field('input.checkbox.locale2')
+     ->label(__('Checkboxes'))
+     ->options($options)
+     ->value(array_values($options));
+
+$form->field('input.text')
+     ->label(__('Input (text)'))
+     ->value('Lorem ipsum dolor sit amet');
+
+$form->field('input.color')
+     ->label(__('Input (color)'))
+     ->value('#feed01');
+
+$form->field('input.number')
+     ->label(__('Input (number)'))
+     ->value(5);
+
+$form->field('input.range')
+     ->label(__('Input (range)'))
+     ->scales(0, 1, 10)
+     ->value(5);
+
+$form->field('select')
+     ->label(__('Select'))
+     ->options($options)
+     ->value(array_values($options));
+
+$form->field('textarea')
+     ->label(__('Textarea'))
+     ->value('Lorem ipsum dolor sit amet.')
+     ->cols(30);
 
 $form->field('input.submit')->value(__('Submit'));
 
 ?>
 <div>
-	<h1><?php ___('Deft example') ?></h1>
-	<h2><?php ___('User environment') ?></h2>
-	<p><a href="<?php echo DEFT_URL ?>">Return to previous page.</a><br>Here is a basic form created with <code>Deft::form()</code>
-		to set the user's locale/language (information is stored and retrieved from a PHP session and browser
-		cookie using the <code>Deft\Lib\Token</code> class). This script is located at
-		<code>~/plugin/example/page/user.php</code></p>
+	<h1><?php ___('Deft Example') ?></h1>
+	<h2><?php ___('Form API') ?></h2>
+	<p><a href="<?php echo DEFT_URL ?>">Return to previous page.</a><br>Here is a form created with <code>Deft::form()</code>
+		This script is located at <code>~/plugin/example/page/form.php</code></p>
 </div>
 <?php echo $form;
