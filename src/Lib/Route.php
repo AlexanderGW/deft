@@ -230,6 +230,55 @@ class Route extends \Deft_Concrete {
 	}
 
 	/**
+	 * @return string
+	 */
+	public static function toUrl($name, $params = null) {
+		$absolute = false;
+		if (substr($name, 0, 4) === 'abs.') {
+			$absolute = true;
+			$name = substr($name, 4);
+		}
+
+		$rules = self::getRules();
+		foreach ($rules as $path => $rule) {
+			if ($rule['name'] === $name) {
+				if (!array_key_exists('pattern', $rule))
+					$match = true;
+				else {
+					$i = 0;
+					foreach (array_keys($rule['pattern']) as $name) {
+						$search = '[' . $name . ']';
+						if (strpos($path, $search) !== false && (is_string($params[$name]) || is_numeric($params[$name]))) {
+							$path = str_replace(
+								$search,
+								$params[$name],
+								$path
+							);
+							$i++;
+						}
+					}
+					if ($i === count($rule['pattern']))
+						$match = true;
+				}
+
+				if ($match)
+					return ( $absolute ? DEFT_URL : '' ) . self::getSeparator() . $path;
+			}
+		}
+		if (array_key_exists($name, $rules))
+
+
+		return null;
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function getSeparator() {
+		return \Deft::config()->get( 'url_separator', '/' );
+	}
+
+	/**
 	 * @param null $path
 	 * @param array $args
 	 */
