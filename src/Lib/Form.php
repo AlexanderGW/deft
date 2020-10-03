@@ -588,9 +588,13 @@ class formField {
 							         'aria-labelledby' => $option_label_id
 						         ) + $this->props;
 
-								// Is option the current state value?
-								if ($prop_value and $value == $prop_value) {
-									$props['checked'] = true;
+								// Is option a current state value?
+								if (!is_null($prop_value)) {
+									if (!is_array($prop_value) && $value == $prop_value) {
+										$props['checked'] = true;
+									} elseif (is_array($prop_value) && in_array($value, $prop_value)) {
+										$props['checked'] = true;
+									}
 								}
 
 								// Control element
