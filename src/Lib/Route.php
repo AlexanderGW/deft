@@ -313,6 +313,17 @@ class Route extends \Deft_Concrete {
 
 	/**
 	 * @param null $path
+	 * @param array $args
+	 */
+	public function api( $name = null, $path = null, $args = array(), $callback = null ) {
+		if ( is_null( $path ) )
+			return null;
+
+		return self::add($name, $path, $args, $callback, 'http', 'json');
+	}
+
+	/**
+	 * @param null $path
 	 */
 	public function get( $path = null, $group = null ) {
 		if ( is_null( $path ) )
