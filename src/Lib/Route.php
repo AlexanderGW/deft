@@ -280,6 +280,7 @@ class Route extends \Deft_Concrete {
 		// Store rule
 		self::$rules[$group][ $path ] = array(
 			'name'     => $name,
+			'class'    => $class,
 			'data'     => $args,
 			'pattern'  => $patterns,
 			'callback' => ( is_array( $callback ) ? $callback[ 0 ] . '::' . $callback[ 1 ] : $callback )
