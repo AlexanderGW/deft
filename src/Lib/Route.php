@@ -72,17 +72,21 @@ class Route extends \Deft_Concrete {
 //		}
 
 		// Load config based routes
-		$config = \Deft::config( 'config.route' );
-		if ( ! $config->isEmpty() ) {
-			$routes = $config->get( 'routes', array() );
-			if ( count( $routes ) ) {
-				foreach ( $routes as $path => $rule ) {
-					Route::add( $path, $rule );
-				}
+		$routes = self::load();
+		if ( count( $routes ) ) {
+			foreach ( $routes as $path => $rule ) {
+				Route::add( $path, $rule );
 			}
 		}
 
-		self::$initialized = true;
+		return self::$initialized = true;
+	}
+
+	/**
+	 *
+	 */
+	public static function load() {
+		return \Deft::config( 'config.route' )->get( 'routes', array() );
 	}
 
 	/**
