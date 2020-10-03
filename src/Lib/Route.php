@@ -261,7 +261,6 @@ class Route extends \Deft_Concrete {
 		// Process route arguments
 		$patterns = array();
 		if ( is_array( $args ) and count( $args ) ) {
-			$errors = array();
 
 			// Test for route placeholders
 			preg_match_all( '#\[([a-z0-9]+)\]#', $path, $matches );
@@ -269,17 +268,11 @@ class Route extends \Deft_Concrete {
 				foreach ( $matches[ 1 ] as $label ) {
 
 					// Placeholder pattern not found in route rule list
-					if ( ! array_key_exists( $label, $args ) ) {
-						$errors[] = $label;
-					} else {
-						$patterns[ $label ] = $args[ $label ];
-						unset( $args[ $label ] );
-					}
-				}
+					if ( ! array_key_exists( $label, $args ) )
+						$args[$label] = '[\s\S]+';
 
-				// Throw route rule pattern errors
-				if ( count( $errors ) ) {
-					\Deft::error( 'Route rule "%1$s" missing required parameter(s): %2$s', $path, implode( ', ', $errors ) );
+					$patterns[ $label ] = $args[ $label ];
+					unset( $args[ $label ] );
 				}
 			}
 		}
