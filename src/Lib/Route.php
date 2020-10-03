@@ -93,9 +93,8 @@ class Route extends \Deft_Concrete {
 	 *
 	 */
 	public static function parse() {
-		if ( self::$parsed ) {
-			return;
-		}
+		if ( self::$parsed )
+			return null;
 
 		$start = Helper::getMicroTime();
 
@@ -142,7 +141,6 @@ class Route extends \Deft_Concrete {
 			$request = explode( $divider, $string );
 			array_pop( $request );
 			$max = count( $request );
-			//$request = implode( $divider, $request );
 
 			foreach ( $routes as $path => $args ) {
 				if (
@@ -152,11 +150,11 @@ class Route extends \Deft_Concrete {
 
 					// Has placeholders
 					and strpos( $path, '[' ) !== false
-					and strpos( $path, ']' ) !== false
+					    and strpos( $path, ']' ) > 1
 
-				    // Has placeholder patterns
-				    and array_key_exists( 'pattern', $args )
-			        and count( $args['pattern'] )
+					        // Has placeholder patterns
+					        and array_key_exists( 'pattern', $args )
+					            and count( $args['pattern'] )
 				) {
 
 					// Build pattern
@@ -170,7 +168,7 @@ class Route extends \Deft_Concrete {
 					}
 
 					// Run pattern
-					preg_match( $path_pattern, DEFT_ROUTE, $matches );
+					preg_match( $path_pattern, $string, $matches );
 					if ( count( $matches ) ) {
 						preg_match_all( '#\[([a-z0-9]+)\]#', $path, $keys );
 						array_shift( $matches );
@@ -200,11 +198,6 @@ class Route extends \Deft_Concrete {
 				$value                         = Sanitize::forText( $value );
 				$route[ 'data' ][ $key ] = $value;
 			}
-		}
-
-		// Route callback
-		if ( is_callable( self::$route[ 'callback' ] ) ) {
-			call_user_func( self::$route[ 'callback' ] );
 		}
 
 		// Return match
@@ -286,7 +279,7 @@ class Route extends \Deft_Concrete {
 	 * @param null $path
 	 * @param array $args
 	 */
-	public function add( $name = null, $path = null, $args = array(), $callback = null, $group = null ) {
+	public static function add( $name = null, $path = null, $args = array(), $callback = null, $group = null, $class = null ) {
 
 		// TODO: Need to split path by separator
 
@@ -302,7 +295,7 @@ class Route extends \Deft_Concrete {
 			$group = self::$group;
 		}
 
-		$sep = \Deft::config()->get( 'url_separator', '/' );
+		$sep = self::getSeparator();
 		if ( strpos( $path, $sep ) === 0 ) {
 			$path = substr( $path, strlen( $sep ) );
 		}
@@ -383,7 +376,7 @@ class Route extends \Deft_Concrete {
 			return NULL;
 		if (is_null($group))
 			$group = self::$group;
-		$sep = \Deft::config()->get( 'url_separator', '/' );
+		$sep = self::getSeparator();
 		if ( strpos( $path, $sep ) === 0 ) {
 			$path = substr( $path, strlen( $sep ) );
 		}
@@ -407,7 +400,7 @@ class Route extends \Deft_Concrete {
 	 * @param null $path
 	 */
 	public function remove( $path = null, $group = null ) {
-		if ( strpos( $path, '/' ) === 0 ) {
+		if ( strpos( $path, self::getSeparator() ) === 0 ) {
 			$path = substr( $path, 1 );
 		}
 		if (is_null($group))
@@ -441,7 +434,7 @@ class Route extends \Deft_Concrete {
 	}
 
 	/**
-	 * Syntactic suger
+	 * Syntactic sugar
 	 *
 	 * @return mixed|object|void
 	 */
