@@ -20,15 +20,19 @@ body {
 	> main {
 		background-color: #000;
 		color: #fff;
-		max-width: 50em;
-		margin: 10em auto;
+		max-width: 50rem;
+		margin: 4rem 1rem;
+		@media (min-width: 860px) {
+			margin: 10rem auto;
+		}
 		> * {
 			padding: 1.5em;
 			> * {
 				padding: 0 .75rem;
 			}
 			> p {
-				padding: 1em;
+				font-size: 1.25em;
+				line-height: 1.5;
 			}
 			a {
 				color: #ffce1b;
@@ -42,7 +46,9 @@ body {
 }
 
 .pad-l1 {
-	padding-left: 2em;
+	@media (min-width: 860px) {
+		padding-left: 2em;
+	}
 }
 
 .grid {
@@ -54,43 +60,62 @@ body {
 		vertical-align: top;
 		@extend %font-root;
 		width: 100%;
-		&.col-9 {
-			width: 75%;
-		}
-		&.col-6 {
-			width: 50%;
-		}
-		&.col-3 {
-			width: 25%;
+		@media (min-width: 860px) {
+			&.col-9 {
+				width: 75%;
+			}
+			&.col-6 {
+				width: 50%;
+			}
+			&.col-3 {
+				width: 25%;
+			}
 		}
 	}
 }
 
+$logo1: #333;
+$logo2: #333;
+
 .logo {
 	box-sizing: border-box;
 	display: inline-block;
-	border: .25em solid #fff;
-	padding: 2em 1em 1em;
+	border: .5rem solid #fff;
+	border-radius: 2rem 2rem;
+	padding: 2.25rem 1rem 1rem;
 	width: 172px;
 	height: 172px;
 	line-height: 1;
+	text-align: center;
 	div:first-child {
-		font-size: 4em;
+		font-size: 3.5rem;
+		font-weight: 700;
 	}
 	div:last-child {
 		text-align: center;
 		text-transform: uppercase;
 		font-weight: 700;
-		letter-spacing: .125em;
-		margin-top: 1.25em;
+		margin-top: 1.5rem;
 	}
 }
 
 h1 {
-	margin: 0 0 .5em 0;
+	margin: 1rem 0;
 	padding: 0;
 	font-size: 2.5em;
 	font-weight: 400;
+	@media (min-width: 860px) {
+		margin-top: 0;
+	}
+}
+
+code {
+	background-color: #ddd;
+	border-radius: .25em;
+	font-size: .9em;
+	font-weight: 700;
+	color: black;
+	padding: .125em .125em .125em .25em;
 }
 
 .scr-read {
@@ -100,13 +125,35 @@ h1 {
 	top: -9999em;
 }
 
-.sy-field {
+form .field {
 	padding: .75rem .75rem;
+	&:first-child {
+		label:first-child {
+			margin-top: 0;
+		}
+	}
 	.control {
 		.option {
 			position: relative;
 			display: inline-block;
 			padding: 0 .5rem 0 2rem;
+			> label {
+				display: inline-block;
+				float: left;
+				cursor: pointer;
+				&:before {
+					content: '';
+					position: absolute;
+					top: 0;
+					left: 0;
+					width: 1.5rem;
+					height: 1.5rem;
+					border: .175rem solid #000;
+					background-color: #fff;
+					box-sizing: border-box;
+					box-shadow: 0 0 0 .2rem #666;
+				}
+			}
 			> input {
 				display: inline-block;
 				cursor: pointer;
@@ -119,9 +166,18 @@ h1 {
 				opacity: 0;
 				float: left;
 				z-index: 1;
+				&[type="radio"] + label {
+					&:before {
+						border-radius: 50%;
+					}
+					&:after {
+						font-size: 2rem;
+						border-radius: 50%;
+					}
+				}
 				&:checked + label {
 					&:before {
-						box-shadow: 0 0 0 .2rem #ffce1b;
+						box-shadow: 0 0 0 .25rem #1bafff;
 					}
 					&:after {
 						content: '';
@@ -134,29 +190,22 @@ h1 {
 						left: .5rem;
 						width: .5rem;
 						height: .5rem;
-						border-radius: 50%;
 						background-color: #fff;
-						border: .25rem solid #333;
+						border: .25rem solid #000;
 					}
 				}
-				&:focus, &:hover {
-					outline: .25rem solid yellow;
+				&:focus + label {
+					&:before {
+						box-shadow: 0 0 0 .2rem #ffce1b;
+					}
 				}
-			}
-			> label {
-				display: inline-block;
-				float: left;
-				&:before {
-					content: '';
-					position: absolute;
-					top: 0;
-					left: 0;
-					width: 1.5rem;
-					height: 1.5rem;
-					border-radius: 50%;
-					border: .175rem solid #333;
-					background-color: #fff;
-					box-sizing: border-box;
+				&:hover + label {
+					&:before {
+						box-shadow: 0 0 0 .2rem #00ff7d;
+					}
+					&:after {
+						border: .25rem solid #000;
+					}
 				}
 			}
 		}
@@ -165,43 +214,89 @@ h1 {
 		background-color: rgba(0, 0, 0, .05);
 	}
 	&:not(:first-child) {
-		border-top: .125rem solid rgba(0, 0, 0, .1);
+		border-top: .125em solid rgba(0, 0, 0, .1);
 	}
 	> label {
+		display: block;
 		position: relative;
-		margin-top: 1rem;
+		margin: .5rem 0 .75rem;
 		font-weight: bold;
+		font-size: 1.25rem;
 	}
 	> label + p {
-		margin-bottom: .5rem;
+		margin: 0 0 .75rem;
 		font-size: 1rem;
 	}
 	input, textarea, select {
-		&:not([type="submit"]):not([type="color"]) {
-			border: .175rem solid #555;
+		min-width: 12rem;
+		border: .175rem solid #fff;
+		&:not([type="range"]):not([type="submit"]):not([type="color"]) {
 			padding: .5rem;
 		}
 		font-size: 1rem;
 		box-sizing: border-box;
-		&:hover, &:focus {
+		max-width: 100%;
+		outline-offset: 0;
+		&:focus {
+			border: .175rem solid #000;
 			outline: .25rem solid #ffce1b;
-			outline-offset: 0;
 		}
-		&[type="file"], select {
+		&:hover {
+			border: .175rem solid #000;
+			outline: .25rem solid #00ff7d;
+		}
+		&[type="color"] {
+			min-width: 5rem;
+			padding: 0;
+		}
+		&[type="file"] {
 			font-family: 'Raleway', sans-serif;
+		}
+		&[type="range"] {
+			border: 0;
+			&:focus, &:hover {
+				border: 0;
+				outline: none;
+			}
+		}
+		&:not([type="range"]) {
+			background-color: #fff;
 		}
 	}
 	input[type="submit"] {
-		font-family: 'Raleway', sans-serif;
-		font-size: 1.25rem;
-		border: none;
-		background-color: #333;
-		color: #fff;
-		padding: .5rem 1.5rem;
-		box-sizing: border-box;
-		&:hover {
-			background-color: #007dff;
-		}
+		min-width: 8rem;
+		@extend .button;
+	}
+}
+
+.buttons {
+	padding: 1em 0;
+	.button {
+		margin: .5em .5em .5em 0;
+	}
+}
+
+.button {
+	font-family: 'Raleway', sans-serif;
+	font-size: 1.25rem;
+	font-weight: 700;
+	border: none;
+	background-color: #333;
+	color: #fff;
+	padding: .5rem 1.5rem;
+	box-sizing: border-box;
+	cursor: pointer;
+	outline-offset: 0;
+	text-decoration: none;
+	&:focus {
+		background-color: #ffce1b;
+		outline: .25rem solid #ffce1b;
+		color: #000;
+	}
+	&:hover {
+		background-color: #00ff7d;
+		outline: .25rem solid #00ff7d;
+		color: #000;
 	}
 }
 
@@ -223,4 +318,52 @@ p {
 			font-size: 1.25rem;
 		}
 	}
+}
+
+
+
+
+
+
+
+/* The slider itself */
+input[type="range"] {
+	-webkit-appearance: none;  /* Override default CSS styles */
+	appearance: none;
+	max-width: 15rem;
+	height: .25rem; /* Specified height */
+	background: #444; /* Grey background */
+	outline: none; /* Remove outline */
+	-webkit-transition: .2s; /* 0.2 seconds transition on hover */
+	transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+input[type="range"]:focus {
+	background: #ffce1b;
+}
+
+/* Mouse-over effects */
+input[type="range"]:hover {
+	background: #00ff7d;
+}
+
+%thumb {
+	-webkit-appearance: none; /* Override default look */
+	appearance: none;
+	width: 1rem; /* Set a specific slider handle width */
+	height: 2rem; /* Slider handle height */
+	background: #fff; /* Green background */
+	cursor: pointer; /* Cursor on hover */
+	border: .25rem solid #000;
+	border-radius: 0;
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+input[type="range"]::-webkit-slider-thumb {
+	@extend %thumb;
+}
+
+input[type="range"]::-moz-range-thumb {
+	@extend %thumb;
 }
