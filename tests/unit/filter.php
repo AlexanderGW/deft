@@ -29,7 +29,7 @@
  * @group unit.filter
  */
 
-class TestDeftUnitFilter extends \PHPUnit\Framework\TestCase {
+class DeftTestUnitFilter extends \PHPUnit\Framework\TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();

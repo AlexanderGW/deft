@@ -29,7 +29,7 @@
  * @group unit.response.http.json
  */
 
-class TestDeftUnitResponseHttpJson extends \PHPUnit\Framework\TestCase {
+class DeftTestUnitResponseHttpJson extends \PHPUnit\Framework\TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 

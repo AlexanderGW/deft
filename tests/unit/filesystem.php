@@ -29,7 +29,7 @@
  * @group unit.filesystem
  */
 
-class TestDeftUnitFilesystem extends \PHPUnit\Framework\TestCase {
+class DeftTestUnitFilesystem extends \PHPUnit\Framework\TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();

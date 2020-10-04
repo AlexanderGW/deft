@@ -29,7 +29,7 @@
  * @group unit.deft
  */
 
-class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
+class DeftTestUnitCore extends \PHPUnit\Framework\TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();

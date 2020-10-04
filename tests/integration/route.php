@@ -28,7 +28,7 @@
  *
  * @group integration.route
  */
-class TestDeftIntegrationRoute extends \PHPUnit\Framework\TestCase {
+class DeftTestIntegrationRoute extends \PHPUnit\Framework\TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 	}

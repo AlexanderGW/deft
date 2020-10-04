@@ -28,7 +28,7 @@
  *
  * @group integration.deft
  */
-class TestDeftIntegrationCore extends \PHPUnit\Framework\TestCase {
+class DeftTestIntegrationCore extends \PHPUnit\Framework\TestCase {
 	private $output = NULL;
 
 	protected function setUp(): void {
