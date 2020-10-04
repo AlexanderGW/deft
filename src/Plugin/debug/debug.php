@@ -54,7 +54,8 @@ class Debug extends Plugin {
 		$res = \Deft::response();
 		if ($res->type === 'http.html') {
 			$hash = \Deft\Plugin\Debug::getHash();
-			$res->addScriptContent("var Deft = Deft || {}; Deft.debugHash = '{$hash}';");
+			$debug = intval(\Deft::config()->get('debug', 0));
+			$res->addScriptContent("var Deft = Deft || {}; Deft.DEBUG = {$debug}; Deft.debugHash = '{$hash}';");
 			$res->addScript('plugin/debug/asset/debug.js');
 			$res->addStyle('plugin/debug/asset/debug.css');
 		}
