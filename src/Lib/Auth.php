@@ -21,9 +21,9 @@
  * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO: send to a wrapper function for the Deft payloads stuff
-echo json_encode([
-	'deft' => Deft::VERSION,
-	'querySelector' => 'textarea#json_test',
-	'data' => "[['time' => " . \Deft\Lib\Sanitize::forHtml(time()) . "],['FOO' => 'BAR'], [['baz' => 'qux']]]"
-]);
+namespace Deft\Lib;
+
+
+class Auth extends \Deft_Concrete {
+
+}
