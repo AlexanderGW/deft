@@ -564,7 +564,8 @@ class formField {
 
 							// Remove value prop
 							$prop_value = null;
-							if ($prop_value = $this->prop('value')) {
+							if (array_key_exists('value', $this->props)) {
+								$prop_value = $this->prop('value');
 								unset($this->props['value']);
 							}
 
@@ -821,12 +822,13 @@ class formField {
 			'@markup' => '%1$s%2$s%3$s',
 			'@props'  => array(
 				'class' => array(
-					'sy-field',
+					'deft',
+					'field',
 					$this->prop('type'),
 					$this->prop('name')
 				)
 			)
-		), 'form.field..template');
+		), 'form.field.template');
 		if (!empty($template)) {
 			return sprintf($template, $label, $description, $elements);
 		} else {
