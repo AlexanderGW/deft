@@ -17,6 +17,7 @@
             <file>tests/integration/core.php</file>
             <file>tests/integration/event.php</file>
             <file>tests/integration/filter.php</file>
+            <file>tests/integration/route.php</file>
         </testsuite>
         <!--<testsuite name="Selenium Test Suite">
             <directory>../tests/selenium</directory>
