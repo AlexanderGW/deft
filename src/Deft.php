@@ -630,9 +630,9 @@ class Deft {
 		}
 		$config = self::config();
 
-		$secret = $config->get('secret');
+		$secret = $config->get('encode.secret');
 		if (empty($secret)) {
-			$config->set('secret', str_shuffle(\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS));
+			$config->set('encode.secret', str_shuffle(\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS));
 			$config->save();
 		}
 
@@ -655,7 +655,7 @@ class Deft {
 			return;
 		}
 
-		$secret = self::config()->get('secret');
+		$secret = self::config()->get('encode.secret');
 		if (!$secret) {
 			return;
 		}
