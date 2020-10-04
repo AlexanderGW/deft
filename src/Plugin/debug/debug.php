@@ -34,7 +34,7 @@ class Debug extends Plugin {
 
 	public static function init () {
 		\Deft::route()->http('debug', 'debug', null, '\Deft\Plugin\Debug::returnSetting');
-		\Deft::route()->http('debug.request', 'debug/request/[hash]', array(
+		\Deft::route()->api('debug.request', 'debug/request/[hash]', array(
 			'hash' => '[0-9a-z]{32}'
 		), '\Deft\Plugin\Debug::returnRequest');
 
@@ -116,15 +116,15 @@ class Debug extends Plugin {
 		$res->appendBody($form);
 	}
 
+	/**
+	 * Buffer the content
+	 */
 	public static function returnRequest() {
-
-		// Set response output to JSON
-		\Deft::config()->set('response.type', 'http.json');
-
-		$content = \Deft::filesystem()->read(self::getPath() . DS . \Deft::route()->getParam('hash') . '.json');
-
-		// Buffer the content
-		\Deft::response()->buffer($content);
+		\Deft::response()->buffer(
+			\Deft::filesystem()->read(
+				self::getPath() . DS . \Deft::route()->getParam('hash') . '.json'
+			)
+		);
 	}
 
 	public static function shutdown() {
