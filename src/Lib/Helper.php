@@ -219,4 +219,26 @@ class Helper {
 
 		return $bytes;
 	}
+
+	/**
+	 * Similar to explode() except that it prefixes each previous level
+	 * @param null $scope
+	 *
+	 * @return array
+	 */
+	public static function explodeLevel($scope = null, $delimiter = '.') {
+		$array = [];
+		if (is_string($scope) && is_string($delimiter)) {
+			if (strpos($scope, $delimiter)) {
+				while ($offset < strlen($scope) && ($pos = strpos($scope, $delimiter, $offset)) !== false) {
+					$value = substr($scope, 0, $pos);
+					$array[] = $value;
+					$offset += ($pos+1);
+				}
+			} else
+				$array[] = $scope;
+		}
+
+		return $array;
+	}
 }

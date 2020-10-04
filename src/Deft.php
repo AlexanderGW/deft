@@ -420,23 +420,10 @@ class Deft {
 		// First time calls may need to import library
 		if (!count($log)) {
 
-
 			// Import if not already
 			if (!class_exists($class)) {
-				$offset = 0;
-				$array = [];
-				if (strpos($scope, '.')) {
-					while ($offset < strlen($scope) && ($pos = strpos($scope, '.', $offset)) !== false) {
-						$value = substr($scope, 0, $pos);
-						//if ($value !== 'lib')
-							$array[] = $value;
-						$offset += ($pos+1);
-					}
-				}
-
-				//if ($value !== 'lib')
-					$array[] = $scope;
-
+				$array = \Deft\Lib\Helper::explodeLevel($scope);
+				$array[] = $scope;
 				$errors = call_user_func_array([__CLASS__, 'import'], $array);
 				if (count($errors)) {
 					\Deft::error('Failed to import and instantiate: %1$s', implode(', ', $errors));

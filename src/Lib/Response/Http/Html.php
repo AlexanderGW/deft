@@ -1114,15 +1114,35 @@ class Html extends Http {
 	/**
 	 * @param null $content
 	 */
-	public function prependBody ($content = null) {
-		array_unshift($this->body, $content);
+	public function prependBody ($content = null, $scope = null) {
+		$pos = &$this->body;
+		if (is_string($scope)) {
+			$items = \Deft\Lib\Helper::explodeLevel($scope);
+			foreach ($items as $item) {
+				if (!array_key_exists($item, $pos))
+					$pos[$item] = [];
+				$pos = &$pos[$item];
+			}
+		}
+
+		array_unshift($pos, $content);
 	}
 
 	/**
 	 * @param null $content
 	 */
-	public function appendBody ($content = null) {
-		array_push($this->body, $content);
+	public function appendBody ($content = null, $scope = null) {
+		$pos = &$this->body;
+		if (is_string($scope)) {
+			$items = \Deft\Lib\Helper::explodeLevel($scope);
+			foreach ($items as $item) {
+				if (!array_key_exists($item, $pos))
+					$pos[$item] = [];
+				$pos = &$pos[$item];
+			}
+		}
+
+		array_push($pos, $content);
 	}
 
 	/**

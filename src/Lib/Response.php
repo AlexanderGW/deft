@@ -56,8 +56,18 @@ class Response extends \Deft_Concrete {
 	 *
 	 * @return string
 	 */
-	public function buffer($buffer = NULL) {
-		$this->buffer = $buffer;
+	public function buffer ($buffer = null, $scope = null) {
+		$pos = &$this->buffer;
+		if (is_string($scope)) {
+			$items = \Deft\Lib\Helper::explodeLevel($scope);
+			foreach ($items as $item) {
+				if (!array_key_exists($item, $pos))
+					$pos[$item] = [];
+				$pos = &$pos[$item];
+			}
+		}
+
+		array_push($pos, $buffer);
 		return TRUE;
 	}
 
