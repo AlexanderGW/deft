@@ -21,37 +21,72 @@
 
 'use strict';
 
+var _deftObjectResponse = {
+	xhr: null,
+	atReadyState4: {},
+	asText: function(querySelector) {
+		if (this.xhr.readyState === 1)
+			this.atReadyState4['asText'] = querySelector;
+		if (this.xhr.readyState === 4) {
+			document.querySelector(querySelector).innerText = this.xhr.responseText;
+		}
+		return this;
+	},
+	asHtml: function(querySelector) {
+		if (this.xhr.readyState === 1)
+			this.atReadyState4['asHtml'] = querySelector;
+		if (this.xhr.readyState === 4) {
+			document.querySelector(querySelector).innerHTML = this.xhr.responseText;
+		}
+		return this;
+	}
+}
+
 var Deft = Deft || {
-	DEBUG: 1
+	DEBUG: 1,
+	stack: null
 };
+
+Deft.stack = {
+	__stack: {},
+	get: function(name) {
+		return this.__stack[name];
+	},
+	set: function(name, obj) {
+		return this.__stack[name] = obj;
+	}
+};
+
+
+
 
 Deft.request = function (method, url, data) {
-	var xhr = new XMLHttpRequest();
-	xhr.open(method, url);
-	xhr.send(data);
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState === 4) {
-			Deft.response(xhr);
+	let obj = Object.create(_deftObjectResponse);
+	obj.xhr = new XMLHttpRequest();
+	obj.xhr.open(method, url);
+	obj.xhr.send(data);
+	obj.xhr.onreadystatechange = function () {
+		if (obj.xhr.readyState === 4) {
+			for (let prop in obj.atReadyState4) {
+				obj[prop](obj.atReadyState4[prop]);
+			}
 		}
 	};
-};
-
-Deft.response = function (xhr /*XMLHttpRequest*/ ) {
-	console.log(xhr);
+	return Deft.stack.set(url, obj);
 };
 
 Deft.delete = function (url) {
-	Deft.request('DELETE', url);
+	return Deft.request('DELETE', url);
 };
 
 Deft.get = function (url) {
-	Deft.request('GET', url);
+	return Deft.request('GET', url);
 };
 
 Deft.post = function (url, data) {
-	Deft.request('POST', url, data);
+	return Deft.request('POST', url, data);
 };
 
 Deft.put = function (url) {
-	Deft.request('PUT', url, data);
+	return Deft.request('PUT', url, data);
 };
