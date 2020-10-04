@@ -446,6 +446,18 @@ class Html extends Http {
 	/**
 	 * @param null $name
 	 *
+	 * @return string|null
+	 */
+	public function getMeta ($name = null) {
+		$hash = md5($name);
+		if (array_key_exists($hash, $this->meta))
+			return $this->meta[$hash];
+		return;
+	}
+
+	/**
+	 * @param null $name
+	 *
 	 * @return bool|void
 	 */
 	public function removeMeta ($name = null) {
