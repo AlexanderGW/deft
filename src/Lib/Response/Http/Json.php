@@ -49,7 +49,7 @@ class Json extends Http {
 	 *
 	 * @return string
 	 */
-	public function buffer($buffer = NULL) {
+	public function buffer($buffer = null, $scope = null) {
 		$this->buffer = $buffer;
 		return TRUE;
 	}
