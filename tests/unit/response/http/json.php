@@ -47,10 +47,11 @@ class TestDeftUnitResponseHttpJson extends \PHPUnit\Framework\TestCase {
 
 		// Check empty output is JSON NULL (N;)
 		$output = $this->response->output();
+		$expected = json_encode(null);
 		$this->assertEquals(
-			'N;',
+			$expected,
 			$output,
-			"Empty JSON buffer should be 'N;', instead '$output'"
+			"Empty JSON buffer should be '$expected', instead '$output'"
 		);
 
 		// Check 'Content-type' is text/json
