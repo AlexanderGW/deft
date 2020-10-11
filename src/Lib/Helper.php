@@ -228,6 +228,7 @@ class Helper {
 	 */
 	public static function explodeLevel($scope = null, $delimiter = '.') {
 		$array = [];
+		$offset = 0;
 		if (is_string($scope) && is_string($delimiter)) {
 			if (strpos($scope, $delimiter)) {
 				while ($offset < strlen($scope) && ($pos = strpos($scope, $delimiter, $offset)) !== false) {
