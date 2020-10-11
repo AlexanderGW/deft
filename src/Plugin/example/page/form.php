@@ -87,10 +87,15 @@ $form->field('input.range')
      ->scales(0, 1, 10)
      ->value(5);
 
-$form->field('select')
-     ->label(__('Select'))
+$form->field('select.single')
+     ->label(__('Select (single)'))
      ->options($options)
      ->value(array_values($options));
+
+$form->field('select.multiple')
+     ->label(__('Select (multiple)'))
+     ->options(array_keys($config->get()))
+     ->size(3);
 
 $form->field('textarea')
      ->label(__('Textarea'))
