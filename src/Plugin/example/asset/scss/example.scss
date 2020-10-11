@@ -121,11 +121,38 @@ code {
 	padding: .125em .125em .125em .25em;
 }
 
-.scr-read {
-	display: none;
+%scr-read, .scr-read {
+	border: 0;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
 	position: absolute;
-	left: -9999em;
-	top: -9999em;
+	width: 1px;
+	word-wrap: normal !important;
+}
+
+.field-ui {
+	min-width: 12rem;
+	border: .175rem solid #fff;
+	background-color: #fff;
+	color: #000;
+	&:not([type="range"]):not([type="submit"]):not([type="color"]) {
+		padding: .5rem;
+	}
+	font-size: 1rem;
+	max-width: 100%;
+	outline-offset: 0;
+	&:focus {
+		border: .175rem solid #000;
+		outline: .25rem solid #ffce1b;
+	}
+	&:hover {
+		border: .175rem solid #000;
+		outline: .25rem solid #00ff7d;
+	}
 }
 
 form .field {
@@ -136,6 +163,9 @@ form .field {
 		}
 	}
 	.control {
+		.js-container {
+			display: none;
+		}
 		.option {
 			position: relative;
 			display: inline-block;
@@ -231,23 +261,7 @@ form .field {
 		font-size: 1rem;
 	}
 	input, textarea, select {
-		min-width: 12rem;
-		border: .175rem solid #fff;
-		&:not([type="range"]):not([type="submit"]):not([type="color"]) {
-			padding: .5rem;
-		}
-		font-size: 1rem;
-		box-sizing: border-box;
-		max-width: 100%;
-		outline-offset: 0;
-		&:focus {
-			border: .175rem solid #000;
-			outline: .25rem solid #ffce1b;
-		}
-		&:hover {
-			border: .175rem solid #000;
-			outline: .25rem solid #00ff7d;
-		}
+		@extend .field-ui;
 		&[type="color"] {
 			min-width: 5rem;
 			padding: 0;
@@ -271,6 +285,108 @@ form .field {
 		@extend .button;
 	}
 }
+
+body.js {
+	.deft.field.select {
+		select {
+			@extend %scr-read;
+			&:focus + .js-container .options {
+				box-shadow: 0 0 0 .2rem #ffce1b;
+				border: .175rem solid #000;
+			}
+			&:hover + .js-container .options {
+				box-shadow: 0 0 0 .2rem #00ff7d;
+				border: .175rem solid #000;
+			}
+			&:focus + .js-container,
+			&:hover + .js-container,
+			&.active + .js-container {
+				.option {
+					display: block;
+					&[selected] {
+						background-color: rgba(27, 175, 255, .5);
+					}
+				}
+			}
+			&[multiple] + .js-container {
+				.options {
+					max-height: 12rem;
+					max-height: 35vh;
+					overflow-y: scroll;
+				}
+				.option[selected] {
+					background-color: rgba(27, 175, 255, .5);
+					&:hover {
+						background-color: rgba(0, 255, 125, .75);
+					}
+				}
+			}
+			&:not([multiple]) + .js-container {
+				.options {
+					&:after {
+						content: '\2304';
+						position: absolute;
+						right: .25rem;
+						top: 0;
+						height: 1rem;
+						color: #000;
+						font-size: 3rem;
+						line-height: 1rem;
+					}
+					&:hover:after {
+						content: '';
+					}
+				}
+			}
+		}
+		.js-container {
+			display: block;
+			padding: .25rem .25rem 0;
+			position: relative;
+			width: 75%;
+			div:not(.options) {
+				padding: .5rem;
+			}
+			.options {
+				@extend .field-ui;
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				z-index: 99;
+				padding: 0 !important;
+				&:hover {
+					.option {
+						display: block;
+						&[selected] {
+							background-color: rgba(27, 175, 255, .5);
+							&:hover {
+								background-color: rgba(0, 255, 125, .75);
+							}
+						}
+					}
+				}
+			}
+			.option {
+				display: none;
+				&.show {
+					display: block;
+				}
+				&[selected] &:hover {
+					background-color: rgba(0, 255, 125, .75);
+				}
+				&:hover {
+					background-color: rgba(0, 255, 125, .5);
+				}
+			}
+		}
+	}
+}
+
+/*background-color: rgba(27, 175, 255, .5);
+						&:hover {
+							background-color: rgba(0, 255, 125, .75);
+						}*/
 
 .buttons {
 	padding: 1em 0;
