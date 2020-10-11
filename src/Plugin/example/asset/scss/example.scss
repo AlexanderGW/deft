@@ -21,7 +21,10 @@ body {
 		background-color: #000;
 		color: #fff;
 		max-width: 50rem;
-		margin: 4rem 1rem;
+		margin: .75rem;
+		@media (min-width: 430px) {
+			margin: 2rem;
+		}
 		@media (min-width: 860px) {
 			margin: 10rem auto;
 		}
