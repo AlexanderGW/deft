@@ -29,11 +29,17 @@ $markup = "\r\n" . Element::html( array(
 ), 'element.head' ) .
 	  "\r\n" . Element::html( array(
 	'@tag' => 'body',
-	'@markup' => \Deft::response()->getBody() . '<!--Rendered: ' . date('Y-m-d H:i:s') . '-->'
+	'@markup' => \Deft::response()->getBody() . '<!--Rendered: ' . date('Y-m-d H:i:s') . '-->',
+	'@props' => [
+		'class' => Deft::filter()->exec('response.html5.body.class', [
+			'no-js'
+		])
+	]
 ), 'element.body' );
 
 $props = array(
-	'lang' => \Deft::response()->getLocale()
+	'lang' => \Deft::response()->getLocale(),
+	'class' => Deft::filter()->exec('response.html5.html.class')
 );
 if( \Deft::response()->getDirection() != 'ltr' )
 	$props['dir'] = \Deft::response()->getDirection();

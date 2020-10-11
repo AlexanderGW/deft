@@ -87,6 +87,7 @@ class Example extends \Deft\Lib\Plugin {
 		$res->addStyle( 'plugin/example/asset/css/example.css' );
 		$res->addScript( 'plugin/example/asset/js/main.js' );
 		$res->addScript( 'deft.js' );
+		$res->addScriptContent( "document.body.className=document.body.className.replace('no-js','js');" );
 		$res->setVpWidth( 0 );
 		$res->addStyle( 'https://fonts.googleapis.com/css?family=Raleway:400,700' );
 		$res->setTitleSeparator( ' &bull; ' );
