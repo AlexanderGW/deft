@@ -35,7 +35,7 @@ define('TIME_UTC', (time() - date('Z')));
  * Class Deft
  */
 class Deft {
-	const VERSION = '0.9';
+	const VERSION = '0.10';
 
 	const PLUGIN_LOADED = 2;
 	const PLUGIN_EXISTS = 1;
@@ -106,7 +106,7 @@ class Deft {
 			'config_format'          => 'php',
 			'debug'                  => 0,
 			'directory.lib'          => 'Lib',
-			'directory.plugin'       => 'Plugin',
+			'directory.plugin'       => 'plugin',
 			'directory.storage'      => 'storage',
 			'directory.tmp'          => 'tmp',
 			'directory.public'       => 'public',
@@ -420,23 +420,10 @@ class Deft {
 		// First time calls may need to import library
 		if (!count($log)) {
 
-
 			// Import if not already
 			if (!class_exists($class)) {
-				$offset = 0;
-				$array = [];
-				if (strpos($scope, '.')) {
-					while ($offset < strlen($scope) && ($pos = strpos($scope, '.', $offset)) !== false) {
-						$value = substr($scope, 0, $pos);
-						//if ($value !== 'lib')
-							$array[] = $value;
-						$offset += ($pos+1);
-					}
-				}
-
-				//if ($value !== 'lib')
-					$array[] = $scope;
-
+				$array = \Deft\Lib\Helper::explodeLevel($scope);
+				$array[] = $scope;
 				$errors = call_user_func_array([__CLASS__, 'import'], $array);
 				if (count($errors)) {
 					\Deft::error('Failed to import and instantiate: %1$s', implode(', ', $errors));
@@ -643,9 +630,9 @@ class Deft {
 		}
 		$config = self::config();
 
-		$secret = $config->get('secret');
+		$secret = $config->get('encode.secret');
 		if (empty($secret)) {
-			$config->set('secret', str_shuffle(\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS));
+			$config->set('encode.secret', str_shuffle(\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS));
 			$config->save();
 		}
 
@@ -668,7 +655,7 @@ class Deft {
 			return;
 		}
 
-		$secret = self::config()->get('secret');
+		$secret = self::config()->get('encode.secret');
 		if (!$secret) {
 			return;
 		}
@@ -710,8 +697,6 @@ class Deft {
 		${'capture_scope__' . $hash} = strtolower(\Deft::filter()->exec('beforeCapture', $scope));
 
 		$path = ${'capture_scope__' . $hash};
-		if (substr($path, 0, 7) === 'plugin.')
-			$path = ucfirst($path);
 
 		$path  = DEFT_PATH . DS . str_replace('.', DS, $path) . '.php';
 

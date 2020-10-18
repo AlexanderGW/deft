@@ -29,7 +29,7 @@
  * @group unit.response.http
  */
 
-class TestDeftUnitResponseHttp extends \PHPUnit\Framework\TestCase {
+class DeftTestUnitResponseHttp extends \PHPUnit\Framework\TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 

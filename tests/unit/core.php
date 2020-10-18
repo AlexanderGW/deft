@@ -29,7 +29,7 @@
  * @group unit.deft
  */
 
-class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
+class DeftTestUnitCore extends \PHPUnit\Framework\TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -333,7 +333,7 @@ class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 		$config = Deft::config();
 
 		$this->assertNull(
-			$config->get('secret'),
+			$config->get('encode.secret'),
 			"Secret should not initially exist"
 		);
 
@@ -341,7 +341,7 @@ class TestDeftUnitCore extends \PHPUnit\Framework\TestCase {
 
 		$this->assertRegExp(
 			'%^[!-~]+$%',
-			$config->get('secret'),
+			$config->get('encode.secret'),
 			'Secret of ASCII characters was not generated for encoding'
 		);
 

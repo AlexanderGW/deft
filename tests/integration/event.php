@@ -28,7 +28,7 @@
  *
  * @group integration.event
  */
-class TestDeftIntegrationEvent extends \PHPUnit\Framework\TestCase {
+class DeftTestIntegrationEvent extends \PHPUnit\Framework\TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 	}

@@ -49,7 +49,7 @@ class Json extends Http {
 	 *
 	 * @return string
 	 */
-	public function buffer($buffer = NULL) {
+	public function buffer($buffer = null, $scope = null) {
 		$this->buffer = $buffer;
 		return TRUE;
 	}
@@ -72,7 +72,7 @@ class Json extends Http {
 		\Deft::event()->exec('beforeResponseOutput', $this->args);
 
 		if (is_null($content)) {
-			$content = is_null($this->buffer) ? 'N;' : $this->buffer;
+			$content = is_null($this->buffer) ? null : $this->buffer;
 
 			// Nothing to output, set status to 404
 			if (is_null($this->buffer)) {
@@ -81,6 +81,9 @@ class Json extends Http {
 		}
 
 		$content = \Deft::filter()->exec('responseHttpJsonOutput', \Deft::filter()->exec('responseOutput', $content));
+
+		if (!is_string($content))
+			$content = json_encode($content);
 
 		$this->header('Content-length', strlen($content));
 

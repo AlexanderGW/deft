@@ -7,10 +7,10 @@ Ideas for this framework stem from experience with Drupal, Laravel, WordPress, a
 
 https://gailey-white.com/deft-php-framework
 
-#### Default public docroot
+#### The public directory
 `~/public`
 
-#### Default config
+#### The default configuration
 `~/config/deft.php`
 
 If left unchanged, Deft will default to the **example**, and **debug** plugins.

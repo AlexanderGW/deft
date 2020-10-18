@@ -103,4 +103,4 @@ class Memcached extends Dictionary {
 // Process HTTP request against available route rules
 \Deft::event()->set( 'init', '\Deft\Lib\Cache\Memcached::init', 20 );
 
-Filter::add('documentOutput', '\Deft\Lib\Cache\Memcached::documentOutput', 999);
+\Deft::filter()->add('documentOutput', '\Deft\Lib\Cache\Memcached::documentOutput', 999);

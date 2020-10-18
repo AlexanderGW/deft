@@ -446,6 +446,18 @@ class Html extends Http {
 	/**
 	 * @param null $name
 	 *
+	 * @return string|null
+	 */
+	public function getMeta ($name = null) {
+		$hash = md5($name);
+		if (array_key_exists($hash, $this->meta))
+			return $this->meta[$hash];
+		return;
+	}
+
+	/**
+	 * @param null $name
+	 *
 	 * @return bool|void
 	 */
 	public function removeMeta ($name = null) {
@@ -774,9 +786,6 @@ class Html extends Http {
 			foreach ($this->links['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
 					$this->links[$hash]['href'] = Sanitize::forText($this->links[$hash]['href']);
-
-					if (strpos($this->links[$hash]['href'], 'plugin/') === 0)
-						$this->links[$hash]['href'] = 'Plugin/' . substr($this->links[$hash]['href'], 7);
 
 					// Add meta..
 					if (
@@ -1114,15 +1123,35 @@ class Html extends Http {
 	/**
 	 * @param null $content
 	 */
-	public function prependBody ($content = null) {
-		array_unshift($this->body, $content);
+	public function prependBody ($content = null, $scope = null) {
+		$pos = &$this->body;
+		if (is_string($scope)) {
+			$items = \Deft\Lib\Helper::explodeLevel($scope);
+			foreach ($items as $item) {
+				if (!array_key_exists($item, $pos))
+					$pos[$item] = [];
+				$pos = &$pos[$item];
+			}
+		}
+
+		array_unshift($pos, $content);
 	}
 
 	/**
 	 * @param null $content
 	 */
-	public function appendBody ($content = null) {
-		array_push($this->body, $content);
+	public function appendBody ($content = null, $scope = null) {
+		$pos = &$this->body;
+		if (is_string($scope)) {
+			$items = \Deft\Lib\Helper::explodeLevel($scope);
+			foreach ($items as $item) {
+				if (!array_key_exists($item, $pos))
+					$pos[$item] = [];
+				$pos = &$pos[$item];
+			}
+		}
+
+		array_push($pos, $content);
 	}
 
 	/**
@@ -1137,9 +1166,6 @@ class Html extends Http {
 			foreach ($this->scripts['_'] as $priority => $hashes) {
 				foreach ($hashes as $hash) {
 					$this->scripts[$hash]['@props']['src'] = array_key_exists('src', $this->scripts[$hash]['@props']) ? Sanitize::forText($this->scripts[$hash]['@props']['src']) : NULL;
-
-					if (strpos($this->scripts[$hash]['@props']['src'], 'plugin/') === 0)
-						$this->scripts[$hash]['@props']['src'] = 'Plugin/' . substr($this->scripts[$hash]['@props']['src'], 7);
 
 					// Add script..
 					if (

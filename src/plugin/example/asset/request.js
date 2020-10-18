@@ -1,0 +1,1 @@
+Deft.get('/example/json').asText('#response');

@@ -37,6 +37,14 @@ class Example extends \Deft\Lib\Plugin {
 		/**
 		 * Route rules can be automatically loaded at runtime after being stored with \Deft::route()->save()
 		 */
+		\Deft::route()->api( 'example.json', 'example/json', null, function(){
+			\Deft::response()->buffer([
+				'exampleJson' => [
+					'reqTime' => \Deft\Lib\Sanitize::forHtml(time())
+				]
+			]);
+		});
+
 		\Deft::route()->http( 'example.index', '', null, '\Deft\Plugin\Example::content' );
 		\Deft::route()->http(
 
@@ -44,11 +52,11 @@ class Example extends \Deft\Lib\Plugin {
 			'example.page',
 
 			// Route path relative to Deft framework, with regex pattern placeholder [page]
-			'[page]',
+			'example/[page]',
 			array(
 
 				// Pattern for [page]. Route data is accessed using \Deft::route()->getParam('page');
-				'page' => '[a-z]+',
+				'page' => '[a-z]+',//'[index|request|response|users]+',
 
 				// Additional route meta[data] set if route matched.
 				'foo' => 'bar'
@@ -63,12 +71,8 @@ class Example extends \Deft\Lib\Plugin {
 	 * Callback for route matches...
 	 */
 	public static function content() {
-
-		// Do we have a 'page' parameter in the route data?
-		if (is_array($query = \Deft::route()->current()->data)) {
-			$page = $query['page'];
-		}
-
+		$res = \Deft::response();
+		$page = \Deft::route()->current()->data['page'];
 		if( empty( $page ) ) {
 			$page = 'index';
 			\Deft::log()->add(
@@ -76,59 +80,28 @@ class Example extends \Deft\Lib\Plugin {
 				'example',
 				\Deft\Lib\Log::INFORMATION
 			);
-		} elseif( $page == 'index' ) {
-			\Deft::response()->location();
-		}
-
-		// If we're serving the 'response' page, set response to JSON
-		if ($page == 'response') {
-			\Deft::config()->set('response.type', 'http.json');
-		}
-
-		// Otherwise default http.html response, add event actions to add an HTML header and footer
-		else {
-			\Deft::event()->set( 'beforeDocumentGetHead', '\Deft\Plugin\Example::beforeDocumentGetHead' );
-			\Deft::event()->set( 'beforeDocumentGetBody', '\Deft\Plugin\Example::beforeDocumentGetBody' );
-		}
+		} elseif( $page == 'index' )
+			$res->location();
 
 		// Get response handle
-		$res = \Deft::response();
-
-		// Capture the output
-		$content = \Deft::capture( 'plugin.example.page.' . $page );
-		if( is_string( $content ) ) {
-
-			// Add the content to response
-			if ($res->type === 'http.json')
-				$res->buffer($content);
-			else
-				$res->appendBody($content);
-		}
-
-		// Capture returned FALSE
-		else {
-			$res->status(404);
-		}
-	}
-
-	public static function beforeDocumentGetHead() {
-
-		// Set some document properties
-		$res = \Deft::response();
-		$res->addStyle( 'plugin/example/asset/css/example.css' );
-		$res->addScript( 'plugin/example/asset/js/main.js' );
+		$res->addStyle( 'plugin/example/asset/example.css' );
+		$res->addScript( 'plugin/example/asset/main.js' );
 		$res->addScript( 'deft.js' );
+		$res->addScriptContent( "document.body.className=document.body.className.replace('no-js','js');" );
 		$res->setVpWidth( 0 );
 		$res->addStyle( 'https://fonts.googleapis.com/css?family=Raleway:400,700' );
 		$res->setTitleSeparator( ' &bull; ' );
 		$res->setTitle( 'Deft, a PHP & JS framework' );
-		$res->setDescription( 'Another framework, attempting to make your life easier. Its early days yet...' );
-	}
+		$res->setDescription( 'Another framework, another approach' );
+		$res->addMeta('plugin.example', '1');
 
-	public static function beforeDocumentGetBody() {
-		$res = \Deft::response();
-		$res->prependBody( '<main>' );
-		$res->appendBody( '</main>' );
+		// Capture the output
+		$content = \Deft::capture( 'plugin.example.page.' . $page );
+		if( is_string( $content ) ) {
+			$res->appendBody($content);
+			$res->prependBody( '<main>' );
+			$res->appendBody( '</main>' );
+		}
 	}
 }
 

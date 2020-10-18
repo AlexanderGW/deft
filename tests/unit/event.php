@@ -29,7 +29,7 @@
  * @group unit.event
  */
 
-class TestDeftUnitEvent extends \PHPUnit\Framework\TestCase {
+class DeftTestUnitEvent extends \PHPUnit\Framework\TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();

@@ -106,7 +106,7 @@ class Locale {
 		}
 
 		if (is_null($locale)) {
-			$locale = $config->get('locale_default', self::DEFAULT_LOCALE);
+			$locale = $config->get('locale.default', self::DEFAULT_LOCALE);
 		}
 
 		if ($locale != self::DEFAULT_LOCALE) {

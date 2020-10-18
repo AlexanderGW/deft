@@ -130,14 +130,14 @@ class Http extends Response {
 	 *
 	 * @return string
 	 */
-	public function output($content = '') {
+	public function output($content = '', $replace = true) {
 		parent::output();
 
 		$this->header('X-Generator', 'Deft/' . \Deft::VERSION);
 
 		$this->headers = \Deft::filter()->exec('responseOutputHeaders', $this->headers);
 		foreach($this->headers as $key => $value) {
-			header($key . ': ' . $value, true);
+			header($key . ': ' . $value, (bool)$replace);
 		}
 		return $content;
 	}

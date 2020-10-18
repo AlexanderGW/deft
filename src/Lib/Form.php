@@ -564,7 +564,8 @@ class formField {
 
 							// Remove value prop
 							$prop_value = null;
-							if ($prop_value = $this->prop('value')) {
+							if (array_key_exists('value', $this->props)) {
+								$prop_value = $this->prop('value');
 								unset($this->props['value']);
 							}
 
@@ -588,9 +589,13 @@ class formField {
 							         'aria-labelledby' => $option_label_id
 						         ) + $this->props;
 
-								// Is option the current state value?
-								if ($prop_value and $value == $prop_value) {
-									$props['checked'] = true;
+								// Is option a current state value?
+								if (!is_null($prop_value)) {
+									if (!is_array($prop_value) && $value == $prop_value) {
+										$props['checked'] = true;
+									} elseif (is_array($prop_value) && in_array($value, $prop_value)) {
+										$props['checked'] = true;
+									}
 								}
 
 								// Control element
@@ -655,12 +660,12 @@ class formField {
 
 								// Build props
 								$props = array(
-									         'type'            => 'radio',
-									         'value'           => $value,
-									         'name'            => $this->prop('name'),
-									         'id'              => $option_id,
-									         'aria-labelledby' => $option_label_id
-								         ) + $this->props;
+							         'type'            => 'radio',
+							         'value'           => $value,
+							         'name'            => $this->prop('name'),
+							         'id'              => $option_id,
+							         'aria-labelledby' => $option_label_id
+						         ) + $this->props;
 
 								// Is option the current state value?
 								if ($prop_value and $value == $prop_value) {
@@ -737,10 +742,39 @@ class formField {
 					), 'form.field.control.select.option');
 				}
 
+				if (array_key_exists('size', $this->props)) {
+					$this->props['multiple'] = '1';
+				}
+
 				$elements = Element::html(array(
 					'@tag'    => 'select',
 					'@markup' => $this->markup,
 					'@props'  => $this->props
+				));
+				$elements .= Element::html(array(
+					'@tag'    => 'div',
+					'@props'  => [
+						'class' => 'js-container',
+						'aria-hidden' => "true"
+					],
+					'@markup' => [
+						[
+							'@tag'    => 'div',
+							'@markup' => '&nbsp;'
+						],
+						[
+							'@tag'    => 'div',
+							'@props'  => [
+								'class' => 'options'
+							],
+							'@markup' => [
+								[
+									'@tag'    => 'div',
+									'@markup' => '&nbsp;'
+								],
+							]
+						]
+					]
 				));
 				break;
 
@@ -817,12 +851,14 @@ class formField {
 			'@markup' => '%1$s%2$s%3$s',
 			'@props'  => array(
 				'class' => array(
-					'sy-field',
+					'deft',
+					'field',
+					$this->tag,
 					$this->prop('type'),
 					$this->prop('name')
 				)
 			)
-		), 'form.field..template');
+		), 'form.field.template');
 		if (!empty($template)) {
 			return sprintf($template, $label, $description, $elements);
 		} else {

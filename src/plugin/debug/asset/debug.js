@@ -126,7 +126,7 @@ xhr.onreadystatechange = function () {
 			for (key in debug) {
 				switch (typeof debug[key]) {
 					case 'object':
-						html += '<section class="'+(key == 'event' ? 'expanded' : 'collapsed')+'"><div>';
+						html += '<section class="expanded"><div>';
 						html += '<h3>'+key+'</h3>';
 						html += '</div><div class="timeline">';
 						html += Deft.debug.generateTimeline(debug[key]);

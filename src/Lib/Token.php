@@ -47,9 +47,9 @@ class Token {
 		$hash = self::getHash();
 		$data = null;
 		if( !empty($_SESSION) && array_key_exists( $hash, $_SESSION ) )
-			$data =& $_SESSION[ $hash ];
+			$data = &$_SESSION[ $hash ];
 		elseif( array_key_exists( $hash, $_COOKIE ) ) {
-			$data =& $_COOKIE[ $hash ];
+			$data = &$_COOKIE[ $hash ];
 			self::$cookie = true;
 		}
 
@@ -68,12 +68,12 @@ class Token {
 	 */
 	public static function getHash() {
 		$config = \Deft::config();
-		$hash = $config->get( 'token_hash' );
+		$hash = $config->get( 'token.hash' );
 		if( is_null( $hash ) ) {
 			$hash = Random::getMd5();
 			$config->set( array(
-				'token_hash' => $hash,
-				'token_timeout' => 2592000
+				'token.hash' => $hash,
+				'token.timeout' => 2592000
 			) );
 			$config->save();
 		}
@@ -89,26 +89,30 @@ class Token {
 
 		$hash = self::getHash();
 		self::$props = Filter::exec( 'tokenSave', self::$props );
-		$_SESSION[ $hash ] = \Deft::encode( self::$props );
+//		$_SESSION[ $hash ] = \Deft::encode( self::$props );
 		return true;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public static function saveCookie() {
+	public static function saveCookie($path = DEFT_URL_PATH, $host = null) {
 		self::save();
-		$hash = self::getHash();
-		$timeout = (int)\Deft::config()->get( 'token_timeout', 2592000 );
-		$expire = ( ( TIME_UTC + ( 3600 * (float)self::get( 'timezone' ) ) ) + $timeout );
+
+		$timeout = (int)\Deft::config()->get( 'token.timeout', 2592000 );
+		$timezone = (float)self::get( 'timezone' );
+		$expire = ( ( TIME_UTC + ( 3600 * $timezone ) ) + $timeout );
 
 		if( !count( self::$props ) ) {
-			$encoded = -1;
+			$value = -1;
 			$expire = time() - 86400;
 		} else
-			$encoded = \Deft::encode( self::$props );
+			$value = \Deft::encode( self::$props );
 
-		setcookie( $hash, $encoded, $expire, DEFT_URL_PATH, \Deft::request()->host() );
+		$name = self::getHash();
+		$host = null;//$host ?: \Deft::request()->host();
+		setcookie( $name, $value, $expire, $path, $host );
+
 		return true;
 	}
 
