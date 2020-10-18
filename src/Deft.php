@@ -106,7 +106,7 @@ class Deft {
 			'config_format'          => 'php',
 			'debug'                  => 0,
 			'directory.lib'          => 'Lib',
-			'directory.plugin'       => 'Plugin',
+			'directory.plugin'       => 'plugin',
 			'directory.storage'      => 'storage',
 			'directory.tmp'          => 'tmp',
 			'directory.public'       => 'public',
@@ -697,8 +697,6 @@ class Deft {
 		${'capture_scope__' . $hash} = strtolower(\Deft::filter()->exec('beforeCapture', $scope));
 
 		$path = ${'capture_scope__' . $hash};
-		if (substr($path, 0, 7) === 'plugin.')
-			$path = ucfirst($path);
 
 		$path  = DEFT_PATH . DS . str_replace('.', DS, $path) . '.php';
 

@@ -84,8 +84,8 @@ class Example extends \Deft\Lib\Plugin {
 			$res->location();
 
 		// Get response handle
-		$res->addStyle( 'plugin/example/asset/css/example.css' );
-		$res->addScript( 'plugin/example/asset/js/main.js' );
+		$res->addStyle( 'plugin/example/asset/example.css' );
+		$res->addScript( 'plugin/example/asset/main.js' );
 		$res->addScript( 'deft.js' );
 		$res->addScriptContent( "document.body.className=document.body.className.replace('no-js','js');" );
 		$res->setVpWidth( 0 );

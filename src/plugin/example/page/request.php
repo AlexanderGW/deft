@@ -27,7 +27,7 @@ use Deft\Lib\Http;
 
 $res = Deft::response();
 $res->prependTitle(__('JSON tools'));
-$res->addScript( 'plugin/example/asset/js/request.js' );
+$res->addScript( 'plugin/example/asset/request.js' );
 
 $form = Deft::form('request');
 

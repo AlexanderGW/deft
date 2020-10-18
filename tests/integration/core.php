@@ -75,7 +75,7 @@ class DeftTestIntegrationCore extends \PHPUnit\Framework\TestCase {
 //			"The default Deft 'tmp' path '" . DEFT_TMP_PATH . "' does not match '$path'"
 //		);
 
-		$path = DEFT_ABS_PATH . DS . 'Plugin';
+		$path = DEFT_ABS_PATH . DS . 'plugin';
 
 		$this->assertEquals(
 			$path,
