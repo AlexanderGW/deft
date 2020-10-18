@@ -42,8 +42,8 @@ class Debug extends Plugin {
 
 		\Deft::event()->set('cliCacheClearStorage', function(){
 			$fs = \Deft::filesystem();
-			if ($fs->exists(DEFT_STORAGE_PATH . DS . 'debug')) {
-				if (!$fs->delete(DEFT_STORAGE_PATH . DS . 'debug', true)) {
+			if ($fs->exists(self::getPath())) {
+				if (!$fs->delete(self::getPath(), true)) {
 					\Deft::log()->warning(__('Failed to delete debug storage'));
 				}
 			}
