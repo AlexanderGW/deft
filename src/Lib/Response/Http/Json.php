@@ -66,8 +66,8 @@ class Json extends Http {
 	 *
 	 * @return mixed|string|void
 	 */
-	public function output($content = null) {
-		$this->header('Content-type', 'text/json');
+	public function output($content = null, $replace = true) {
+		$this->header('Content-type', 'text/json', (bool)$replace);
 
 		\Deft::event()->exec('beforeResponseOutput', $this->args);
 
@@ -85,7 +85,7 @@ class Json extends Http {
 		if (!is_string($content))
 			$content = json_encode($content);
 
-		$this->header('Content-length', strlen($content));
+		$this->header('Content-length', strlen($content), (bool)$replace);
 
 		\Deft::event()->exec('afterResponseOutput', $this->args);
 

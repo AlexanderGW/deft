@@ -1,3 +1,6 @@
 .idea
 vendor
 src/public/asset
+/node_modules
+*.css.map
+*.css

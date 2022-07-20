@@ -205,7 +205,7 @@ class Route extends \Deft_Concrete {
 			'name'     => $route[ 'name' ],
 			'class'    => $route[ 'class' ],
 			'request'  => $string,
-			'path'     => array_key_exists('path', $route) ? $route[ 'path' ] : '',
+			'path'     => (is_array($route) && array_key_exists('path', $route)) ? $route[ 'path' ] : '',
 			'pattern'  => $route[ 'pattern' ],
 			'data'     => $route[ 'data' ],
 			'callback' => $route[ 'callback' ]
@@ -236,7 +236,7 @@ class Route extends \Deft_Concrete {
 			$name = substr($name, 4);
 		}
 
-		$rules = self::getRules();
+		$rules = \Deft::route()->getRules();
 		foreach ($rules as $path => $rule) {
 			if ($rule['name'] === $name) {
 				if (!array_key_exists('pattern', $rule))
@@ -429,7 +429,7 @@ class Route extends \Deft_Concrete {
 	 */
 	public function save() {
 		$config = \Deft::config( 'config.route' );
-		$config->set( self::getRules() );
+		$config->set( \Deft::route()->getRules() );
 		$config->save();
 	}
 

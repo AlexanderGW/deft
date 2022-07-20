@@ -1225,8 +1225,8 @@ class Html extends Http {
 	 *
 	 * @return mixed|string|void
 	 */
-	public function output($scope = null) {
-		$this->header('Content-type', 'text/html');
+	public function output($scope = null, $replace = true) {
+		$this->header('Content-type', 'text/html', (bool)$replace);
 
 		// Default template name
 		if (!is_string($scope)) {
@@ -1239,7 +1239,7 @@ class Html extends Http {
 
 		$content = (string)\Deft::filter()->exec('responseHttpHtmlOutput', \Deft::filter()->exec('responseOutput', $this->buffer));
 
-		$this->header('Content-length', strlen($content));
+		$this->header('Content-length', strlen($content), (bool)$replace);
 
 		\Deft::event()->exec('afterResponseOutput', $content);
 
