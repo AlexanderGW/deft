@@ -35,7 +35,7 @@ define('TIME_UTC', (time() - date('Z')));
  * Class Deft
  */
 class Deft {
-	const VERSION = '0.11';
+	const VERSION = '0.12-dev';
 
 	const PLUGIN_LOADED = 2;
 	const PLUGIN_EXISTS = 1;
