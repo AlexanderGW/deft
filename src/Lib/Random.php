@@ -57,10 +57,11 @@ class Random {
 		for ($i = 0; $i < $length; $i++) {
 			mt_srand((int)self::getSeed());
 			$offset = mt_rand(0, $map_length);
-			if(strpos($exception, $map{ $offset }) !== false)
+			$char = substr($map, $offset, 1);
+			if(strpos($exception, $char) !== false)
 				$i--;
 			else
-				$string .= $map{ $offset };
+				$string .= $char;
 		}
 		return $string;
 	}
