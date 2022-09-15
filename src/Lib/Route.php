@@ -194,8 +194,8 @@ class Route extends \Deft_Concrete {
 		// Apply route environment
 		if ( is_array( $route[ 'data' ] ) ) {
 			foreach ( $route[ 'data' ] as $key => $value ) {
-				$key                           = Sanitize::forText( $key );
-				$value                         = Sanitize::forText( $value );
+				$key   = Sanitize::forText( $key );
+				$value = Sanitize::forText( $value );
 				$route[ 'data' ][ $key ] = $value;
 			}
 		}
@@ -236,6 +236,7 @@ class Route extends \Deft_Concrete {
 			$name = substr($name, 4);
 		}
 
+		$match = false;
 		$rules = \Deft::route()->getRules();
 		foreach ($rules as $path => $rule) {
 			if ($rule['name'] === $name) {
@@ -262,8 +263,6 @@ class Route extends \Deft_Concrete {
 					return ( $absolute ? DEFT_URL : '' ) . self::getSeparator() . $path;
 			}
 		}
-		if (array_key_exists($name, $rules))
-
 
 		return null;
 	}
@@ -393,7 +392,7 @@ class Route extends \Deft_Concrete {
 	public function getRules($group = null) {
 		if (is_null($group))
 			$group = self::$group;
-		return self::$rules[$group];
+		return (array)self::$rules[$group];
 	}
 
 	/**
