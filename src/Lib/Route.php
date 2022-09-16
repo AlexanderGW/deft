@@ -128,14 +128,14 @@ class Route extends \Deft_Concrete {
 	/**
 	 * @param null $path
 	 */
-	public static function match ($string = null) {
+	public static function match ($string = null, $group = null) {
 
 		// Process requested route
 		$route = \Deft::route()->get( $string );
 
 		// No match
 		if ( $route === FALSE and strlen( $string ) ) {
-			$routes  = \Deft::route()->getRules();
+			$routes  = \Deft::route()->byGroup($group);
 			$divider = self::getSeparator();
 
 			$request = explode( $divider, $string );
@@ -237,32 +237,40 @@ class Route extends \Deft_Concrete {
 		}
 
 		$match = false;
-		$rules = \Deft::route()->getRules();
-		foreach ($rules as $path => $rule) {
-			if ($rule['name'] === $name) {
-				if (!array_key_exists('pattern', $rule))
-					$match = true;
-				else {
-					$i = 0;
-					foreach (array_keys($rule['pattern']) as $name) {
-						$search = '[' . $name . ']';
-						if (strpos($path, $search) !== false && (is_string($params[$name]) || is_numeric($params[$name]))) {
-							$path = str_replace(
-								$search,
-								$params[$name],
-								$path
-							);
-							$i++;
-						}
-					}
-					if ($i === count($rule['pattern']))
-						$match = true;
-				}
+		$rule = \Deft::route()->byName($name);
 
-				if ($match)
-					return ( $absolute ? DEFT_URL : '' ) . self::getSeparator() . $path;
+		if (is_null($rule))
+			return null;
+
+		$path = $rule['path'];
+
+		if (!array_key_exists('pattern', $rule))
+			$match = true;
+		else {
+			$i = 0;
+			foreach (array_keys($rule['pattern']) as $name) {
+				$search = '[' . $name . ']';
+				if (
+					strpos($path, $search) !== false
+					&& (
+						is_string($params[$name])
+						|| is_numeric($params[$name])
+					)
+				) {
+					$path = str_replace(
+						$search,
+						$params[$name],
+						$path
+					);
+					$i++;
+				}
 			}
+			if ($i === count($rule['pattern']))
+				$match = true;
 		}
+
+		if ($match)
+			return ( $absolute ? DEFT_URL : '' ) . self::getSeparator() . $path;
 
 		return null;
 	}
@@ -389,10 +397,31 @@ class Route extends \Deft_Concrete {
 	/**
 	 * @return array
 	 */
-	public function getRules($group = null) {
+	public function byGroup($group = null) {
 		if (is_null($group))
 			$group = self::$group;
 		return (array)self::$rules[$group];
+	}
+
+	/**
+	 * @return array
+	 */
+	public function byName($name = null, $group = null) {
+		if (is_null($name))
+			return null;
+
+		$rules = \Deft::route()->byGroup($group);
+		foreach ($rules as $path => $rule) {
+			if ($rule['name'] === $name)
+				return array_merge(
+					$rule,
+					[
+						'path' => $path
+					]
+				);
+		}
+
+		return null;
 	}
 
 	/**
@@ -428,7 +457,7 @@ class Route extends \Deft_Concrete {
 	 */
 	public function save() {
 		$config = \Deft::config( 'config.route' );
-		$config->set( \Deft::route()->getRules() );
+		$config->set( self::$rules );
 		$config->save();
 	}
 
