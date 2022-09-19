@@ -21,10 +21,6 @@
  * along with Deft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-\Deft::import('lib.http');
-
-use Deft\Lib\Http;
-
 $res = Deft::response();
 $res->prependTitle(__('JSON tools'));
 $res->addScript( 'plugin/example/asset/request.js' );
@@ -39,7 +35,7 @@ $form->field('textarea.url')
      ->value(\Deft::route()->toUrl('abs.example.json'));
 
 $form->field('textarea.req')
-	->label('Or a JS request to DOM')
+	->label('Or a JS request, response to DOM')
 	->readOnly(true)
 	->cols(45)
 	->rows(2)
