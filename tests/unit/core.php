@@ -219,6 +219,14 @@ class DeftTestUnitCore extends \PHPUnit\Framework\TestCase {
 			"Argument 'foo' should equal 'bar', instead returned '$result'"
 		);
 
+		$result = $instance->foo;
+
+		$this->assertEquals(
+			'bar',
+			$result,
+			"Magic getter of 'foo' should equal 'bar', instead returned '$result'"
+		);
+
 		$this->assertTrue(
 			$instance->setArg('foo', 'baz'),
 			"Set argument 'foo' to 'baz' failed"
@@ -230,6 +238,15 @@ class DeftTestUnitCore extends \PHPUnit\Framework\TestCase {
 			'baz',
 			$result,
 			"Argument 'foo' should equal 'baz', instead returned '$result'"
+		);
+
+		$instance->foo = 'qux';
+		$result = $instance->getArg('foo');
+
+		$this->assertEquals(
+			'qux',
+			$result,
+			"Magic setter of 'foo' should equal 'qux', instead returned '$result'"
 		);
 
 		$this->assertTrue(
