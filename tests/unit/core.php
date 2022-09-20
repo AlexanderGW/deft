@@ -193,7 +193,7 @@ class DeftTestUnitCore extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * Test log
+	 * Test concrete class
 	 *
 	 * @depends test_getInstanceKey
 	 *
@@ -211,7 +211,7 @@ class DeftTestUnitCore extends \PHPUnit\Framework\TestCase {
 			'Stack ID format is not valid'
 		);
 
-		$result = $instance->get('foo');
+		$result = $instance->getArg('foo');
 
 		$this->assertEquals(
 			'bar',
@@ -220,11 +220,11 @@ class DeftTestUnitCore extends \PHPUnit\Framework\TestCase {
 		);
 
 		$this->assertTrue(
-			$instance->put('foo', 'baz'),
+			$instance->setArg('foo', 'baz'),
 			"Set argument 'foo' to 'baz' failed"
 		);
 
-		$result = $instance->get('foo');
+		$result = $instance->getArg('foo');
 
 		$this->assertEquals(
 			'baz',
@@ -233,13 +233,41 @@ class DeftTestUnitCore extends \PHPUnit\Framework\TestCase {
 		);
 
 		$this->assertTrue(
-			$instance->put('foo'),
+			$instance->setArg('foo'),
 			"Failed to set argument 'foo' to NULL"
 		);
 
 		$this->assertNull(
-			$instance->get('foo'),
+			$instance->getArg('foo'),
 			"Argument 'foo' should be NULL"
+		);
+
+		$instance->setArg('foo', 'baz');
+
+		$this->assertTrue(
+			$instance->prependArg('foo', 'bar'),
+			"Prepend value 'bar' onto 'baz', in argument 'foo'"
+		);
+
+		$result = $instance->getArg('foo');
+
+		$this->assertEquals(
+			'bar baz',
+			$result,
+			"Argument 'foo' should equal 'bar baz', instead returned '$result'"
+		);
+
+		$this->assertTrue(
+			$instance->appendArg('foo', 'qux'),
+			"Append value 'qux' onto 'bar baz', in argument 'foo'"
+		);
+
+		$result = $instance->getArg('foo');
+
+		$this->assertEquals(
+			'bar baz qux',
+			$result,
+			"Argument 'foo' should equal 'bar baz qux', instead returned '$result'"
 		);
 	}
 
