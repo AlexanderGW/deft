@@ -77,7 +77,7 @@ class Html extends Http {
 			'locale'    => 'en',
 			'direction' => 'ltr',
 			'mime'      => 'text/html'
-		), $args);
+		), (array)$args);
 		$this->args = $args;
 		parent::__construct($this->args, $class);
 	}
