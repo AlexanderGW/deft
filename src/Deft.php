@@ -632,14 +632,15 @@ class Deft {
 
 		$secret = $config->get('encode.secret');
 		if (empty($secret)) {
-			$config->set('encode.secret', str_shuffle(\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS));
+			$secret = str_shuffle(\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS);
+			$config->set('encode.secret', $secret);
 			$config->save();
 		}
 
 		return strtr(
 			serialize($args),
 			\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS,
-			(string)$secret
+			$secret
 		);
 	}
 
