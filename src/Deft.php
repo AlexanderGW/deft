@@ -639,7 +639,7 @@ class Deft {
 		return strtr(
 			serialize($args),
 			\Deft\Lib\Helper::ALPHANUMERIC_CHARS . \Deft\Lib\Helper::EXTENDED_CHARS,
-			$secret
+			(string)$secret
 		);
 	}
 
@@ -888,7 +888,10 @@ class Deft_Concrete {
 	 * @param null $arg
 	 */
 	public function get ($key = null) {
-		if ((is_string($key) or is_integer($key)) and array_key_exists($key, $this->args)) {
+		if (
+			(is_string($key) or is_integer($key))
+			and array_key_exists($key, $this->args)
+		) {
 			return $this->args[$key];
 		}
 
@@ -921,7 +924,8 @@ class Deft_Concrete {
 		if (is_null($arg)) {
 			return false;
 		}
-		$this->args[$arg] = array($value);
+
+		$this->args[$arg] = !is_null($value) ? array($value) : null;
 
 		return true;
 	}
@@ -973,7 +977,7 @@ class Deft_Concrete {
 			$this->args[$arg] .= $value;
 		} else {
 			if (!is_array($this->args[$arg])) {
-				$this->args[$arg] = array();
+				$this->args[$arg] = array($this->args[$arg]);
 			}
 
 			if (is_string($value)) {
@@ -1018,10 +1022,12 @@ class Deft_Concrete {
 		return $this->getArg($key);
 	}
 
-//	public function __set($key, $value) {
-//		return $this->setArg($key, $value);
-//	}
+	public function __set($key, $value) {
+		return $this->setArg($key, $value);
+	}
 }
+
+// TODO: Imutable concrete interface for `__set`?
 
 /**
  * Return locale phrase
